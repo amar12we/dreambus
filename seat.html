@@ -32,7 +32,7 @@ input { padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #c
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// FIREBASE CONFIG
+// ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
   authDomain: "dreamliner-421b0.firebaseapp.com",
@@ -41,81 +41,102 @@ const firebaseConfig = {
   messagingSenderId: "454472970770",
   appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// URL PARAMS
+// ---------------- URL PARAMS ----------------
 const params = new URLSearchParams(window.location.search);
 const from = params.get("from") || "Start";
 const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
 
-// Choose document
-const busDocId = trip==="AM" ? "bus1" : "bus2";
+// ---------------- DOCUMENT PER DATE + TRIP ----------------
+// Each date & trip combination has its own document
+const busDocId = `${date}_${trip}`;  // e.g., "2026-03-20_AM"
 const docRef = doc(db, "buses", busDocId);
 
+// ---------------- HEADER ----------------
 document.getElementById("route").innerText = `${from} → ${to} | ${date} | ${trip} Trip`;
 
-// SEATS
+// ---------------- SEATS ----------------
 const allSeats = ["A1","A2","A3","A4","B1","B2","B3","B4","C1","C2","C3","C4"];
 let selectedSeat = null;
 
-// RENDER SEATS
+// ---------------- RENDER SEATS ----------------
 function renderSeats(bookedSeats){
     const container = document.getElementById("seats");
     container.innerHTML = "";
     allSeats.forEach(seat=>{
-        const div=document.createElement("div");
-        div.className="seat";
-        div.innerText=seat;
-        if(bookedSeats && bookedSeats[seat]?.status==="booked"){ div.classList.add("booked"); }
-        else{
-            div.addEventListener("click",()=>{
-                document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
+        const div = document.createElement("div");
+        div.className = "seat";
+        div.innerText = seat;
+
+        if(bookedSeats && bookedSeats[seat]?.status === "booked"){
+            div.classList.add("booked");
+        } else {
+            div.addEventListener("click", () => {
+                document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
                 div.classList.add("selected");
-                selectedSeat=seat;
+                selectedSeat = seat;
             });
         }
+
         container.appendChild(div);
     });
 }
 
-// REAL-TIME LISTENER
-onSnapshot(docRef,(docSnap)=>{
-    const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
+// ---------------- REAL-TIME LISTENER ----------------
+onSnapshot(docRef, (docSnap) => {
+    const bookedSeats = docSnap.exists() ? docSnap.data().seats : {};
     renderSeats(bookedSeats);
-    if(selectedSeat && bookedSeats[selectedSeat]?.status==="booked"){
-        selectedSeat=null;
+
+    if(selectedSeat && bookedSeats[selectedSeat]?.status === "booked"){
+        selectedSeat = null;
         alert("The seat you selected was just booked by someone else!");
     }
 });
 
-// BOOK SEAT
+// ---------------- BOOK SEAT FUNCTION ----------------
 async function bookSeat(){
-    const emailInput=document.getElementById("customerEmail").value.trim();
-    if(!emailInput){ alert("Enter email!"); return; }
-    if(!selectedSeat){ alert("Select a seat!"); return; }
+    const emailInput = document.getElementById("customerEmail").value.trim();
+    if(!emailInput){ alert("Please enter your email!"); return; }
+    if(!selectedSeat){ alert("Please select a seat!"); return; }
 
     try{
         const docSnap = await getDoc(docRef);
-        let seats = docSnap.exists()? docSnap.data().seats : {};
+        let seats = docSnap.exists() ? docSnap.data().seats : {};
 
-        if(seats[selectedSeat]?.status==="booked"){
-            alert("Seat was just booked by someone else!"); selectedSeat=null; return;
+        // Check if seat already booked
+        if(seats[selectedSeat]?.status === "booked"){
+            alert("This seat was just booked by someone else!");
+            selectedSeat = null;
+            return;
         }
 
-        seats[selectedSeat] = {status:"booked", customerEmail:emailInput, timestamp:new Date().toISOString()};
+        // Store each user's route inside the seat
+        seats[selectedSeat] = {
+            status: "booked",
+            customerEmail: emailInput,
+            from: from,
+            to: to,
+            timestamp: new Date().toISOString()
+        };
 
-        await setDoc(docRef,{seats, from, to, date, trip},{merge:true});
+        await setDoc(docRef, { seats }, { merge: true });
 
         alert(`Seat ${selectedSeat} booked successfully!`);
-        selectedSeat=null;
-        document.getElementById("customerEmail").value="";
-    }catch(err){ console.error(err); alert("Error booking seat"); }
+        selectedSeat = null;
+        document.getElementById("customerEmail").value = "";
+    } catch(err){
+        console.error("Booking error:", err);
+        alert("Error booking seat. Check Firestore permissions.");
+    }
 }
 
-document.getElementById("bookBtn").addEventListener("click",bookSeat);
+document.getElementById("bookBtn").addEventListener("click", bookSeat);
 </script>
+
 </body>
 </html>
