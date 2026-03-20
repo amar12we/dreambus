@@ -3,194 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Select Seats</title>
-
+<title>Select Seats (Real-Time)</title>
 <style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f4f6f8;
-}
-
-/* HEADER */
-.header {
-    background: #ff7a00;
-    color: white;
-    padding: 15px;
-    text-align: center;
-}
-
-/* SEAT GRID */
-#seats {
-    display: grid;
-    grid-template-columns: repeat(4, 60px);
-    gap: 12px;
-    justify-content: center;
-    margin-top: 30px;
-}
-
-/* SEAT */
-.seat {
-    height: 50px;
-    border-radius: 10px;
-    background: #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-/* STATES */
-.booked {
-    background: red;
-    cursor: not-allowed;
-    color: white;
-}
-
-.selected {
-    background: green;
-    color: white;
-}
-
-/* BUTTON */
-button {
-    display: block;
-    margin: 30px auto;
-    padding: 12px 20px;
-    background: #ff7a00;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-}
+body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; margin: 0; padding-bottom: 50px; }
+.header { background: #ff7a00; color: white; padding: 15px; text-align: center; font-weight: bold; }
+#seats { display: grid; grid-template-columns: repeat(4, 60px); gap: 12px; justify-content: center; margin-top: 30px; }
+.seat { height: 50px; border-radius: 10px; background: #ddd; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; }
+.booked { background: #ff4d4d; cursor: not-allowed; color: white; }
+.selected { background: #28a745; color: white; border: 2px solid #1e7e34; }
+.footer-action { text-align: center; margin-top: 30px; }
+button { padding: 12px 40px; background: #ff7a00; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
+button:hover { background: #e66e00; }
 </style>
 </head>
-
 <body>
 
-<div class="header" id="route"></div>
-
+<div class="header" id="route">Loading route...</div>
 <div id="seats"></div>
 
-<button onclick="bookSeat()">Book Seat</button>
+<div class="footer-action">
+    <button id="bookBtn">Book Selected Seat</button>
+</div>
 
 <script type="module">
-// 🔥 FIREBASE IMPORT
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// 🔥 YOUR CONFIG (PUT YOURS HERE)
+// ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
   authDomain: "dreamliner-421b0.firebaseapp.com",
-  databaseURL: "https://dreamliner-421b0-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "dreamliner-421b0",
   storageBucket: "dreamliner-421b0.firebasestorage.app",
   messagingSenderId: "454472970770",
-  appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb",
-  measurementId: "G-3NFBP3RVG7"
+  appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// GET DATA FROM URL
+// ---------------- URL PARAMS ----------------
 const params = new URLSearchParams(window.location.search);
 const busId = params.get("busId");
 const from = params.get("from");
 const to = params.get("to");
 const date = params.get("date");
 
-console.log("Bus ID:", busId);
-// SHOW HEADER
-document.getElementById("route").innerText =
-    `${from} → ${to} | ${date}`;
+document.getElementById("route").innerText = `${from} → ${to} | ${date}`;
 
-// SEAT LIST
-const allSeats = [
-    "A1","A2","A3","A4",
-    "B1","B2","B3","B4",
-    "C1","C2","C3","C4"
-];
-
+// ---------------- SEATS ----------------
+const allSeats = ["A1","A2","A3","A4","B1","B2","B3","B4","C1","C2","C3","C4"];
 let selectedSeat = null;
 
-// LOAD SEATS FROM FIREBASE
-async function loadSeats() {
-    const docRef = doc(db, "buses", busId);
-    const docSnap = await getDoc(docRef);
-
-    let bookedSeats = docSnap.exists() ? docSnap.data().seats : {};
-
+// ---------------- LOAD SEATS ----------------
+function renderSeats(bookedSeats) {
     const container = document.getElementById("seats");
     container.innerHTML = "";
 
     allSeats.forEach(seat => {
-        let div = document.createElement("div");
+        const div = document.createElement("div");
         div.className = "seat";
         div.innerText = seat;
 
         if (bookedSeats[seat] === "booked") {
             div.classList.add("booked");
+        } else {
+            div.addEventListener("click", () => {
+                document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+                div.classList.add("selected");
+                selectedSeat = seat;
+            });
         }
-
-        div.onclick = () => selectSeat(div, seat, bookedSeats);
 
         container.appendChild(div);
     });
 }
 
-// SELECT SEAT
-function selectSeat(div, seat, bookedSeats) {
-    if (bookedSeats[seat] === "booked") return;
+// ---------------- REAL-TIME LISTENER ----------------
+const docRef = doc(db, "buses", busId);
+onSnapshot(docRef, (docSnap) => {
+    const bookedSeats = docSnap.exists() ? docSnap.data().seats : {};
+    renderSeats(bookedSeats);
+    // If selected seat is booked by someone else, deselect it
+    if (selectedSeat && bookedSeats[selectedSeat] === "booked") {
+        selectedSeat = null;
+        alert("The seat you selected was just booked by someone else!");
+    }
+});
 
-    document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
-
-    div.classList.add("selected");
-    selectedSeat = seat;
-}
-
-// BOOK SEAT
+// ---------------- BOOK SEAT ----------------
 async function bookSeat() {
-
-if (!selectedSeat) {
-    alert("Please select a seat first!");
-    return;
-}
-
-try {
-    const docRef = doc(db, "buses", busId);
-    const docSnap = await getDoc(docRef);
-
-    let seats = docSnap.exists() ? docSnap.data().seats : {};
-
-    // 🔒 Prevent double booking
-    if (seats[selectedSeat] === "booked") {
-        alert("Seat already booked!");
+    if (!selectedSeat) {
+        alert("Please select a seat first!");
         return;
     }
 
-    // ✅ Update selected seat
-    seats[selectedSeat] = "booked";
+    try {
+        // Get latest data snapshot
+        const latestDocSnap = await docRef.get();
+        const seats = latestDocSnap.exists() ? latestDocSnap.data().seats : {};
 
-    await setDoc(docRef, { seats });
+        if (seats[selectedSeat] === "booked") {
+            alert("This seat was just booked by someone else!");
+            selectedSeat = null;
+            return;
+        }
 
-    alert("Seat booked successfully!");
+        seats[selectedSeat] = "booked";
+        await setDoc(docRef, { seats }, { merge: true });
 
-    selectedSeat = null;
+        alert(`Seat ${selectedSeat} booked successfully!`);
+        selectedSeat = null;
 
-    // 🔄 Reload UI
-    loadSeats();
-
-} catch (error) {
-    console.error("Booking error:", error);
-    alert("Error booking seat");
+    } catch (err) {
+        console.error(err);
+        alert("Error booking seat. Check Firestore rules.");
+    }
 }
-}
 
-// LOAD ON START
-loadSeats();
-
+// ---------------- ATTACH BUTTON ----------------
+document.getElementById("bookBtn").addEventListener("click", bookSeat);
 </script>
 
 </body>
