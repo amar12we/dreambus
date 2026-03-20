@@ -142,16 +142,44 @@ const routes = [
         name: "Dreamliner AC Sleeper",
         details: "Mercedes Bench 2*2 Semi Sleeper",
         stops: [
-            {place: "Paltan Bazar", time: "04:15 AM"},
-            {place: "ISBT Guwahati", time: "06:30 AM"},
-            {place: "Nongpoh", time: "08:00 AM"},
-            {place: "Shillong Police Bazar", time: "09:30 AM"},
-            {place: "Charali", time: "09:10 AM"}
+            {place: "Paltan Bazar", time: "04:15 PM"},
+            {place: "ISBT Guwahati", time: "06:30 PM"},
+            {place: "Nongpoh", time: "08:00 PM"},
+            {place: "Shillong Police Bazar", time: "09:30 PM"},
+            {place: "Charali", time: "09:10 PM"}
         ]
     }
 },
 {
     from: "Biswanath Charali",
+    to: "Guwahati",
+    fare: 100,
+    bus: {
+        name: "Dreamliner Volvo",
+        details: "Mercedes Bench 2*2 Semi Sleeper",
+        stops: [
+            {place: "Guwahati", time: "05:00 AM"},
+            {place: "Kolkata", time: "06:00 AM"},
+            {place: "Delhi", time: "08:00 AM"}
+        ]
+    }
+},
+{
+    from: "Nagaon",
+    to: "Guwahati",
+    fare: 100,
+    bus: {
+        name: "Dreamliner Volvo",
+        details: "Mercedes Bench 2*2 Semi Sleeper",
+        stops: [
+            {place: "Guwahati", time: "05:00 AM"},
+            {place: "Kolkata", time: "06:00 AM"},
+            {place: "Delhi", time: "08:00 AM"}
+        ]
+    }
+},
+{
+    from: "",
     to: "Guwahati",
     fare: 100,
     bus: {
