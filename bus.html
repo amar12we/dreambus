@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Available Bus</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(to right, #ff7a00, #ff512f);
+    color: white;
+    padding: 12px 15px;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* keep back button on left */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* ROUTE CONTAINER (route + date stacked) */
+.route-container {
+    display: flex;
+    flex-direction: column; /* stack route and date vertically */
+    align-items: flex-start; /* align left for phone */
+    margin-left: 10px;
+}
+
+/* Route text */
+#routeHeader {
+    font-size: 16px;
+}
+
+/* Date text */
+#routeDate {
+    font-size: 13px;
+    color: #ffe0b2;
+    margin-top: 2px;
+}
+
+/* BACK BUTTON */
+.back-btn {
+    margin-right: 10px;
+    background: rgba(255,255,255,0.9);
+    color: #ff512f;
+    border: none;
+    padding: 3px 12px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.back-btn:hover {
+    background: white;
+    transform: translateX(-2px);
+}
+
+/* BUS CARD */
+.bus-card {
+    background: white;
+    margin: 15px;
+    padding: 18px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* TOP */
+.bus-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bus-title {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.rating {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+/* STOPS */
+.stop {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.stop-name {
+    font-weight: 600;
+}
+
+.stop-time {
+    font-size: 12px;
+    color: gray;
+}
+
+/* BOTTOM */
+.bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.bus-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff512f;
+}
+
+.view-btn {
+    background: #ff7a00;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* BUS DETAILS */
+.bus-details {
+    margin-top: 8px;
+    font-size: 13px;
+    color: gray;
+}
+
+/* NO RESULT */
+.no-result {
+    text-align: center;
+    padding: 50px;
+    color: #777;
+}
+
+/* TIME ROW */
+.time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0;
+}
+
+.time-block {
+    text-align: center;
+}
+
+.time {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.label {
+    font-size: 12px;
+    color: gray;
+}
+
+.duration {
+    font-size: 12px;
+    color: gray;
+}
+
+/* ROUTE TOGGLE */
+.route-toggle {
+    color: #ff512f;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* HIDDEN ROUTE */
+.route {
+    display: none;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="route-container">
+            <div id="routeHeader"></div>
+            <div id="routeDate"></div>
+        </div>
+    </div>
+
+<div id="busList"></div>
+
+<script>
+// GET URL DATA
+const params = new URLSearchParams(window.location.search);
+const from = params.get("from");
+const to = params.get("to");
+const date = params.get("date");
+
+// SHOW ROUTE
+// Show route
+document.getElementById("routeHeader").innerText = `${from} → ${to}`;
+
+// Show date below route
+document.getElementById("routeDate").innerText = `Date: ${date}`;
+// 🔥 ROUTES DATABASE (MANUAL)
+const routes = [
+{
+    from: "Guwahati",
+    to: "Biswanath Charali",
+    fare: 465,
+    bus: {
+        name: "Dreamliner AC Sleeper",
+        details: "Mercedes Bench 2*2 Semi Sleeper",
+        stops: [
+            {place: "Paltan Bazar", time: "04:15 PM"},
+            {place: "ISBT Guwahati", time: "06:30 PM"},
+            {place: "Nongpoh", time: "08:00 PM" },
+            {place: "Shillong Police Bazar", time: "09:30 PM"},
+            {place: "Charali ", time: "09:10 PM"}
+        ]
+    }
+},
+{
+    from: "Guwahati",
+    to: "Mumbai",
+    fare: 100,
+    bus: {
+        name: "Dreamliner Volvo",
+        details: "Mercedes Bench 2*2 Semi Sleeper",
+        stops: [
+            {place: "Guwahati", time: "05:00 PM"},
+            {place: "Kolkata", time: "06:00 AM"},
+            {place: "Delhi", time: "08:00 PM"}
+        ]
+    }
+}
+];
+
+// FIND MATCH
+const matchedRoute = routes.find(r =>
+    r.from === from && r.to === to
+);
+
+const container = document.getElementById("busList");
+
+// ❌ NO RESULT
+if (!matchedRoute) {
+    container.innerHTML = `
+        <div class="no-result">
+            <h2>No Buses Found 😔</h2>
+            <p>Try another route</p>
+        </div>
+    `;
+} else {
+    const bus = matchedRoute.bus;
+
+    let firstStop = bus.stops[0];
+    let lastStop = bus.stops[bus.stops.length - 1];
+
+    let card = document.createElement("div");
+    card.className = "bus-card";
+
+    card.innerHTML = `
+        <div class="bus-top">
+            <div class="bus-title">${bus.name}</div>
+        </div>
+
+        <!-- TIME SUMMARY -->
+        <div class="time-row">
+            <div class="time-block">
+                <div class="time">${firstStop.time}</div>
+                <div class="label">${firstStop.place}</div>
+            </div>
+
+            <div class="duration">
+                → ${bus.stops.length - 1} Stops
+            </div>
+
+            <div class="time-block">
+                <div class="time">${lastStop.time}</div>
+                <div class="label">${lastStop.place}</div>
+            </div>
+        </div>
+        <!-- DATE BELOW PICK & DROP -->
+        <div style="text-align:center; color: gray; font-size: 13px; margin-bottom: 10px;">
+            Date: ${date}
+        </div>
+
+        <!-- PRICE & VIEW SEATS -->
+        <div class="bottom-row">
+            <div class="bus-price">₹${matchedRoute.fare}</div>
+            <button class="view-btn" onclick="goToSeats()">View Seats</button>
+        </div>
+
+        <!-- BUS DETAILS -->
+        <div class="bus-details">${bus.details}</div>
+
+        <!-- VIEW ROUTE BUTTON -->
+        <div class="route-toggle" onclick="toggleRoute(this)">
+            View Route ▼
+        </div>
+
+        <!-- HIDDEN ROUTE -->
+        <div class="route"></div>
+    `;
+
+    container.appendChild(card);
+
+    // ADD STOPS
+    const routeDiv = card.querySelector(".route");
+    bus.stops.forEach(stop => {
+        const div = document.createElement("div");
+        div.className = "stop";
+        div.innerHTML = `
+            <div>
+                <div class="stop-name">${stop.place}</div>
+                <div class="stop-time">${stop.time}</div>
+            </div>
+        `;
+        routeDiv.appendChild(div);
+    });
+}
+
+// NAVIGATION
+function goBack() {
+    window.history.back(); // This makes the back button functional
+}
+
+function goToSeats() {
+    const busId = `${from}_${to}_${date}`;  // 🔥 REQUIRED
+
+    window.location.href = `seat.html?busId=${busId}&from=${from}&to=${to}&date=${date}`;
+}
+
+function toggleRoute(btn) {
+    const route = btn.nextElementSibling;
+
+    if (route.style.display === "block") {
+        route.style.display = "none";
+        btn.innerText = "View Route ▼";
+    } else {
+        route.style.display = "block";
+        btn.innerText = "Hide Route ▲";
+    }
+}
+</script>
+
+</body>
+</html>

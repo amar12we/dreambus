@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Seats</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f6f8;
+}
+
+/* HEADER */
+.header {
+    background: #ff7a00;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+/* SEAT GRID */
+#seats {
+    display: grid;
+    grid-template-columns: repeat(4, 60px);
+    gap: 12px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+/* SEAT */
+.seat {
+    height: 50px;
+    border-radius: 10px;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* STATES */
+.booked {
+    background: red;
+    cursor: not-allowed;
+    color: white;
+}
+
+.selected {
+    background: green;
+    color: white;
+}
+
+/* BUTTON */
+button {
+    display: block;
+    margin: 30px auto;
+    padding: 12px 20px;
+    background: #ff7a00;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header" id="route"></div>
+
+<div id="seats"></div>
+
+<button onclick="bookSeat()">Book Seat</button>
+
+<script type="module">
+// 🔥 FIREBASE IMPORT
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 🔥 YOUR CONFIG (PUT YOURS HERE)
+const firebaseConfig = {
+  apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+  authDomain: "dreamliner-421b0.firebaseapp.com",
+  databaseURL: "https://dreamliner-421b0-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dreamliner-421b0",
+  storageBucket: "dreamliner-421b0.firebasestorage.app",
+  messagingSenderId: "454472970770",
+  appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb",
+  measurementId: "G-3NFBP3RVG7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// GET DATA FROM URL
+const params = new URLSearchParams(window.location.search);
+const busId = params.get("busId");
+const from = params.get("from");
+const to = params.get("to");
+const date = params.get("date");
+
+console.log("Bus ID:", busId);
+// SHOW HEADER
+document.getElementById("route").innerText =
+    `${from} → ${to} | ${date}`;
+
+// SEAT LIST
+const allSeats = [
+    "A1","A2","A3","A4",
+    "B1","B2","B3","B4",
+    "C1","C2","C3","C4"
+];
+
+let selectedSeat = null;
+
+// LOAD SEATS FROM FIREBASE
+async function loadSeats() {
+    const docRef = doc(db, "buses", busId);
+    const docSnap = await getDoc(docRef);
+
+    let bookedSeats = docSnap.exists() ? docSnap.data().seats : {};
+
+    const container = document.getElementById("seats");
+    container.innerHTML = "";
+
+    allSeats.forEach(seat => {
+        let div = document.createElement("div");
+        div.className = "seat";
+        div.innerText = seat;
+
+        if (bookedSeats[seat] === "booked") {
+            div.classList.add("booked");
+        }
+
+        div.onclick = () => selectSeat(div, seat, bookedSeats);
+
+        container.appendChild(div);
+    });
+}
+
+// SELECT SEAT
+function selectSeat(div, seat, bookedSeats) {
+    if (bookedSeats[seat] === "booked") return;
+
+    document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+
+    div.classList.add("selected");
+    selectedSeat = seat;
+}
+
+// BOOK SEAT
+async function bookSeat() {
+
+if (!selectedSeat) {
+    alert("Please select a seat first!");
+    return;
+}
+
+try {
+    const docRef = doc(db, "buses", busId);
+    const docSnap = await getDoc(docRef);
+
+    let seats = docSnap.exists() ? docSnap.data().seats : {};
+
+    // 🔒 Prevent double booking
+    if (seats[selectedSeat] === "booked") {
+        alert("Seat already booked!");
+        return;
+    }
+
+    // ✅ Update selected seat
+    seats[selectedSeat] = "booked";
+
+    await setDoc(docRef, { seats });
+
+    alert("Seat booked successfully!");
+
+    selectedSeat = null;
+
+    // 🔄 Reload UI
+    loadSeats();
+
+} catch (error) {
+    console.error("Booking error:", error);
+    alert("Error booking seat");
+}
+}
+
+// LOAD ON START
+loadSeats();
+
+</script>
+
+</body>
+</html>
