@@ -325,19 +325,23 @@ body {
 // HERO SLIDER
 let current = 0;
 const images = document.querySelectorAll("#slides img");
+
 function showSlide() {
-    images[current].classList.remove("active");
+    images.forEach((img, i) => {
+        img.classList.toggle("active", i === current);
+    });
     current = (current + 1) % images.length;
-    images[current].classList.add("active");
 }
+
+// Call every 3 seconds
 setInterval(showSlide, 3000);
-showSlide();
 
 // CITY MODAL
 let currentField = "";
 let cities = [
-    "Guwahati", "Delhi", "Mumbai", "Kolkata", "Bangalore",
-    "Chennai", "Hyderabad", "Pune", "Jaipur", "Shillong"
+    "Guwahati", "Biswanath Charali", "ISBT", "Games Village", "Khanapara",
+    "Jagiroad", "Nagaon", "Kaliabor", "Dolabari Bypass", "Jamagurihat",
+    "Kusmtola", "Sootea"
 ];
 
 function openModal(field) {
@@ -388,13 +392,20 @@ function setQuickDate(offset) {
     document.getElementById("date").value = formatted;
     document.getElementById("dateText").innerText = formatted;
 }
-
 function searchBus() {
     let from = document.getElementById("fromText").innerText;
     let to = document.getElementById("toText").innerText;
     let date = document.getElementById("date").value;
-    alert(`Searching buses from ${from} to ${to} on ${date}`);
+
+    if (from === "From" || to === "To" || !date) {
+        alert("Please fill all details");
+        return;
+    }
+
+    // REDIRECT TO BUS PAGE
+    window.location.href = `bus.html?from=${from}&to=${to}&date=${date}`;
 }
+
 </script>
 
 </body>
