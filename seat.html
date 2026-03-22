@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Select Seats - M/F Images</title>
+
+<!-- jsPDF & QR Code Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+
 <style>
 body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
 
@@ -120,7 +125,7 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
     <button id="femaleBtn">Female</button>
 </div>
 
-<!-- TOAST CONTAINER -->
+<!-- TOAST -->
 <div id="toastContainer"></div>
 
 <script type="module">
@@ -251,6 +256,55 @@ document.addEventListener("click",(e)=>{
     }
 });
 
+// Download professional PDF ticket
+async function downloadTicketPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFillColor(255, 122, 0);
+    doc.rect(0,0,210,20,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(16);
+    doc.text("🚌 DREAMLINER BUS TICKET", 105, 14, {align:"center"});
+
+    doc.setFontSize(12);
+    doc.setTextColor(0,0,0);
+    let startY=30;
+
+    doc.text(`From: ${from}`, 15, startY);
+    doc.text(`To: ${to}`, 120, startY);
+
+    startY+=10;
+    doc.text(`Date: ${date}`, 15, startY);
+    doc.text(`Trip: ${trip} Trip`, 120, startY);
+
+    startY+=10;
+    const email = document.getElementById("customerEmail").value;
+    doc.text(`Passenger: ${email}`, 15, startY);
+    doc.text(`Seats: ${selectedSeats.join(", ")}`, 120, startY);
+
+    startY+=10;
+    doc.text(`Booking Time: ${new Date().toLocaleString()}`, 15, startY);
+
+    // QR Code
+    const qrData = JSON.stringify({from,to,date,trip,seats:selectedSeats,passenger:email});
+    const qrCanvas = document.createElement("canvas");
+    await QRCode.toCanvas(qrCanvas, qrData, { width:100 });
+    const qrImg = qrCanvas.toDataURL("image/png");
+    doc.addImage(qrImg, "PNG", 80, startY+10, 50, 50);
+
+    // Footer
+    doc.setFontSize(10);
+    doc.text("Owner Contact: +91 98765 43210", 15, 130);
+    doc.text("Driver Contact: +91 91234 56789", 15, 136);
+    doc.text("Support: support@dreamliner.com", 15, 142);
+    doc.text("Thank you for choosing Dreamliner!", 105, 150, {align:"center"});
+
+    doc.save(`BusTicket_${from}-${to}_${date}.pdf`);
+}
+
+// Booking button
 document.getElementById("bookBtn").addEventListener("click", async ()=>{
     const email=document.getElementById("customerEmail").value.trim();
     if(!email){ showToast("Please enter your email!", "error"); return; }
@@ -274,19 +328,13 @@ document.getElementById("bookBtn").addEventListener("click", async ()=>{
         }
 
         await setDoc(docRef,{seats},{merge:true});
-
-        // Generate booking info file
-        const bookingDetails = {
-            from, to, date, trip, customerEmail: email, seats: selectedSeats, timestamp: new Date().toISOString()
-        };
-        const blob = new Blob([JSON.stringify(bookingDetails, null, 2)], {type:"application/json"});
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Booking_${from}-${to}_${date}.json`;
-        link.click();
-
         showToast(`Seats ${selectedSeats.join(", ")} booked successfully!`, "success");
-        selectedSeats=[]; document.getElementById("customerEmail").value="";
+
+        // Download PDF ticket
+        downloadTicketPDF();
+
+        selectedSeats=[]; 
+        document.getElementById("customerEmail").value="";
     } catch(err){ console.error(err); showToast("Error booking seats", "error"); }
 });
 </script>
