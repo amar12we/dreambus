@@ -72,6 +72,9 @@ body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:
 .gender-popup button#femaleBtn { background-color:#d81b60; }
 .gender-popup button#femaleBtn:hover { background-color:#c2185b; }
 
+/* FARE INFO */
+#fareInfo { margin:8px 0; font-size:14px; font-weight:bold; }
+
 /* FOOTER */
 .footer-action { text-align:center; margin-top:10px; }
 button#bookBtn { padding:10px 30px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:14px; margin-top:8px; width:90%; max-width:250px; }
@@ -102,6 +105,11 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
 <div class="bus">
     <div class="driver"></div>
     <div id="seats"></div>
+</div>
+
+<!-- FARE INFO -->
+<div id="fareInfo">
+    Selected Seats: 0 | Total Fare: ₹0
 </div>
 
 <!-- LEGEND -->
@@ -143,11 +151,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Get data dynamically from bus.html via URL
 const params = new URLSearchParams(window.location.search);
 const from = params.get("from") || "Start";
 const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
+const farePerSeat = Number(params.get("fare")) || 250;
 
 document.getElementById("route").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
@@ -163,14 +173,20 @@ const genderPopup = document.getElementById("genderPopup");
 const maleBtn = document.getElementById("maleBtn");
 const femaleBtn = document.getElementById("femaleBtn");
 
-// Toast function
-function showToast(message, type="info", duration=3000){
+// Toast
+function showToast(msg,type="info",duration=3000){
     const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.innerText = message;
+    toast.className=`toast ${type}`;
+    toast.innerText=msg;
     document.getElementById("toastContainer").appendChild(toast);
     setTimeout(()=> toast.classList.add("show"),100);
     setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, duration);
+}
+
+// Update fare info
+function updateFareInfo(){
+    const fareDiv = document.getElementById("fareInfo");
+    fareDiv.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${selectedSeats.length * farePerSeat}`;
 }
 
 // Seats A1 → A52
@@ -180,7 +196,6 @@ for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
 function renderSeats(bookedSeats){
     seatContainer.innerHTML='';
     let index=0;
-    // Top row
     const topRow = document.createElement("div"); topRow.className="row";
     const leftGroup = document.createElement("div"); leftGroup.className="group";
     leftGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
@@ -190,7 +205,7 @@ function renderSeats(bookedSeats){
     rightGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
     topRow.appendChild(rightGroup);
     seatContainer.appendChild(topRow);
-    // Middle rows
+
     for(let r=0;r<11;r++){
         const row = document.createElement("div"); row.className="row";
         const left = document.createElement("div"); left.className="group";
@@ -202,7 +217,7 @@ function renderSeats(bookedSeats){
         row.appendChild(left); row.appendChild(right);
         seatContainer.appendChild(row);
     }
-    // Last row
+
     const lastRow = document.createElement("div"); lastRow.className="row";
     for(;index<allSeats.length;index++){
         lastRow.appendChild(createSeatDiv(allSeats[index], bookedSeats));
@@ -221,9 +236,10 @@ function createSeatDiv(seatObj, bookedSeats){
             if(div.classList.contains("male")||div.classList.contains("female")){
                 div.classList.remove("male","female");
                 selectedSeats = selectedSeats.filter(s=>s!==seatObj.name);
+                updateFareInfo();
                 return;
             }
-            if(selectedSeats.length>=maxSelect){ showToast(`Max ${maxSelect} seats`, "info"); return; }
+            if(selectedSeats.length>=maxSelect){ showToast(`Max ${maxSelect} seats`); return; }
             currentSeat = div;
             const rect = div.getBoundingClientRect();
             genderPopup.style.top=`${rect.top+window.scrollY-genderPopup.offsetHeight-5}px`;
@@ -238,6 +254,7 @@ onSnapshot(docRef,(docSnap)=>{
     const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
     renderSeats(bookedSeats);
     selectedSeats = selectedSeats.filter(seat=>!bookedSeats[seat] || bookedSeats[seat].status!=="booked");
+    updateFareInfo();
 });
 
 maleBtn.addEventListener("click",()=>selectGender("male"));
@@ -248,6 +265,7 @@ function selectGender(gender){
     currentSeat.classList.add(gender);
     selectedSeats.push(currentSeat.innerText);
     genderPopup.style.display="none"; currentSeat=null;
+    updateFareInfo();
 }
 
 document.addEventListener("click",(e)=>{
@@ -256,59 +274,55 @@ document.addEventListener("click",(e)=>{
     }
 });
 
-// Download professional PDF ticket
-async function downloadTicketPDF() {
+// Download PDF ticket
+async function downloadTicketPDF(){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Header
     doc.setFillColor(255, 122, 0);
-    doc.rect(0,0,210,20,'F');
+    doc.rect(0,0,210,25,'F');
     doc.setTextColor(255,255,255);
     doc.setFontSize(16);
-    doc.text("🚌 DREAMLINER BUS TICKET", 105, 14, {align:"center"});
+    doc.text("🚌 DREAMLINER BUS TICKET", 105, 18, {align:"center"});
 
     doc.setFontSize(12);
     doc.setTextColor(0,0,0);
-    let startY=30;
+    let startY=35;
+    const email=document.getElementById("customerEmail").value;
 
     doc.text(`From: ${from}`, 15, startY);
     doc.text(`To: ${to}`, 120, startY);
-
-    startY+=10;
+    startY+=8;
     doc.text(`Date: ${date}`, 15, startY);
     doc.text(`Trip: ${trip} Trip`, 120, startY);
-
-    startY+=10;
-    const email = document.getElementById("customerEmail").value;
+    startY+=8;
     doc.text(`Passenger: ${email}`, 15, startY);
-    doc.text(`Seats: ${selectedSeats.join(", ")}`, 120, startY);
-
-    startY+=10;
+    doc.text(`Seats (${selectedSeats.length}): ${selectedSeats.join(", ")}`, 120, startY);
+    startY+=8;
+    const totalFare = farePerSeat * selectedSeats.length;
+    doc.text(`Fare: ₹${farePerSeat} x ${selectedSeats.length} = ₹${totalFare}`, 15, startY);
+    startY+=12;
     doc.text(`Booking Time: ${new Date().toLocaleString()}`, 15, startY);
 
-    // QR Code
-    const qrData = JSON.stringify({from,to,date,trip,seats:selectedSeats,passenger:email});
-    const qrCanvas = document.createElement("canvas");
-    await QRCode.toCanvas(qrCanvas, qrData, { width:100 });
-    const qrImg = qrCanvas.toDataURL("image/png");
-    doc.addImage(qrImg, "PNG", 80, startY+10, 50, 50);
+    const qrCanvas=document.createElement("canvas");
+    await QRCode.toCanvas(qrCanvas, JSON.stringify({from,to,date,trip,seats:selectedSeats,passenger:email,fare:totalFare}),{width:80});
+    const qrImg=qrCanvas.toDataURL("image/png");
+    doc.addImage(qrImg,"PNG",160,startY-15,35,35);
 
-    // Footer
     doc.setFontSize(10);
-    doc.text("Owner Contact: +91 98765 43210", 15, 130);
-    doc.text("Driver Contact: +91 91234 56789", 15, 136);
-    doc.text("Support: support@dreamliner.com", 15, 142);
-    doc.text("Thank you for choosing Dreamliner!", 105, 150, {align:"center"});
+    doc.text("Owner Contact: +91 98765 43210", 15, 150);
+    doc.text("Driver Contact: +91 91234 56789", 15, 156);
+    doc.text("Support: support@dreamliner.com", 15, 162);
+    doc.text("Thank you for choosing Dreamliner!", 105, 170, {align:"center"});
 
     doc.save(`BusTicket_${from}-${to}_${date}.pdf`);
 }
 
-// Booking button
+// Booking
 document.getElementById("bookBtn").addEventListener("click", async ()=>{
     const email=document.getElementById("customerEmail").value.trim();
-    if(!email){ showToast("Please enter your email!", "error"); return; }
-    if(selectedSeats.length===0){ showToast("Select at least one seat!", "info"); return; }
+    if(!email){ showToast("Please enter your email!","error"); return; }
+    if(selectedSeats.length===0){ showToast("Select at least one seat!","info"); return; }
 
     try{
         const docSnap = await getDoc(docRef);
@@ -316,7 +330,7 @@ document.getElementById("bookBtn").addEventListener("click", async ()=>{
 
         for(const seat of selectedSeats){
             if(seats[seat]?.status==="booked"){ 
-                showToast(`${seat} already booked!`, "error"); 
+                showToast(`${seat} already booked!`,"error"); 
                 selectedSeats = selectedSeats.filter(s=>s!==seat); 
             }
         }
@@ -328,14 +342,14 @@ document.getElementById("bookBtn").addEventListener("click", async ()=>{
         }
 
         await setDoc(docRef,{seats},{merge:true});
-        showToast(`Seats ${selectedSeats.join(", ")} booked successfully!`, "success");
+        showToast(`Seats ${selectedSeats.join(", ")} booked successfully!`,"success");
 
-        // Download PDF ticket
         downloadTicketPDF();
 
-        selectedSeats=[]; 
+        selectedSeats=[];
         document.getElementById("customerEmail").value="";
-    } catch(err){ console.error(err); showToast("Error booking seats", "error"); }
+        updateFareInfo();
+    } catch(err){ console.error(err); showToast("Error booking seats","error"); }
 });
 </script>
 </body>
