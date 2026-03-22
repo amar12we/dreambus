@@ -11,77 +11,36 @@
 
 <style>
 body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
-
-/* HEADER */
-.header {
-    background:#ff7a00; 
-    color:white; 
-    padding:8px 15px;
-    font-weight:bold; 
-    position:sticky; 
-    top:0; 
-    z-index:1000; 
-    display:flex; 
-    align-items:center; 
-    font-size:13px;
-    gap:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.15);
-}
-
-.back-btn { 
-    background:rgba(255,255,255,0.9); 
-    color:#ff7a00; 
-    border:none; 
-    padding:4px 8px; 
-    border-radius:50px; 
-    font-weight:bold; 
-    cursor:pointer; 
-    font-size:12px; 
-    flex-shrink:0;
-}
+.header { background:#ff7a00; color:white; padding:8px 15px; font-weight:bold; position:sticky; top:0; z-index:1000; display:flex; align-items:center; font-size:13px; gap:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+.back-btn { background:rgba(255,255,255,0.9); color:#ff7a00; border:none; padding:4px 8px; border-radius:50px; font-weight:bold; cursor:pointer; font-size:12px; flex-shrink:0;}
 .back-btn:hover { background:white; transform:translateX(-2px); }
-
 .route-info { flex:1; text-align:center; display:flex; flex-direction:column; line-height:1.2; }
 #route { font-size:14px; font-weight:600; }
 #dateTrip { font-size:12px; font-weight:400; }
-
-/* BUS SEATS */
 .bus { width:60%; max-width:360px; margin:10px auto; background:#fff; border-radius:15px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); position:relative; }
 .driver { text-align:right; font-size:18px; margin-bottom:6px; }
 .driver::before { content:""; display:inline-block; width:30px; height:30px; background-image:url('driver.jpg'); background-size:cover; background-position:center; margin-right:3px; }
-
 .row { display:flex; justify-content:space-between; margin:3px 0; flex-wrap:wrap; }
 .group { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; }
-
 .seat { width:30px; height:30px; cursor:pointer; display:flex; justify-content:center; align-items:center; font-size:10px; font-weight:bold; color:#333; border-radius:4px; background-image:url('seatfree.png'); background-size:cover; background-position:center; transition:transform 0.15s, box-shadow 0.15s; }
 .seat:hover { transform:scale(1.1); box-shadow:0 3px 6px rgba(0,0,0,0.2); }
 .seat.booked { background-image:url('seatbooked.png'); cursor:not-allowed; opacity:0.8; }
 .seat.male { background-image:url('male.png'); }
 .seat.female { background-image:url('female.png'); }
-
-/* LEGEND */
 .legend { display:flex; justify-content:center; gap:15px; font-size:12px; align-items:center; flex-wrap:wrap; margin-top:8px; }
 .legend-item { display:flex; align-items:center; gap:3px; }
 .legend .seat { width:18px; height:18px; }
-
-/* GENDER POPUP */
 .gender-popup { position:absolute; background:#fff; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.25); padding:4px 6px; display:none; z-index:1000; font-size:12px; }
 .gender-popup button { margin:2px; padding:2px 6px; font-size:11px; border:none; border-radius:4px; cursor:pointer; color:#fff; font-weight:600; transition:0.2s; }
 .gender-popup button#maleBtn { background-color:#1976d2; }
 .gender-popup button#maleBtn:hover { background-color:#1565c0; }
 .gender-popup button#femaleBtn { background-color:#d81b60; }
 .gender-popup button#femaleBtn:hover { background-color:#c2185b; }
-
-/* FARE INFO */
 #fareInfo { margin:8px 0; font-size:14px; font-weight:bold; }
-
-/* FOOTER */
 .footer-action { text-align:center; margin-top:10px; }
 button#bookBtn { padding:10px 30px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:14px; margin-top:8px; width:90%; max-width:250px; }
 button#bookBtn:hover { background:#e63024; }
 input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; margin-top:8px; width:90%; max-width:250px; }
-
-/* TOAST NOTIFICATIONS */
 #toastContainer { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2000; }
 .toast { min-width:200px; max-width:300px; margin-top:10px; padding:12px 18px; border-radius:8px; color:white; font-weight:600; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.25); opacity:0; transform:translateY(-20px); transition:0.4s ease, opacity 0.4s ease; }
 .toast.show { opacity:1; transform:translateY(0); }
@@ -92,7 +51,6 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <button class="back-btn" onclick="window.history.back()">← Back</button>
     <div class="route-info">
@@ -101,18 +59,13 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
     </div>
 </div>
 
-<!-- BUS -->
 <div class="bus">
     <div class="driver"></div>
     <div id="seats"></div>
 </div>
 
-<!-- FARE INFO -->
-<div id="fareInfo">
-    Selected Seats: 0 | Total Fare: ₹0
-</div>
+<div id="fareInfo">Selected Seats: 0 | Total Fare: ₹0</div>
 
-<!-- LEGEND -->
 <div class="legend">
     <div class="legend-item"><div class="seat"></div> Available</div>
     <div class="legend-item"><div class="seat male"></div> Male</div>
@@ -120,20 +73,17 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
     <div class="legend-item"><div class="seat booked"></div> Booked</div>
 </div>
 
-<!-- FOOTER -->
 <div class="footer-action">
     <input type="email" id="customerEmail" placeholder="Enter your email" required />
     <br>
     <button id="bookBtn">Book Selected Seats</button>
 </div>
 
-<!-- GENDER POPUP -->
 <div id="genderPopup" class="gender-popup">
     <button id="maleBtn">Male</button>
     <button id="femaleBtn">Female</button>
 </div>
 
-<!-- TOAST -->
 <div id="toastContainer"></div>
 
 <script type="module">
@@ -151,13 +101,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Get data dynamically from bus.html via URL
+// URL PARAMS
 const params = new URLSearchParams(window.location.search);
 const from = params.get("from") || "Start";
 const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
-const farePerSeat = Number(params.get("fare")) || 250;
+const farePerSeat = Number(params.get("fare")) || 250; // imported fare
 
 document.getElementById("route").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
@@ -173,7 +123,7 @@ const genderPopup = document.getElementById("genderPopup");
 const maleBtn = document.getElementById("maleBtn");
 const femaleBtn = document.getElementById("femaleBtn");
 
-// Toast
+// TOAST
 function showToast(msg,type="info",duration=3000){
     const toast = document.createElement("div");
     toast.className=`toast ${type}`;
@@ -183,16 +133,18 @@ function showToast(msg,type="info",duration=3000){
     setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, duration);
 }
 
-// Update fare info
+// UPDATE FARE
 function updateFareInfo(){
     const fareDiv = document.getElementById("fareInfo");
-    fareDiv.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${selectedSeats.length * farePerSeat}`;
+    const totalFare = selectedSeats.length * farePerSeat;
+    fareDiv.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${totalFare}`;
 }
 
-// Seats A1 → A52
+// SEATS
 const allSeats = [];
 for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
 
+// RENDER SEATS
 function renderSeats(bookedSeats){
     seatContainer.innerHTML='';
     let index=0;
@@ -225,6 +177,7 @@ function renderSeats(bookedSeats){
     seatContainer.appendChild(lastRow);
 }
 
+// CREATE SEAT DIV
 function createSeatDiv(seatObj, bookedSeats){
     const div=document.createElement("div"); div.className="seat"; div.innerText=seatObj.name;
     if(bookedSeats && bookedSeats[seatObj.name]){
@@ -250,6 +203,7 @@ function createSeatDiv(seatObj, bookedSeats){
     return div;
 }
 
+// FIRESTORE LIVE UPDATE
 onSnapshot(docRef,(docSnap)=>{
     const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
     renderSeats(bookedSeats);
@@ -257,9 +211,9 @@ onSnapshot(docRef,(docSnap)=>{
     updateFareInfo();
 });
 
+// GENDER SELECTION
 maleBtn.addEventListener("click",()=>selectGender("male"));
 femaleBtn.addEventListener("click",()=>selectGender("female"));
-
 function selectGender(gender){
     if(!currentSeat) return;
     currentSeat.classList.add(gender);
@@ -267,58 +221,13 @@ function selectGender(gender){
     genderPopup.style.display="none"; currentSeat=null;
     updateFareInfo();
 }
-
 document.addEventListener("click",(e)=>{
     if(!genderPopup.contains(e.target) && !e.target.classList.contains("seat")){
         genderPopup.style.display="none"; currentSeat=null;
     }
 });
 
-// Download PDF ticket
-async function downloadTicketPDF(){
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    doc.setFillColor(255, 122, 0);
-    doc.rect(0,0,210,25,'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(16);
-    doc.text("🚌 DREAMLINER BUS TICKET", 105, 18, {align:"center"});
-
-    doc.setFontSize(12);
-    doc.setTextColor(0,0,0);
-    let startY=35;
-    const email=document.getElementById("customerEmail").value;
-
-    doc.text(`From: ${from}`, 15, startY);
-    doc.text(`To: ${to}`, 120, startY);
-    startY+=8;
-    doc.text(`Date: ${date}`, 15, startY);
-    doc.text(`Trip: ${trip} Trip`, 120, startY);
-    startY+=8;
-    doc.text(`Passenger: ${email}`, 15, startY);
-    doc.text(`Seats (${selectedSeats.length}): ${selectedSeats.join(", ")}`, 120, startY);
-    startY+=8;
-    const totalFare = farePerSeat * selectedSeats.length;
-    doc.text(`Fare: ₹${farePerSeat} x ${selectedSeats.length} = ₹${totalFare}`, 15, startY);
-    startY+=12;
-    doc.text(`Booking Time: ${new Date().toLocaleString()}`, 15, startY);
-
-    const qrCanvas=document.createElement("canvas");
-    await QRCode.toCanvas(qrCanvas, JSON.stringify({from,to,date,trip,seats:selectedSeats,passenger:email,fare:totalFare}),{width:80});
-    const qrImg=qrCanvas.toDataURL("image/png");
-    doc.addImage(qrImg,"PNG",160,startY-15,35,35);
-
-    doc.setFontSize(10);
-    doc.text("Owner Contact: +91 98765 43210", 15, 150);
-    doc.text("Driver Contact: +91 91234 56789", 15, 156);
-    doc.text("Support: support@dreamliner.com", 15, 162);
-    doc.text("Thank you for choosing Dreamliner!", 105, 170, {align:"center"});
-
-    doc.save(`BusTicket_${from}-${to}_${date}.pdf`);
-}
-
-// Booking
+// BOOKING
 document.getElementById("bookBtn").addEventListener("click", async ()=>{
     const email=document.getElementById("customerEmail").value.trim();
     if(!email){ showToast("Please enter your email!","error"); return; }
@@ -344,13 +253,91 @@ document.getElementById("bookBtn").addEventListener("click", async ()=>{
         await setDoc(docRef,{seats},{merge:true});
         showToast(`Seats ${selectedSeats.join(", ")} booked successfully!`,"success");
 
-        downloadTicketPDF();
+        const seatsToDownload = [...selectedSeats];
+        downloadTicketPDF(seatsToDownload);
 
         selectedSeats=[];
         document.getElementById("customerEmail").value="";
         updateFareInfo();
     } catch(err){ console.error(err); showToast("Error booking seats","error"); }
 });
+
+// PDF TICKET
+async function downloadTicketPDF(selectedSeatsCopy){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // HEADER
+    doc.setFillColor(255, 122, 0);
+    doc.rect(0,0,210,25,'F'); 
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(16);
+    doc.setFont("helvetica","bold");
+    doc.text(" DREAMLINER BUS TICKET", 105, 16, {align:"center"});
+
+    let startY = 35;
+    doc.setFillColor(245,245,245);
+    doc.roundedRect(10, startY-5, 190, 70, 3, 3, 'F'); 
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(12);
+
+    const passengerEmail = document.getElementById("customerEmail").value || "N/A";
+    const totalSeats = selectedSeatsCopy.length;
+    const totalFare = totalSeats * farePerSeat; // ✅ total fare calculated here
+
+    doc.text(`From: ${from}`, 15, startY);
+    doc.text(`To: ${to}`, 110, startY);
+    startY += 7;
+    doc.text(`Date: ${date}`, 15, startY);
+    doc.text(`Trip: ${trip} Trip`, 110, startY);
+    startY += 7;
+    doc.text(`Passenger Email: ${passengerEmail}`, 15, startY);
+    startY += 7;
+
+    // SEAT INFO
+    doc.text(`No. of Seats Booked: ${totalSeats}`, 15, startY);
+    startY += 7;
+
+    doc.setFont("helvetica","bold");
+    doc.text("Seats Selected:", 15, startY);
+    startY += 6;
+    doc.setFont("helvetica","normal");
+    selectedSeatsCopy.forEach(seat=>{
+        const seatDiv = Array.from(document.getElementsByClassName("seat")).find(d=>d.innerText===seat);
+        const gender = seatDiv.classList.contains("male") ? "M" : "F";
+        doc.text(`${seat} (${gender})`, 15, startY);
+        startY += 6;
+    });
+
+    // FARE DETAILS
+    startY += 2;
+    doc.setFont("helvetica","bold");
+    doc.text("Fare Details:", 15, startY);
+    startY += 6;
+    doc.setFont("helvetica","normal");
+    doc.text(`Fare per Seat: ₹${farePerSeat}`, 15, startY);
+    startY += 6;
+    doc.text(`Total Fare: ₹${totalFare}`, 15, startY); // ✅ total fare explicitly added
+    startY += 7;
+
+    // BOOKING TIME
+    const bookingTime = new Date().toLocaleString();
+    doc.text(`Booking Time: ${bookingTime}`, 15, startY);
+
+    // QR CODE
+    const qrCanvas = document.createElement("canvas");
+    await QRCode.toCanvas(qrCanvas, JSON.stringify({
+        from,to,date,trip,seats:selectedSeatsCopy,
+        passenger:passengerEmail,
+        fare:totalFare,
+        bookingTime
+    }), {width:80});
+    const qrImg = qrCanvas.toDataURL("image/png");
+    doc.addImage(qrImg,"PNG",160, startY-10, 35, 35);
+
+    doc.save(`Ticket_${from}_${to}_${date}.pdf`);
+}
 </script>
+
 </body>
 </html>
