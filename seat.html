@@ -3,140 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Select Seats (AM/PM Trips)</title>
+<title>Select Seats - M/F Images</title>
 <style>
-body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; margin: 0; padding-bottom: 50px; }
-.header { background: #ff7a00; color: white; padding: 15px; text-align: center; font-weight: bold; }
-#seats { display: grid; grid-template-columns: repeat(4, 60px); gap: 12px; justify-content: center; margin-top: 30px; }
-.seat { height: 50px; border-radius: 10px; background: #ddd; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: 0.2s; }
-.booked { background: #ff4d4d; cursor: not-allowed; color: white; }
-.selected { background: #28a745; color: white; border: 2px solid #1e7e34; }
-.footer-action { text-align: center; margin-top: 20px; }
-button { padding: 12px 40px; background: #ff7a00; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-button:hover { background: #e66e00; }
-input { padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; margin-top: 10px; width: 250px; }
+body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
+
+/* HEADER */
+.header {
+    background:#ff7a00; 
+    color:white; 
+    padding:8px 15px;
+    font-weight:bold; 
+    position:sticky; 
+    top:0; 
+    z-index:1000; 
+    display:flex; 
+    align-items:center; 
+    font-size:13px;
+    gap:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.back-btn { 
+    background:rgba(255,255,255,0.9); 
+    color:#ff7a00; 
+    border:none; 
+    padding:4px 8px; 
+    border-radius:50px; 
+    font-weight:bold; 
+    cursor:pointer; 
+    font-size:12px; 
+    flex-shrink:0;
+}
+.back-btn:hover { background:white; transform:translateX(-2px); }
+
+.route-info { flex:1; text-align:center; display:flex; flex-direction:column; line-height:1.2; }
+#route { font-size:14px; font-weight:600; }
+#dateTrip { font-size:12px; font-weight:400; }
+
+/* BUS SEATS */
+.bus { width:60%; max-width:360px; margin:10px auto; background:#fff; border-radius:15px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); position:relative; }
+.driver { text-align:right; font-size:18px; margin-bottom:6px; }
+.driver::before { content:""; display:inline-block; width:30px; height:30px; background-image:url('driver.jpg'); background-size:cover; background-position:center; margin-right:3px; }
+
+.row { display:flex; justify-content:space-between; margin:3px 0; flex-wrap:wrap; }
+.group { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; }
+
+.seat { width:30px; height:30px; cursor:pointer; display:flex; justify-content:center; align-items:center; font-size:10px; font-weight:bold; color:#333; border-radius:4px; background-image:url('seatfree.png'); background-size:cover; background-position:center; transition:transform 0.15s, box-shadow 0.15s; }
+.seat:hover { transform:scale(1.1); box-shadow:0 3px 6px rgba(0,0,0,0.2); }
+.seat.booked { background-image:url('seatbooked.png'); cursor:not-allowed; opacity:0.8; }
+.seat.male { background-image:url('male.png'); }
+.seat.female { background-image:url('female.png'); }
+
+/* LEGEND */
+.legend { display:flex; justify-content:center; gap:15px; font-size:12px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+.legend-item { display:flex; align-items:center; gap:3px; }
+.legend .seat { width:18px; height:18px; }
+
+/* GENDER POPUP */
+.gender-popup { position:absolute; background:#fff; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.25); padding:4px 6px; display:none; z-index:1000; font-size:12px; }
+.gender-popup button { margin:2px; padding:2px 6px; font-size:11px; border:none; border-radius:4px; cursor:pointer; color:#fff; font-weight:600; transition:0.2s; }
+.gender-popup button#maleBtn { background-color:#1976d2; }
+.gender-popup button#maleBtn:hover { background-color:#1565c0; }
+.gender-popup button#femaleBtn { background-color:#d81b60; }
+.gender-popup button#femaleBtn:hover { background-color:#c2185b; }
+
+/* FOOTER */
+.footer-action { text-align:center; margin-top:10px; }
+button#bookBtn { padding:10px 30px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:14px; margin-top:8px; width:90%; max-width:250px; }
+button#bookBtn:hover { background:#e63024; }
+input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; margin-top:8px; width:90%; max-width:250px; }
+
+/* TOAST NOTIFICATIONS */
+#toastContainer { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2000; }
+.toast { min-width:200px; max-width:300px; margin-top:10px; padding:12px 18px; border-radius:8px; color:white; font-weight:600; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.25); opacity:0; transform:translateY(-20px); transition:0.4s ease, opacity 0.4s ease; }
+.toast.show { opacity:1; transform:translateY(0); }
+.toast.success { background-color:#4caf50; }
+.toast.error { background-color:#f44336; }
+.toast.info { background-color:#1976d2; }
 </style>
 </head>
 <body>
 
-<div class="header" id="route">Loading route...</div>
-<div id="seats"></div>
+<!-- HEADER -->
+<div class="header">
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    <div class="route-info">
+        <div id="route">Loading route...</div>
+        <div id="dateTrip">Loading date & trip...</div>
+    </div>
+</div>
 
+<!-- BUS -->
+<div class="bus">
+    <div class="driver"></div>
+    <div id="seats"></div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+    <div class="legend-item"><div class="seat"></div> Available</div>
+    <div class="legend-item"><div class="seat male"></div> Male</div>
+    <div class="legend-item"><div class="seat female"></div> Female</div>
+    <div class="legend-item"><div class="seat booked"></div> Booked</div>
+</div>
+
+<!-- FOOTER -->
 <div class="footer-action">
     <input type="email" id="customerEmail" placeholder="Enter your email" required />
     <br>
-    <button id="bookBtn">Book Selected Seat</button>
+    <button id="bookBtn">Book Selected Seats</button>
 </div>
+
+<!-- GENDER POPUP -->
+<div id="genderPopup" class="gender-popup">
+    <button id="maleBtn">Male</button>
+    <button id="femaleBtn">Female</button>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
-  apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-  authDomain: "dreamliner-421b0.firebaseapp.com",
-  projectId: "dreamliner-421b0",
-  storageBucket: "dreamliner-421b0.appspot.com",
-  messagingSenderId: "454472970770",
-  appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+    apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+    authDomain:"dreamliner-421b0.firebaseapp.com",
+    projectId:"dreamliner-421b0",
+    storageBucket:"dreamliner-421b0.appspot.com",
+    messagingSenderId:"454472970770",
+    appId:"1:454472970770:web:cbf95c8b7523f24f2b5ecb"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ---------------- URL PARAMS ----------------
 const params = new URLSearchParams(window.location.search);
 const from = params.get("from") || "Start";
 const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
 
-// ---------------- DOCUMENT PER DATE + TRIP ----------------
-// Each date & trip combination has its own document
-const busDocId = `${date}_${trip}`;  // e.g., "2026-03-20_AM"
-const docRef = doc(db, "buses", busDocId);
+document.getElementById("route").innerText = `${from} → ${to}`;
+document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
 
-// ---------------- HEADER ----------------
-document.getElementById("route").innerText = `${from} → ${to} | ${date} | ${trip} Trip`;
+const busDocId = `${date}_${trip}`;
+const docRef = doc(db,"buses",busDocId);
 
-// ---------------- SEATS ----------------
-const allSeats = ["A1","A2","A3","A4","B1","B2","B3","B4","C1","C2","C3","C4"];
-let selectedSeat = null;
+let selectedSeats = [];
+let currentSeat = null;
+const maxSelect = 6;
+const seatContainer = document.getElementById("seats");
+const genderPopup = document.getElementById("genderPopup");
+const maleBtn = document.getElementById("maleBtn");
+const femaleBtn = document.getElementById("femaleBtn");
 
-// ---------------- RENDER SEATS ----------------
-function renderSeats(bookedSeats){
-    const container = document.getElementById("seats");
-    container.innerHTML = "";
-    allSeats.forEach(seat=>{
-        const div = document.createElement("div");
-        div.className = "seat";
-        div.innerText = seat;
-
-        if(bookedSeats && bookedSeats[seat]?.status === "booked"){
-            div.classList.add("booked");
-        } else {
-            div.addEventListener("click", () => {
-                document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
-                div.classList.add("selected");
-                selectedSeat = seat;
-            });
-        }
-
-        container.appendChild(div);
-    });
+// Toast function
+function showToast(message, type="info", duration=3000){
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.innerText = message;
+    document.getElementById("toastContainer").appendChild(toast);
+    setTimeout(()=> toast.classList.add("show"),100);
+    setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, duration);
 }
 
-// ---------------- REAL-TIME LISTENER ----------------
-onSnapshot(docRef, (docSnap) => {
-    const bookedSeats = docSnap.exists() ? docSnap.data().seats : {};
-    renderSeats(bookedSeats);
+// Seats A1 → A52
+const allSeats = [];
+for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
 
-    if(selectedSeat && bookedSeats[selectedSeat]?.status === "booked"){
-        selectedSeat = null;
-        alert("The seat you selected was just booked by someone else!");
+function renderSeats(bookedSeats){
+    seatContainer.innerHTML='';
+    let index=0;
+    // Top row
+    const topRow = document.createElement("div"); topRow.className="row";
+    const leftGroup = document.createElement("div"); leftGroup.className="group";
+    leftGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    topRow.appendChild(leftGroup);
+    const rightGroup = document.createElement("div"); rightGroup.className="group";
+    rightGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    rightGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    topRow.appendChild(rightGroup);
+    seatContainer.appendChild(topRow);
+    // Middle rows
+    for(let r=0;r<11;r++){
+        const row = document.createElement("div"); row.className="row";
+        const left = document.createElement("div"); left.className="group";
+        left.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+        left.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+        const right = document.createElement("div"); right.className="group";
+        right.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+        right.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+        row.appendChild(left); row.appendChild(right);
+        seatContainer.appendChild(row);
+    }
+    // Last row
+    const lastRow = document.createElement("div"); lastRow.className="row";
+    for(;index<allSeats.length;index++){
+        lastRow.appendChild(createSeatDiv(allSeats[index], bookedSeats));
+    }
+    seatContainer.appendChild(lastRow);
+}
+
+function createSeatDiv(seatObj, bookedSeats){
+    const div=document.createElement("div"); div.className="seat"; div.innerText=seatObj.name;
+    if(bookedSeats && bookedSeats[seatObj.name]){
+        div.classList.add("booked");
+        if(bookedSeats[seatObj.name].gender) div.classList.add(bookedSeats[seatObj.name].gender);
+    } else {
+        div.addEventListener("click",()=>{
+            if(div.classList.contains("booked")) return;
+            if(div.classList.contains("male")||div.classList.contains("female")){
+                div.classList.remove("male","female");
+                selectedSeats = selectedSeats.filter(s=>s!==seatObj.name);
+                return;
+            }
+            if(selectedSeats.length>=maxSelect){ showToast(`Max ${maxSelect} seats`, "info"); return; }
+            currentSeat = div;
+            const rect = div.getBoundingClientRect();
+            genderPopup.style.top=`${rect.top+window.scrollY-genderPopup.offsetHeight-5}px`;
+            genderPopup.style.left=`${rect.left+window.scrollX}px`;
+            genderPopup.style.display="block";
+        });
+    }
+    return div;
+}
+
+onSnapshot(docRef,(docSnap)=>{
+    const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
+    renderSeats(bookedSeats);
+    selectedSeats = selectedSeats.filter(seat=>!bookedSeats[seat] || bookedSeats[seat].status!=="booked");
+});
+
+maleBtn.addEventListener("click",()=>selectGender("male"));
+femaleBtn.addEventListener("click",()=>selectGender("female"));
+
+function selectGender(gender){
+    if(!currentSeat) return;
+    currentSeat.classList.add(gender);
+    selectedSeats.push(currentSeat.innerText);
+    genderPopup.style.display="none"; currentSeat=null;
+}
+
+document.addEventListener("click",(e)=>{
+    if(!genderPopup.contains(e.target) && !e.target.classList.contains("seat")){
+        genderPopup.style.display="none"; currentSeat=null;
     }
 });
 
-// ---------------- BOOK SEAT FUNCTION ----------------
-async function bookSeat(){
-    const emailInput = document.getElementById("customerEmail").value.trim();
-    if(!emailInput){ alert("Please enter your email!"); return; }
-    if(!selectedSeat){ alert("Please select a seat!"); return; }
+document.getElementById("bookBtn").addEventListener("click", async ()=>{
+    const email=document.getElementById("customerEmail").value.trim();
+    if(!email){ showToast("Please enter your email!", "error"); return; }
+    if(selectedSeats.length===0){ showToast("Select at least one seat!", "info"); return; }
 
     try{
         const docSnap = await getDoc(docRef);
-        let seats = docSnap.exists() ? docSnap.data().seats : {};
+        let seats = docSnap.exists()? docSnap.data().seats : {};
 
-        // Check if seat already booked
-        if(seats[selectedSeat]?.status === "booked"){
-            alert("This seat was just booked by someone else!");
-            selectedSeat = null;
-            return;
+        for(const seat of selectedSeats){
+            if(seats[seat]?.status==="booked"){ 
+                showToast(`${seat} already booked!`, "error"); 
+                selectedSeats = selectedSeats.filter(s=>s!==seat); 
+            }
         }
 
-        // Store each user's route inside the seat
-        seats[selectedSeat] = {
-            status: "booked",
-            customerEmail: emailInput,
-            from: from,
-            to: to,
-            timestamp: new Date().toISOString()
+        for(const seat of selectedSeats){
+            const seatDiv = Array.from(document.getElementsByClassName("seat")).find(d=>d.innerText===seat);
+            const gender = seatDiv.classList.contains("male")?"male":"female";
+            seats[seat]={status:"booked", customerEmail:email, gender, from, to, timestamp:new Date().toISOString()};
+        }
+
+        await setDoc(docRef,{seats},{merge:true});
+
+        // Generate booking info file
+        const bookingDetails = {
+            from, to, date, trip, customerEmail: email, seats: selectedSeats, timestamp: new Date().toISOString()
         };
+        const blob = new Blob([JSON.stringify(bookingDetails, null, 2)], {type:"application/json"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Booking_${from}-${to}_${date}.json`;
+        link.click();
 
-        await setDoc(docRef, { seats }, { merge: true });
-
-        alert(`Seat ${selectedSeat} booked successfully!`);
-        selectedSeat = null;
-        document.getElementById("customerEmail").value = "";
-    } catch(err){
-        console.error("Booking error:", err);
-        alert("Error booking seat. Check Firestore permissions.");
-    }
-}
-
-document.getElementById("bookBtn").addEventListener("click", bookSeat);
+        showToast(`Seats ${selectedSeats.join(", ")} booked successfully!`, "success");
+        selectedSeats=[]; document.getElementById("customerEmail").value="";
+    } catch(err){ console.error(err); showToast("Error booking seats", "error"); }
+});
 </script>
-
 </body>
 </html>
