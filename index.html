@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dreamliner Login</title>
+<title>Dreamliner Signup</title>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -25,28 +25,42 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let recaptchaVerifier;
+let countdownTimer;
+
+// Initialize reCAPTCHA once
+window.onload = function() {
+    recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => { console.log("reCAPTCHA verified"); }
+    }, auth);
+
+    recaptchaVerifier.render().then(widgetId => console.log("reCAPTCHA ready, widgetId =", widgetId));
+}
 
 // Send OTP
 window.sendOTP = async function() {
     const phone = document.getElementById('phone').value.trim();
     const username = document.getElementById('username').value.trim();
     const age = document.getElementById('age').value.trim();
+    const sendBtn = document.getElementById('send-btn');
 
     if (!username || !age || !phone) { alert("Fill all fields"); return; }
     if (!phone.startsWith('+')) { alert("Use format +91XXXXXXXXXX"); return; }
 
-    try {
-        // Initialize reCAPTCHA here dynamically
-        recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible',
-            'callback': () => { console.log("reCAPTCHA verified"); }
-        }, auth);
+    if (!recaptchaVerifier) {
+        alert("reCAPTCHA not ready. Try again in a moment.");
+        return;
+    }
 
+    try {
         const confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         window.confirmationResult = confirmationResult;
 
         document.getElementById('otp-section').style.display = 'block';
-        document.getElementById('send-btn').disabled = true;
+        document.getElementById('otp').focus();
+        sendBtn.disabled = true;
+
+        startCountdown(30); // 30 seconds countdown
         alert("OTP sent to " + phone);
     } catch (err) {
         console.error("Error sending OTP:", err);
@@ -54,7 +68,24 @@ window.sendOTP = async function() {
     }
 }
 
-// Verify OTP
+// Countdown timer
+function startCountdown(seconds) {
+    const sendBtn = document.getElementById('send-btn');
+    let counter = seconds;
+    sendBtn.innerText = `Resend OTP in ${counter}s`;
+    countdownTimer = setInterval(() => {
+        counter--;
+        if (counter <= 0) {
+            clearInterval(countdownTimer);
+            sendBtn.innerText = "Send OTP";
+            sendBtn.disabled = false;
+        } else {
+            sendBtn.innerText = `Resend OTP in ${counter}s`;
+        }
+    }, 1000);
+}
+
+// Verify OTP & signup
 window.verifyOTP = async function() {
     const otp = document.getElementById('otp').value.trim();
     const username = document.getElementById('username').value.trim();
@@ -67,8 +98,16 @@ window.verifyOTP = async function() {
         const result = await window.confirmationResult.confirm(otp);
         const user = result.user;
 
+        // Check if user exists
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+            alert("Phone already registered!");
+            return;
+        }
+
+        // Create new user
         await setDoc(doc(db, "users", user.uid), { username, age, phone });
-        alert("Login successful! Welcome " + username);
+        alert("Signup successful! Welcome " + username);
     } catch (err) {
         console.error("OTP verification failed:", err);
         alert("Invalid OTP, try again");
@@ -93,7 +132,7 @@ button:hover { background:#ff9500;}
 
 <body>
 <div class="container">
-    <h2>Dreamliner Login</h2>
+    <h2>Dreamliner Signup</h2>
 
     <div class="input-group">
         <input type="text" id="username" placeholder=" " />
@@ -115,7 +154,7 @@ button:hover { background:#ff9500;}
             <input type="number" id="otp" placeholder=" " />
             <label>Enter OTP</label>
         </div>
-        <button onclick="verifyOTP()">Verify OTP</button>
+        <button onclick="verifyOTP()">Verify OTP & Signup</button>
     </div>
 
     <div id="recaptcha-container"></div>
