@@ -29,7 +29,7 @@ let countdownTimer;
 
 // Initialize reCAPTCHA once
 window.onload = function() {
-    recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': () => { console.log("reCAPTCHA verified"); }
     }, auth);
@@ -160,4 +160,4 @@ button:hover { background:#ff9500;}
     <div id="recaptcha-container"></div>
 </div>
 </body>
-</html>
+</html> 
