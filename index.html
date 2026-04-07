@@ -1,219 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dreamliner Login</title>
+<title>Dreamliner Bus Booking</title>
 
 <style>
-body{
-font-family:Segoe UI;
-margin:0;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:linear-gradient(135deg,#ff7a00,#ffb347);
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #e0e0e0;
 }
 
-.container{
-background:white;
-padding:40px;
-border-radius:15px;
-width:350px;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
-text-align:center;
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(to right, #ff7a00, #ff512f);
+    color: white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
 
-h2{
-color:#ff7a00;
-margin-bottom:30px;
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 18px;
 }
 
-input{
-width:100%;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:15px;
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
 }
 
-button{
-width:100%;
-padding:12px;
-background:#ff7a00;
-border:none;
-color:white;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
+.login-btn {
+    background: white;
+    color: #ff512f;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-button:hover{
-background:#ff9500;
+.login-btn:hover {
+    background: #ffeed9;
 }
 
-#otpSection{
-display:none;
+/* HERO SLIDER */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
 }
 
+.slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slides img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    backface-visibility: hidden;
+}
+
+.slides img.active {
+    opacity: 1;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.35);
+    top: 0;
+    left: 0;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+}
+
+.hero-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    z-index: 2;
+    text-align: center;
+}
+
+.hero-text h1 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 1px 2px 6px rgba(0,0,0,0.5);
+}
+
+/* BOOKING CARD */
+.booking-card {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 380px;
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+    z-index: 10;
+    transition: 0.3s;
+}
+
+.booking-card:hover {
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* INPUT BOXES */
+.input-box, .date-box {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    font-size: 14px;
+    border-radius: 15px;
+    background: #f9f9f9;
+    border: none;
+    margin-bottom: 10px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.input-box:hover, .date-box:hover {
+    box-shadow: 0 4px 12px rgba(255,122,0,0.25);
+    background: #fff;
+}
+
+/* ICONS IN INPUTS */
+.input-box i, .date-box i {
+    margin-right: 10px;
+    color: #ff7a00;
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.route-box {
+    position: relative;
+}
+
+/* Swap Button */
+.swap-btn {
+    position: absolute;
+    right: 10px;
+    top: 28px;
+    background: #ff7a00;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+
+.swap-btn:hover {
+    background: #ff512f;
+}
+
+/* Quick date buttons */
+.quick-date {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.quick-btn {
+    flex: 1;
+    min-width: 80px;
+    background: #f1f2f6;
+    padding: 10px 0;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.3s;
+    font-size: 13px;
+}
+
+.quick-btn:hover {
+    background: #ffe6cc;
+}
+
+/* Search Button */
+.search-btn {
+    width: 100%;
+    background: #ff7a00;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    margin-top: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.search-btn:hover {
+    background: #ff512f;
+}
+
+/* MODAL */
+.modal {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: white;
+    top: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    z-index: 20;
+}
+
+.modal input {
+    padding: 15px;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.list div {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.list div:hover {
+    background: #f1f2f6;
+}
 </style>
-
 </head>
-
 <body>
 
-<div class="container">
-
-<h2>Dreamliner Login</h2>
-
-<input type="text" id="phone" placeholder="+91XXXXXXXXXX">
-
-<button onclick="sendOTP()">Send OTP</button>
-
-<div id="otpSection">
-
-<input type="text" id="otp" placeholder="Enter OTP">
-
-<button onclick="verifyOTP()">Verify OTP</button>
-
+<!-- HEADER -->
+<div class="header">
+    <div class="logo">
+        <img src="logo.png" class="logo-img">
+        Dreamliner
+    </div>
+    <button class="login-btn">Login</button>
 </div>
 
-<div id="recaptcha-container"></div>
-
+<!-- HERO -->
+<div class="hero">
+    <div class="slides" id="slides">
+        <img src="demo1.webp" class="active">
+        <img src="demo2.jpeg">
+        <img src="demo3.jpeg">
+    </div>
+    <div class="hero-text">
+        <h1>SMOOTH JOURNEY'S, SUPERIOR COMFORT</h1>
+    </div>
 </div>
 
+<!-- BOOKING CARD -->
+<div class="booking-card">
+    <div class="route-box">
+        <div class="input-box" onclick="openModal('from')">
+            <i class="fas fa-location-dot"></i> 
+            <span id="fromText">From</span>
+        </div>
 
-<script type="module">
+        <button class="swap-btn" onclick="swapCities()">⇄</button>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        <div class="input-box" onclick="openModal('to')">
+            <i class="fas fa-map-marker-alt"></i>
+            <span id="toText">To</span>
+        </div>
+    </div>
 
-import { 
-getAuth,
-RecaptchaVerifier,
-signInWithPhoneNumber
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    <div class="date-box" onclick="document.getElementById('date').showPicker();">
+        <i class="fas fa-calendar-alt"></i>
+        <span id="dateText">Select Date</span>
+        <input type="date" id="date" hidden onchange="document.getElementById('dateText').innerText=this.value;">
+    </div>
 
-import { 
-getFirestore,
-doc,
-getDoc,
-setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <!-- QUICK DATE BUTTONS -->
+    <div class="quick-date">
+        <div class="quick-btn" onclick="setQuickDate(0)">Today</div>
+        <div class="quick-btn" onclick="setQuickDate(1)">Tomorrow</div>
+    </div>
 
+    <button class="search-btn" onclick="searchBus()">Search Buses</button>
+</div>
 
-const firebaseConfig = {
-apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-authDomain:"dreamliner-421b0.firebaseapp.com",
-projectId:"dreamliner-421b0",
-storageBucket:"dreamliner-421b0.appspot.com",
-messagingSenderId:"454472970770",
-appId:"1:454472970770:web:cbf95c8b7523f24f2b5ecb"
-};
+<!-- MODAL -->
+<div class="modal" id="modal">
+    <input type="text" placeholder="Search city..." onkeyup="filterList(this.value)">
+    <div class="list" id="cityList"></div>
+</div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+<script>
+// HERO SLIDER
+let current = 0;
+const images = document.querySelectorAll("#slides img");
 
-let confirmationResult;
-
-
-window.onload = function(){
-
-window.recaptchaVerifier = new RecaptchaVerifier(auth,'recaptcha-container',{
-size:'invisible'
-});
-
+function showSlide() {
+    images.forEach((img, i) => {
+        img.classList.toggle("active", i === current);
+    });
+    current = (current + 1) % images.length;
 }
 
+// Call every 3 seconds
+setInterval(showSlide, 3000);
 
-window.sendOTP = async function(){
+// CITY MODAL
+let currentField = "";
+let cities = [
+    "Guwahati", "Biswanath Charali", "ISBT", "Games Village", "Khanapara",
+    "Jagiroad", "Nagaon", "Kaliabor", "Tezpur(Dolabari Bypass)", "Jamagurihat",
+    "Kusmtola", "Sootea"
+];
 
-const phone = document.getElementById("phone").value;
-
-if(!phone){
-
-alert("Enter phone number");
-
-return;
-
+function openModal(field) {
+    currentField = field;
+    document.getElementById("modal").style.display = "flex";
+    showList(cities);
 }
 
-try{
-
-const appVerifier = window.recaptchaVerifier;
-
-confirmationResult = await signInWithPhoneNumber(auth,phone,appVerifier);
-
-document.getElementById("otpSection").style.display="block";
-
-alert("OTP sent");
-
+function showList(data) {
+    let list = document.getElementById("cityList");
+    list.innerHTML = "";
+    data.forEach(city => {
+        let div = document.createElement("div");
+        div.innerText = city;
+        div.onclick = () => selectCity(city);
+        list.appendChild(div);
+    });
 }
 
-catch(error){
-
-alert(error.message);
-
-console.log(error);
-
+function swapCities() {
+    let from = document.getElementById("fromText").innerText;
+    let to = document.getElementById("toText").innerText;
+    document.getElementById("fromText").innerText = to;
+    document.getElementById("toText").innerText = from;
 }
 
+function filterList(value) {
+    let filtered = cities.filter(c =>
+        c.toLowerCase().includes(value.toLowerCase())
+    );
+    showList(filtered);
 }
 
-
-window.verifyOTP = async function(){
-
-const otp = document.getElementById("otp").value;
-
-if(!otp){
-
-alert("Enter OTP");
-
-return;
-
+function selectCity(city) {
+    if (currentField === "from") {
+        document.getElementById("fromText").innerText = city;
+    } else {
+        document.getElementById("toText").innerText = city;
+    }
+    document.getElementById("modal").style.display = "none";
 }
 
-try{
-
-const result = await confirmationResult.confirm(otp);
-
-const user = result.user;
-
-
-const userRef = doc(db,"users",user.uid);
-
-const userSnap = await getDoc(userRef);
-
-
-if(!userSnap.exists()){
-
-await setDoc(userRef,{
-phone:user.phoneNumber,
-createdAt:new Date()
-});
-
+// QUICK DATE BUTTONS
+function setQuickDate(offset) {
+    const d = new Date();
+    d.setDate(d.getDate() + offset);
+    const formatted = d.toISOString().split("T")[0];
+    document.getElementById("date").value = formatted;
+    document.getElementById("dateText").innerText = formatted;
 }
+function searchBus() {
+    let from = document.getElementById("fromText").innerText;
+    let to = document.getElementById("toText").innerText;
+    let date = document.getElementById("date").value;
 
+    if (from === "From" || to === "To" || !date) {
+        alert("Please fill all details");
+        return;
+    }
 
-alert("Login Successful");
-
-
-window.location.href="home.html";
-
-
-}
-
-catch(error){
-
-alert("Invalid OTP");
-
-}
-
+    // REDIRECT TO BUS PAGE
+    window.location.href = `bus.html?from=${from}&to=${to}&date=${date}`;
 }
 
 </script>
 
 </body>
-</html> 
+</html>
