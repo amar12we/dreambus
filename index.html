@@ -6,18 +6,19 @@
 <title>Dreamliner Signup</title>
 
 <script type="module">
+// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
-    apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-    authDomain:"dreamliner-421b0.firebaseapp.com",
-    projectId:"dreamliner-421b0",
-    storageBucket:"dreamliner-421b0.appspot.com",
-    messagingSenderId:"454472970770",
-    appId:"1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+    apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+    authDomain: "dreamliner-421b0.firebaseapp.com",
+    projectId: "dreamliner-421b0",
+    storageBucket: "dreamliner-421b0.appspot.com",
+    messagingSenderId: "454472970770",
+    appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -25,13 +26,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let recaptchaVerifier;
-let countdownTimer;
+let confirmationResult;
 
-// Initialize reCAPTCHA once
+// Initialize invisible reCAPTCHA
 window.onload = function() {
-    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => { console.log("reCAPTCHA verified"); }
+    recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => { console.log("reCAPTCHA verified"); }
     }, auth);
 
     recaptchaVerifier.render().then(widgetId => console.log("reCAPTCHA ready, widgetId =", widgetId));
@@ -42,25 +43,19 @@ window.sendOTP = async function() {
     const phone = document.getElementById('phone').value.trim();
     const username = document.getElementById('username').value.trim();
     const age = document.getElementById('age').value.trim();
-    const sendBtn = document.getElementById('send-btn');
 
     if (!username || !age || !phone) { alert("Fill all fields"); return; }
-    if (!phone.startsWith('+')) { alert("Use format +91XXXXXXXXXX"); return; }
-
-    if (!recaptchaVerifier) {
-        alert("reCAPTCHA not ready. Try again in a moment.");
-        return;
-    }
+    if (!phone.startsWith('+')) { alert("Phone number must start with +91"); return; }
 
     try {
-        const confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-        window.confirmationResult = confirmationResult;
+        if (recaptchaVerifier) recaptchaVerifier.clear(); // Clear previous reCAPTCHA
+        recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { size: 'invisible' }, auth);
+        await recaptchaVerifier.render();
 
+        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         document.getElementById('otp-section').style.display = 'block';
         document.getElementById('otp').focus();
-        sendBtn.disabled = true;
 
-        startCountdown(30); // 30 seconds countdown
         alert("OTP sent to " + phone);
     } catch (err) {
         console.error("Error sending OTP:", err);
@@ -68,49 +63,38 @@ window.sendOTP = async function() {
     }
 }
 
-// Countdown timer
-function startCountdown(seconds) {
-    const sendBtn = document.getElementById('send-btn');
-    let counter = seconds;
-    sendBtn.innerText = `Resend OTP in ${counter}s`;
-    countdownTimer = setInterval(() => {
-        counter--;
-        if (counter <= 0) {
-            clearInterval(countdownTimer);
-            sendBtn.innerText = "Send OTP";
-            sendBtn.disabled = false;
-        } else {
-            sendBtn.innerText = `Resend OTP in ${counter}s`;
-        }
-    }, 1000);
-}
-
-// Verify OTP & signup
+// Verify OTP and store user info
 window.verifyOTP = async function() {
     const otp = document.getElementById('otp').value.trim();
     const username = document.getElementById('username').value.trim();
     const age = document.getElementById('age').value.trim();
-    const phone = document.getElementById('phone').value.trim();
 
     if (!otp) { alert("Enter OTP"); return; }
 
     try {
-        const result = await window.confirmationResult.confirm(otp);
+        const result = await confirmationResult.confirm(otp); // verify OTP
         const user = result.user;
 
-        // Check if user exists
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-            alert("Phone already registered!");
-            return;
+        // Check if user already exists
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+
+        if (!userDoc.exists()) {
+            // Store user info only if OTP matched
+            await setDoc(userRef, {
+                username,
+                age,
+                phone: user.phoneNumber,
+                createdAt: new Date()
+            });
         }
 
-        // Create new user
-        await setDoc(doc(db, "users", user.uid), { username, age, phone });
-        alert("Signup successful! Welcome " + username);
+        alert("Signup successful!");
+        window.location.href = "index.html"; // redirect to index.html
+
     } catch (err) {
         console.error("OTP verification failed:", err);
-        alert("Invalid OTP, try again");
+        alert("Invalid OTP. Try again.");
     }
 }
 </script>
@@ -160,4 +144,4 @@ button:hover { background:#ff9500;}
     <div id="recaptcha-container"></div>
 </div>
 </body>
-</html> 
+</html>
