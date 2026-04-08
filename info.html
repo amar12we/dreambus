@@ -20,7 +20,7 @@
         }
 
         /* CONTAINER */
-        .container { max-width: 420px; margin: auto; padding: 16px; }
+        .container { max-width: 420px; margin: auto; padding: 166px; padding-top: 16px; }
 
         /* CARD */
         .card {
@@ -137,7 +137,6 @@
         apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
         authDomain: "dreamliner-421b0.firebaseapp.com",
         projectId: "dreamliner-421b0",
-        // Updated to match your bucket from the screenshot
         storageBucket: "dreamliner-421b0.firebasestorage.app", 
         messagingSenderId: "454472970770",
         appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
@@ -199,43 +198,28 @@
         }
     };
 
-    // --- PHOTO UPLOAD (Matches your Rules) ---
+    // --- PHOTO UPLOAD ---
     document.getElementById("fileInput").addEventListener("change", async (e) => {
         const file = e.target.files[0];
         const user = auth.currentUser;
-        
         if (!file || !user) return;
 
-        // Check file size (optional but recommended: e.g., 2MB limit)
         if (file.size > 2 * 1024 * 1024) {
             alert("File is too large. Please select an image under 2MB.");
             return;
         }
 
         try {
-            profileImg.style.opacity = "0.3"; // Visual loading state
-            
-            // Path must match your Rules: match /profilePhotos/{userId}
+            profileImg.style.opacity = "0.3";
             const storageRef = ref(storage, `profilePhotos/${user.uid}`);
-            
-            // Upload
             await uploadBytes(storageRef, file);
-            
-            // Get URL
             const url = await getDownloadURL(storageRef);
-            
-            // Update UI
             profileImg.src = url;
-            
-            // Save URL to Firestore
-            await setDoc(doc(db, "profiles", user.uid), { 
-                photoURL: url 
-            }, { merge: true });
-            
+            await setDoc(doc(db, "profiles", user.uid), { photoURL: url }, { merge: true });
             alert("Photo Updated Successfully!");
         } catch (error) {
             console.error(error);
-            alert("Upload failed. Make sure you clicked 'Publish' on your Firebase Rules!");
+            alert("Upload failed.");
         } finally {
             profileImg.style.opacity = "1";
         }
@@ -285,15 +269,36 @@
             loadUserProfile(user.uid);
             loadBookingHistory(user.uid);
         } else {
-            // Redirect to login if not logged in
             window.location.href = "index.html";
         }
     });
 
-    // --- LOGOUT ---
+// Listen for changes in localStorage from other tabs
+window.addEventListener('storage', (event) => {
+    if (event.key === 'isLoggedIn') {
+        if (event.newValue === 'true') {
+            // User logged in in another tab
+            showProfileIcon(); 
+        } else {
+            // User logged out in another tab
+            // Hide icon and show login button
+            document.getElementById("login-btn").style.display = "block";
+            document.getElementById("user-profile").style.display = "none";
+            
+            // Optional: If they are on a private page like info.html, redirect them
+            if (window.location.pathname.includes("info.html")) {
+                window.location.href = "index.html";
+            }
+        }
+    }
+});
+
+
+    // --- LOGOUT (UPDATED FEATURE) ---
     document.getElementById("logoutBtn").onclick = () => {
         signOut(auth).then(() => {
-            localStorage.setItem("isLoggedIn", "false"); // RESET LOGIN STATE
+            // Signal all tabs that the user is logged out
+            localStorage.setItem("isLoggedIn", "false"); 
             window.location.href = "index.html";
         });
     };
