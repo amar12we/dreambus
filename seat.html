@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Select Seats - M/F Images</title>
+<title>Select Seats - Dreamliner</title>
 
-<!-- jsPDF & QR Code Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
 
@@ -33,16 +32,19 @@ body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:
 .gender-popup { position:absolute; background:#fff; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.25); padding:4px 6px; display:none; z-index:1000; font-size:12px; }
 .gender-popup button { margin:2px; padding:2px 6px; font-size:11px; border:none; border-radius:4px; cursor:pointer; color:#fff; font-weight:600; transition:0.2s; }
 .gender-popup button#maleBtn { background-color:#1976d2; }
-.gender-popup button#maleBtn:hover { background-color:#1565c0; }
 .gender-popup button#femaleBtn { background-color:#d81b60; }
-.gender-popup button#femaleBtn:hover { background-color:#c2185b; }
 #fareInfo { margin:8px 0; font-size:14px; font-weight:bold; }
 .footer-action { text-align:center; margin-top:10px; }
-button#bookBtn { padding:10px 30px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:14px; margin-top:8px; width:90%; max-width:250px; }
-button#bookBtn:hover { background:#e63024; }
-input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; margin-top:8px; width:90%; max-width:250px; }
-#toastContainer { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2000; }
-.toast { min-width:200px; max-width:300px; margin-top:10px; padding:12px 18px; border-radius:8px; color:white; font-weight:600; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.25); opacity:0; transform:translateY(-20px); transition:0.4s ease, opacity 0.4s ease; }
+button#bookBtn { padding:12px 30px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:15px; width:90%; max-width:250px; }
+
+/* --- LOGIN IFRAME POPUP STYLES --- */
+#authOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:3000; }
+.auth-container { background:white; width:90%; max-width:400px; height:550px; border-radius:15px; overflow:hidden; position:relative; box-shadow:0 15px-35px rgba(0,0,0,0.4); }
+.close-overlay { position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer; color:#333; z-index:3001; font-weight:bold; }
+iframe#authFrame { width:100%; height:100%; border:none; }
+
+#toastContainer { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:4000; }
+.toast { min-width:200px; padding:12px 18px; border-radius:8px; color:white; font-weight:600; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.25); opacity:0; transform:translateY(-20px); transition:0.4s ease; }
 .toast.show { opacity:1; transform:translateY(0); }
 .toast.success { background-color:#4caf50; }
 .toast.error { background-color:#f44336; }
@@ -74,9 +76,14 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
 </div>
 
 <div class="footer-action">
-    <input type="email" id="customerEmail" placeholder="Enter your email" required />
-    <br>
     <button id="bookBtn">Book Selected Seats</button>
+</div>
+
+<div id="authOverlay">
+    <div class="auth-container">
+        <span class="close-overlay" onclick="document.getElementById('authOverlay').style.display='none'">&times;</span>
+        <iframe src="login.html" id="authFrame"></iframe>
+    </div>
 </div>
 
 <div id="genderPopup" class="gender-popup">
@@ -89,6 +96,7 @@ input { padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; m
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
@@ -98,16 +106,17 @@ const firebaseConfig = {
     messagingSenderId:"454472970770",
     appId:"1:454472970770:web:cbf95c8b7523f24f2b5ecb"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-// URL PARAMS
 const params = new URLSearchParams(window.location.search);
 const from = params.get("from") || "Start";
 const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
-const farePerSeat = Number(params.get("fare")) || 250; // imported fare
+const farePerSeat = Number(params.get("fare")) || 250;
 
 document.getElementById("route").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
@@ -115,49 +124,56 @@ document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
 const busDocId = `${date}_${trip}`;
 const docRef = doc(db,"buses",busDocId);
 
-let selectedSeats = [];
+let selectedSeats = []; 
 let currentSeat = null;
+let currentUser = null;
 const maxSelect = 6;
+
 const seatContainer = document.getElementById("seats");
 const genderPopup = document.getElementById("genderPopup");
-const maleBtn = document.getElementById("maleBtn");
-const femaleBtn = document.getElementById("femaleBtn");
 
-// TOAST
-function showToast(msg,type="info",duration=3000){
+// Listen for Login Success from the Iframe
+window.addEventListener("message", (event) => {
+    if (event.data === "loginSuccess") {
+        document.getElementById('authOverlay').style.display = 'none';
+        showToast("Logged in successfully!", "success");
+    }
+}, false);
+
+onAuthStateChanged(auth, (user) => { currentUser = user; });
+
+function showToast(msg,type="info"){
     const toast = document.createElement("div");
     toast.className=`toast ${type}`;
     toast.innerText=msg;
     document.getElementById("toastContainer").appendChild(toast);
     setTimeout(()=> toast.classList.add("show"),100);
-    setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, duration);
+    setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, 3000);
 }
 
-// UPDATE FARE
 function updateFareInfo(){
-    const fareDiv = document.getElementById("fareInfo");
     const totalFare = selectedSeats.length * farePerSeat;
-    fareDiv.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${totalFare}`;
+    document.getElementById("fareInfo").innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${totalFare}`;
 }
 
-// SEATS
 const allSeats = [];
 for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
 
-// RENDER SEATS
 function renderSeats(bookedSeats){
     seatContainer.innerHTML='';
     let index=0;
+    // Driver & Front Row
     const topRow = document.createElement("div"); topRow.className="row";
-    const leftGroup = document.createElement("div"); leftGroup.className="group";
-    leftGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    topRow.appendChild(leftGroup);
-    const rightGroup = document.createElement("div"); rightGroup.className="group";
-    rightGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    rightGroup.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    topRow.appendChild(rightGroup);
+    const leftG = document.createElement("div"); leftG.className="group";
+    leftG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    topRow.appendChild(leftG);
+    const rightG = document.createElement("div"); rightG.className="group";
+    rightG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    rightG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    topRow.appendChild(rightG);
     seatContainer.appendChild(topRow);
 
+    // Standard Rows
     for(let r=0;r<11;r++){
         const row = document.createElement("div"); row.className="row";
         const left = document.createElement("div"); left.className="group";
@@ -169,15 +185,12 @@ function renderSeats(bookedSeats){
         row.appendChild(left); row.appendChild(right);
         seatContainer.appendChild(row);
     }
-
+    // Back Row
     const lastRow = document.createElement("div"); lastRow.className="row";
-    for(;index<allSeats.length;index++){
-        lastRow.appendChild(createSeatDiv(allSeats[index], bookedSeats));
-    }
+    for(;index<allSeats.length;index++){ lastRow.appendChild(createSeatDiv(allSeats[index], bookedSeats)); }
     seatContainer.appendChild(lastRow);
 }
 
-// CREATE SEAT DIV
 function createSeatDiv(seatObj, bookedSeats){
     const div=document.createElement("div"); div.className="seat"; div.innerText=seatObj.name;
     if(bookedSeats && bookedSeats[seatObj.name]){
@@ -185,159 +198,136 @@ function createSeatDiv(seatObj, bookedSeats){
         if(bookedSeats[seatObj.name].gender) div.classList.add(bookedSeats[seatObj.name].gender);
     } else {
         div.addEventListener("click",()=>{
-            if(div.classList.contains("booked")) return;
-            if(div.classList.contains("male")||div.classList.contains("female")){
+            if(selectedSeats.find(s=>s.seat===seatObj.name)){
+                selectedSeats = selectedSeats.filter(s=>s.seat !== seatObj.name);
                 div.classList.remove("male","female");
-                selectedSeats = selectedSeats.filter(s=>s!==seatObj.name);
-                updateFareInfo();
-                return;
+                updateFareInfo(); return;
             }
-            if(selectedSeats.length>=maxSelect){ showToast(`Max ${maxSelect} seats`); return; }
             currentSeat = div;
             const rect = div.getBoundingClientRect();
-            genderPopup.style.top=`${rect.top+window.scrollY-genderPopup.offsetHeight-5}px`;
-            genderPopup.style.left=`${rect.left+window.scrollX}px`;
-            genderPopup.style.display="block";
+            genderPopup.style.top = `${rect.top+window.scrollY-35}px`;
+            genderPopup.style.left = `${rect.left+window.scrollX}px`;
+            genderPopup.style.display = "block";
         });
     }
     return div;
 }
 
-// FIRESTORE LIVE UPDATE
 onSnapshot(docRef,(docSnap)=>{
     const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
     renderSeats(bookedSeats);
-    selectedSeats = selectedSeats.filter(seat=>!bookedSeats[seat] || bookedSeats[seat].status!=="booked");
     updateFareInfo();
 });
 
-// GENDER SELECTION
-maleBtn.addEventListener("click",()=>selectGender("male"));
-femaleBtn.addEventListener("click",()=>selectGender("female"));
-function selectGender(gender){
-    if(!currentSeat) return;
-    currentSeat.classList.add(gender);
-    selectedSeats.push(currentSeat.innerText);
-    genderPopup.style.display="none"; currentSeat=null;
+document.getElementById("maleBtn").onclick = () => selectGender("male");
+document.getElementById("femaleBtn").onclick = () => selectGender("female");
+
+function selectGender(g){
+    if(selectedSeats.length >= maxSelect){ showToast(`Max ${maxSelect} seats`); return; }
+    currentSeat.classList.add(g);
+    selectedSeats.push({seat: currentSeat.innerText, gender: g});
+    genderPopup.style.display = "none";
     updateFareInfo();
 }
-document.addEventListener("click",(e)=>{
-    if(!genderPopup.contains(e.target) && !e.target.classList.contains("seat")){
-        genderPopup.style.display="none"; currentSeat=null;
-    }
-});
 
-// BOOKING
+// Booking Button
 document.getElementById("bookBtn").addEventListener("click", async ()=>{
-    const email=document.getElementById("customerEmail").value.trim();
-    if(!email){ showToast("Please enter your email!","error"); return; }
-    if(selectedSeats.length===0){ showToast("Select at least one seat!","info"); return; }
+    if(selectedSeats.length===0){ showToast("Select a seat first!","info"); return; }
+    if(!currentUser){
+        document.getElementById('authOverlay').style.display = 'flex';
+        return;
+    }
 
     try{
         const docSnap = await getDoc(docRef);
         let seats = docSnap.exists()? docSnap.data().seats : {};
-
-        for(const seat of selectedSeats){
-            if(seats[seat]?.status==="booked"){ 
-                showToast(`${seat} already booked!`,"error"); 
-                selectedSeats = selectedSeats.filter(s=>s!==seat); 
-            }
+        for(const s of selectedSeats){
+            seats[s.seat] = { status:"booked", gender:s.gender, customerEmail:currentUser.email, from, to, timestamp:new Date().toISOString() };
         }
-
-        for(const seat of selectedSeats){
-            const seatDiv = Array.from(document.getElementsByClassName("seat")).find(d=>d.innerText===seat);
-            const gender = seatDiv.classList.contains("male")?"male":"female";
-            seats[seat]={status:"booked", customerEmail:email, gender, from, to, timestamp:new Date().toISOString()};
-        }
-
         await setDoc(docRef,{seats},{merge:true});
-        showToast(`Seats ${selectedSeats.join(", ")} booked successfully!`,"success");
-
-        const seatsToDownload = [...selectedSeats];
-        downloadTicketPDF(seatsToDownload);
-
-        selectedSeats=[];
-        document.getElementById("customerEmail").value="";
-        updateFareInfo();
-    } catch(err){ console.error(err); showToast("Error booking seats","error"); }
+        showToast("Booked successfully!","success");
+        downloadTicketPDF([...selectedSeats]);
+        selectedSeats=[]; updateFareInfo();
+    } catch(e){ showToast("Booking failed","error"); }
 });
 
-// PDF TICKET
 async function downloadTicketPDF(selectedSeatsCopy){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // HEADER
     doc.setFillColor(255, 122, 0);
-    doc.rect(0,0,210,25,'F'); 
+    doc.rect(0,0,210,30,'F'); 
     doc.setTextColor(255,255,255);
-    doc.setFontSize(16);
     doc.setFont("helvetica","bold");
-    doc.text(" DREAMLINER BUS TICKET", 105, 16, {align:"center"});
+    doc.setFontSize(18);
+    doc.text("DREAMLINER BUS TICKET", 105, 18, {align:"center"});
 
-    let startY = 35;
+    let startY = 40;
+    const seatsHeight = selectedSeatsCopy.length * 6;
+    const detailsBoxHeight = 90 + seatsHeight;
+
     doc.setFillColor(245,245,245);
-    doc.roundedRect(10, startY-5, 190, 70, 3, 3, 'F'); 
+    doc.roundedRect(10, startY-5, 190, detailsBoxHeight, 3, 3, 'F');
+
     doc.setTextColor(0,0,0);
+    doc.setFont("helvetica","bold");
     doc.setFontSize(12);
+    doc.text("Passenger & Fare Details", 15, startY);
+    startY += 7;
 
-    const passengerEmail = document.getElementById("customerEmail").value || "N/A";
-    const totalSeats = selectedSeatsCopy.length;
-    const totalFare = totalSeats * farePerSeat; // ✅ total fare calculated here
-
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(11);
     doc.text(`From: ${from}`, 15, startY);
     doc.text(`To: ${to}`, 110, startY);
-    startY += 7;
+    startY += 6;
     doc.text(`Date: ${date}`, 15, startY);
     doc.text(`Trip: ${trip} Trip`, 110, startY);
-    startY += 7;
-    doc.text(`Passenger Email: ${passengerEmail}`, 15, startY);
-    startY += 7;
+    startY += 6;
+    doc.text(`Email: ${currentUser.email}`, 15, startY);
 
-    // SEAT INFO
-    doc.text(`No. of Seats Booked: ${totalSeats}`, 15, startY);
-    startY += 7;
-
+    startY += 8;
     doc.setFont("helvetica","bold");
-    doc.text("Seats Selected:", 15, startY);
+    doc.text("Seats Booked:", 15, startY);
     startY += 6;
     doc.setFont("helvetica","normal");
-    selectedSeatsCopy.forEach(seat=>{
-        const seatDiv = Array.from(document.getElementsByClassName("seat")).find(d=>d.innerText===seat);
-        const gender = seatDiv.classList.contains("male") ? "M" : "F";
-        doc.text(`${seat} (${gender})`, 15, startY);
+    selectedSeatsCopy.forEach(s=>{
+        const gender = s.gender === "male" ? "M" : "F";
+        doc.text(`${s.seat} (${gender})`, 15, startY);
         startY += 6;
     });
 
-    // FARE DETAILS
-    startY += 2;
+    startY += 4;
     doc.setFont("helvetica","bold");
     doc.text("Fare Details:", 15, startY);
     startY += 6;
     doc.setFont("helvetica","normal");
-    doc.text(`Fare per Seat: ₹${farePerSeat}`, 15, startY);
+    const totalFare = selectedSeatsCopy.length * farePerSeat;
+    doc.text(`Fare per Seat: ${farePerSeat}`, 15, startY);
     startY += 6;
-    doc.text(`Total Fare: ₹${totalFare}`, 15, startY); // ✅ total fare explicitly added
-    startY += 7;
+    doc.text(`Total Fare: ${totalFare}`, 15, startY);
 
-    // BOOKING TIME
+    startY += 10;
+    doc.setFont("helvetica","italic");
+    doc.setFontSize(10);
     const bookingTime = new Date().toLocaleString();
     doc.text(`Booking Time: ${bookingTime}`, 15, startY);
 
-    // QR CODE
     const qrCanvas = document.createElement("canvas");
     await QRCode.toCanvas(qrCanvas, JSON.stringify({
         from,to,date,trip,seats:selectedSeatsCopy,
-        passenger:passengerEmail,
+        passenger:currentUser.email,
         fare:totalFare,
         bookingTime
     }), {width:80});
     const qrImg = qrCanvas.toDataURL("image/png");
     doc.addImage(qrImg,"PNG",160, startY-10, 35, 35);
+    
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(12);
+    doc.text("Thank You for Choosing DREAMLINER", 105, 40 + detailsBoxHeight - 10, {align:"center"});
 
     doc.save(`Ticket_${from}_${to}_${date}.pdf`);
 }
 </script>
-
 </body>
 </html>
