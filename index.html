@@ -259,6 +259,60 @@ body {
 .list div:hover {
     background: #f1f2f6;
 }
+
+/* POPUP STYLES */
+.login-popup-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Dim background */
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-popup-content {
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    height: 550px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: popupScale 0.3s ease-out;
+}
+
+@keyframes popupScale {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+#login-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+/* Profile Icon tweak */
+#user-profile:hover {
+    transform: scale(1.1);
+    transition: 0.2s;
+}
 </style>
 </head>
 <body>
@@ -269,7 +323,21 @@ body {
         <img src="logo.png" class="logo-img">
         Dreamliner
     </div>
-    <button class="login-btn">Login</button>
+    <div id="auth-section">
+        <button id="login-btn" class="login-btn" onclick="openLoginPopup()">Login</button>
+        <div id="user-profile" style="display: none; cursor: pointer;" onclick="window.location.href='info.html'">
+            <i class="fas fa-user-circle" style="font-size: 28px; color: white;"></i>
+        </div>
+    </div>
+</div>
+
+<div id="login-popup" class="login-popup-overlay">
+    <div class="login-popup-content">
+        <button class="close-popup" onclick="closeLoginPopup()">&times;</button>
+        <iframe src="login.html" id="login-iframe"></iframe>
+    </div>
+</div>
+    
 </div>
 
 <!-- HERO -->
@@ -361,6 +429,7 @@ function showList(data) {
     });
 }
 
+
 function swapCities() {
     let from = document.getElementById("fromText").innerText;
     let to = document.getElementById("toText").innerText;
@@ -406,7 +475,46 @@ function searchBus() {
     window.location.href = `bus.html?from=${from}&to=${to}&date=${date}`;
 }
 
+
+
+// Function to show the Popup
+function openLoginPopup() {
+    document.getElementById("login-popup").style.display = "flex";
+}
+
+// Function to close the Popup
+function closeLoginPopup() {
+    document.getElementById("login-popup").style.display = "none";
+}
+
+// Check if user is already logged in on page load
+window.onload = function() {
+    const userLoggedIn = localStorage.getItem("isLoggedIn");
+    if (userLoggedIn === "true") {
+        showProfileIcon();
+    }
+}
+
+// This function swaps the button for the icon
+function showProfileIcon() {
+    document.getElementById("login-btn").style.display = "none";
+    document.getElementById("user-profile").style.display = "block";
+}
+
+// Listen for a message from the iframe (signup/login.html) 
+// telling us the login was successful
+window.addEventListener("message", function(event) {
+    if (event.data === "loginSuccess") {
+        localStorage.setItem("isLoggedIn", "true");
+        showProfileIcon();
+        closeLoginPopup();
+    }
+}, false);
+
+
+
 </script>
 
 </body>
 </html>
+ 
