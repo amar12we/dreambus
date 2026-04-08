@@ -132,10 +132,16 @@ const maxSelect = 6;
 const seatContainer = document.getElementById("seats");
 const genderPopup = document.getElementById("genderPopup");
 
-// Listen for Login Success from the Iframe
+/* --- SYNC LOGIC UPDATED HERE --- */
 window.addEventListener("message", (event) => {
     if (event.data === "loginSuccess") {
+        // 1. Update global storage so index.html and other tabs sync up
+        localStorage.setItem("isLoggedIn", "true");
+        
+        // 2. Hide the overlay
         document.getElementById('authOverlay').style.display = 'none';
+        
+        // 3. Show feedback
         showToast("Logged in successfully!", "success");
     }
 }, false);
@@ -162,7 +168,6 @@ for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
 function renderSeats(bookedSeats){
     seatContainer.innerHTML='';
     let index=0;
-    // Driver & Front Row
     const topRow = document.createElement("div"); topRow.className="row";
     const leftG = document.createElement("div"); leftG.className="group";
     leftG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
@@ -173,7 +178,6 @@ function renderSeats(bookedSeats){
     topRow.appendChild(rightG);
     seatContainer.appendChild(topRow);
 
-    // Standard Rows
     for(let r=0;r<11;r++){
         const row = document.createElement("div"); row.className="row";
         const left = document.createElement("div"); left.className="group";
@@ -185,7 +189,6 @@ function renderSeats(bookedSeats){
         row.appendChild(left); row.appendChild(right);
         seatContainer.appendChild(row);
     }
-    // Back Row
     const lastRow = document.createElement("div"); lastRow.className="row";
     for(;index<allSeats.length;index++){ lastRow.appendChild(createSeatDiv(allSeats[index], bookedSeats)); }
     seatContainer.appendChild(lastRow);
@@ -230,7 +233,6 @@ function selectGender(g){
     updateFareInfo();
 }
 
-// Booking Button
 document.getElementById("bookBtn").addEventListener("click", async ()=>{
     if(selectedSeats.length===0){ showToast("Select a seat first!","info"); return; }
     if(!currentUser){
@@ -251,30 +253,39 @@ document.getElementById("bookBtn").addEventListener("click", async ()=>{
     } catch(e){ showToast("Booking failed","error"); }
 });
 
+window.addEventListener("message", (event) => {
+    if (event.data === "loginSuccess") {
+        // This line triggers the 'storage' event in index.html
+        localStorage.setItem("isLoggedIn", "true");
+        
+        document.getElementById('authOverlay').style.display = 'none';
+        showToast("Logged in successfully!", "success");
+    }
+}, false);
+
+
+
+
+
 async function downloadTicketPDF(selectedSeatsCopy){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
     doc.setFillColor(255, 122, 0);
     doc.rect(0,0,210,30,'F'); 
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica","bold");
     doc.setFontSize(18);
     doc.text("DREAMLINER BUS TICKET", 105, 18, {align:"center"});
-
     let startY = 40;
     const seatsHeight = selectedSeatsCopy.length * 6;
     const detailsBoxHeight = 90 + seatsHeight;
-
     doc.setFillColor(245,245,245);
     doc.roundedRect(10, startY-5, 190, detailsBoxHeight, 3, 3, 'F');
-
     doc.setTextColor(0,0,0);
     doc.setFont("helvetica","bold");
     doc.setFontSize(12);
     doc.text("Passenger & Fare Details", 15, startY);
     startY += 7;
-
     doc.setFont("helvetica","normal");
     doc.setFontSize(11);
     doc.text(`From: ${from}`, 15, startY);
@@ -284,7 +295,6 @@ async function downloadTicketPDF(selectedSeatsCopy){
     doc.text(`Trip: ${trip} Trip`, 110, startY);
     startY += 6;
     doc.text(`Email: ${currentUser.email}`, 15, startY);
-
     startY += 8;
     doc.setFont("helvetica","bold");
     doc.text("Seats Booked:", 15, startY);
@@ -295,7 +305,6 @@ async function downloadTicketPDF(selectedSeatsCopy){
         doc.text(`${s.seat} (${gender})`, 15, startY);
         startY += 6;
     });
-
     startY += 4;
     doc.setFont("helvetica","bold");
     doc.text("Fare Details:", 15, startY);
@@ -305,13 +314,11 @@ async function downloadTicketPDF(selectedSeatsCopy){
     doc.text(`Fare per Seat: ${farePerSeat}`, 15, startY);
     startY += 6;
     doc.text(`Total Fare: ${totalFare}`, 15, startY);
-
     startY += 10;
     doc.setFont("helvetica","italic");
     doc.setFontSize(10);
     const bookingTime = new Date().toLocaleString();
     doc.text(`Booking Time: ${bookingTime}`, 15, startY);
-
     const qrCanvas = document.createElement("canvas");
     await QRCode.toCanvas(qrCanvas, JSON.stringify({
         from,to,date,trip,seats:selectedSeatsCopy,
@@ -321,11 +328,9 @@ async function downloadTicketPDF(selectedSeatsCopy){
     }), {width:80});
     const qrImg = qrCanvas.toDataURL("image/png");
     doc.addImage(qrImg,"PNG",160, startY-10, 35, 35);
-    
     doc.setFont("helvetica","bold");
     doc.setFontSize(12);
     doc.text("Thank You for Choosing DREAMLINER", 105, 40 + detailsBoxHeight - 10, {align:"center"});
-
     doc.save(`Ticket_${from}_${to}_${date}.pdf`);
 }
 </script>
