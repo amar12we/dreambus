@@ -253,15 +253,7 @@ document.getElementById("bookBtn").addEventListener("click", async ()=>{
     } catch(e){ showToast("Booking failed","error"); }
 });
 
-window.addEventListener("message", (event) => {
-    if (event.data === "loginSuccess") {
-        // This line triggers the 'storage' event in index.html
-        localStorage.setItem("isLoggedIn", "true");
-        
-        document.getElementById('authOverlay').style.display = 'none';
-        showToast("Logged in successfully!", "success");
-    }
-}, false);
+
 
 
 
