@@ -262,13 +262,13 @@ body {
 
 /* POPUP STYLES */
 .login-popup-overlay {
-    display: none; /* Hidden by default */
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6); /* Dim background */
+    background: rgba(0, 0, 0, 0.6); 
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -308,7 +308,6 @@ body {
     z-index: 1001;
 }
 
-/* Profile Icon tweak */
 #user-profile:hover {
     transform: scale(1.1);
     transition: 0.2s;
@@ -317,7 +316,6 @@ body {
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <div class="logo">
         <img src="logo.png" class="logo-img">
@@ -337,10 +335,7 @@ body {
         <iframe src="login.html" id="login-iframe"></iframe>
     </div>
 </div>
-    
-</div>
 
-<!-- HERO -->
 <div class="hero">
     <div class="slides" id="slides">
         <img src="demo1.webp" class="active">
@@ -352,7 +347,6 @@ body {
     </div>
 </div>
 
-<!-- BOOKING CARD -->
 <div class="booking-card">
     <div class="route-box">
         <div class="input-box" onclick="openModal('from')">
@@ -374,7 +368,6 @@ body {
         <input type="date" id="date" hidden onchange="document.getElementById('dateText').innerText=this.value;">
     </div>
 
-    <!-- QUICK DATE BUTTONS -->
     <div class="quick-date">
         <div class="quick-btn" onclick="setQuickDate(0)">Today</div>
         <div class="quick-btn" onclick="setQuickDate(1)">Tomorrow</div>
@@ -383,7 +376,6 @@ body {
     <button class="search-btn" onclick="searchBus()">Search Buses</button>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
     <input type="text" placeholder="Search city..." onkeyup="filterList(this.value)">
     <div class="list" id="cityList"></div>
@@ -401,7 +393,6 @@ function showSlide() {
     current = (current + 1) % images.length;
 }
 
-// Call every 3 seconds
 setInterval(showSlide, 3000);
 
 // CITY MODAL
@@ -429,7 +420,6 @@ function showList(data) {
     });
 }
 
-
 function swapCities() {
     let from = document.getElementById("fromText").innerText;
     let to = document.getElementById("toText").innerText;
@@ -453,7 +443,6 @@ function selectCity(city) {
     document.getElementById("modal").style.display = "none";
 }
 
-// QUICK DATE BUTTONS
 function setQuickDate(offset) {
     const d = new Date();
     d.setDate(d.getDate() + offset);
@@ -461,6 +450,7 @@ function setQuickDate(offset) {
     document.getElementById("date").value = formatted;
     document.getElementById("dateText").innerText = formatted;
 }
+
 function searchBus() {
     let from = document.getElementById("fromText").innerText;
     let to = document.getElementById("toText").innerText;
@@ -470,51 +460,75 @@ function searchBus() {
         alert("Please fill all details");
         return;
     }
-
-    // REDIRECT TO BUS PAGE
     window.location.href = `bus.html?from=${from}&to=${to}&date=${date}`;
 }
 
+// --- AUTH & POPUP LOGIC ---
 
-
-// Function to show the Popup
 function openLoginPopup() {
     document.getElementById("login-popup").style.display = "flex";
 }
 
-// Function to close the Popup
 function closeLoginPopup() {
-    document.getElementById("login-popup").style.display = "none";
+    const popup = document.getElementById("login-popup");
+    if (popup) popup.style.display = "none";
 }
 
-// Check if user is already logged in on page load
-window.onload = function() {
-    const userLoggedIn = localStorage.getItem("isLoggedIn");
-    if (userLoggedIn === "true") {
+function showProfileIcon() {
+    const loginBtn = document.getElementById("login-btn");
+    const userProfile = document.getElementById("user-profile");
+    
+    if (loginBtn) loginBtn.style.display = "none";
+    if (userProfile) userProfile.style.display = "block";
+}
+
+function hideProfileIcon() {
+    const loginBtn = document.getElementById("login-btn");
+    const userProfile = document.getElementById("user-profile");
+    
+    if (loginBtn) loginBtn.style.display = "block";
+    if (userProfile) userProfile.style.display = "none";
+}
+
+// Check status on load
+function checkLoginStatus(){
+    if (localStorage.getItem("isLoggedIn") === "true") {
         showProfileIcon();
+    } else {
+        hideProfileIcon();
     }
 }
 
-// This function swaps the button for the icon
-function showProfileIcon() {
-    document.getElementById("login-btn").style.display = "none";
-    document.getElementById("user-profile").style.display = "block";
-}
+// Run when page loads
+window.onload = checkLoginStatus;
 
-// Listen for a message from the iframe (signup/login.html) 
-// telling us the login was successful
+// Auto check every 1 second
+setInterval(checkLoginStatus, 1000);
+
+// Listen for message from login.html (Inside Iframe) - UPDATED FEATURE
 window.addEventListener("message", function(event) {
     if (event.data === "loginSuccess") {
         localStorage.setItem("isLoggedIn", "true");
-        showProfileIcon();
+        
+        // This force-triggers the UI update in the SAME tab immediately
+        showProfileIcon(); 
+        
         closeLoginPopup();
     }
 }, false);
 
-
+// SYNC ACROSS TABS: Automatically updates if login/logout happens in another window
+window.addEventListener('storage', (event) => {
+    if (event.key === 'isLoggedIn') {
+        if (event.newValue === 'true') {
+            showProfileIcon();
+        } else {
+            hideProfileIcon();
+        }
+    }
+});
 
 </script>
 
 </body>
 </html>
- 
