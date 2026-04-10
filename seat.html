@@ -7,8 +7,21 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
 
 <style>
+    :root{
+--orange:#ff7a00;
+--text-dark:#222;
+--text-muted:#777;
+--white:#ffffff;
+--border:#e6e6e6;
+--soft-grey:#f7f7f7;
+--red:#ff3b30;
+--primary-gradient:linear-gradient(135deg,#ff7a00,#ff9c40);
+}
+
 body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
 .header { background:#ff7a00; color:white; padding:8px 15px; font-weight:bold; position:sticky; top:0; z-index:1000; display:flex; align-items:center; font-size:13px; gap:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
 .back-btn { background:rgba(255,255,255,0.9); color:#ff7a00; border:none; padding:4px 8px; border-radius:50px; font-weight:bold; cursor:pointer; font-size:12px; flex-shrink:0;}
@@ -37,9 +50,34 @@ body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:
 .footer-action { text-align:center; margin-top:10px; }
 button#bookBtn { padding:12px 30px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:15px; width:90%; max-width:250px; }
 
-/* --- LOGIN IFRAME POPUP STYLES --- */
+#detailsOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:flex-start; z-index:3000; overflow-y:auto; padding-top: 20px; }
+.details-container { background:white; width:92%; max-width:450px; border-radius:15px; position:relative; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; margin-bottom: 20px; }
+.details-header { background: #f8f9fa; padding: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+.details-body { padding: 15px; }
+
+.points-grid { display: flex; gap: 12px; margin-top: 5px; }
+.point-box { flex: 1; background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+.point-box.pickup { border-left: 4px solid #ff7a00; }
+.point-box.drop { border-left: 4px solid #28a745; }
+.point-label { font-size: 10px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 4px; display: block; }
+.point-city-name { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 4px; }
+.point-list { list-style: none; padding: 0; margin: 0; }
+.point-item { font-size: 11px; padding: 8px; margin-bottom: 5px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; transition: 0.2s; background: #fafafa; color: #555; }
+.point-item:hover { background: #fff4eb; border-color: #ff7a00; color: #ff7a00; }
+.point-item.selected { background: #ff7a00 !important; color: white !important; border-color: #ff7a00; font-weight: bold; }
+.point-item.selected-drop { background: #28a745 !important; color: white !important; border-color: #28a745; font-weight: bold; }
+
+.passenger-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.input-group { margin-bottom: 8px; }
+.details-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.details-container input, .details-container textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; box-sizing: border-box; outline: none; transition: border 0.2s; font-family: inherit; }
+.details-container input:focus, .details-container textarea:focus { border-color: #ff7a00; }
+.fare-footer { background: #fff; padding: 15px; border-top: 1px solid #eee; position: sticky; bottom: 0; }
+
+.gst-breakdown { display: none; font-size: 12px; color: #666; background: #f9f9f9; padding: 8px; border-radius: 6px; margin-top: 8px; border: 1px dashed #ccc; }
+
 #authOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:3000; }
-.auth-container { background:white; width:90%; max-width:400px; height:550px; border-radius:15px; overflow:hidden; position:relative; box-shadow:0 15px-35px rgba(0,0,0,0.4); }
+.auth-container { background:white; width:90%; max-width:400px; height:550px; border-radius:15px; overflow:hidden; position:relative; box-shadow:0 15px 35px rgba(0,0,0,0.4); }
 .close-overlay { position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer; color:#333; z-index:3001; font-weight:bold; }
 iframe#authFrame { width:100%; height:100%; border:none; }
 
@@ -49,6 +87,217 @@ iframe#authFrame { width:100%; height:100%; border:none; }
 .toast.success { background-color:#4caf50; }
 .toast.error { background-color:#f44336; }
 .toast.info { background-color:#1976d2; }
+
+.btn-box-alt { padding:15px; background:#ff7a00; color:white; border:2px solid #ff7a00; border-radius:10px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; margin-top:10px; transition: 0.3s; }
+.btn-box-alt:hover { background: #e66e00; }
+
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg-body); overflow: hidden; height: 100vh; }
+.bottom-sheet {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 85vh;
+            background: var(--white); border-top-left-radius: 30px; border-top-right-radius: 30px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 1000; display: flex; flex-direction: column;
+            transform: translateY(calc(85vh - 110px));
+        }
+        .bottom-sheet.active { transform: translateY(0); }
+
+        .sheet-header { padding: 15px 0 0; cursor: pointer; background: white; border-top-left-radius: 30px; border-top-right-radius: 30px; z-index: 10; }
+        .handle { width: 45px; height: 5px; background: #e0e0e0; border-radius: 10px; margin: 0 auto 15px; }
+
+        .sheet-tabs { display: flex; overflow-x: auto; gap: 20px; padding: 0 20px 10px; border-bottom: 1px solid #f1f1f1; scrollbar-width: none; }
+        .sheet-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: none; border: none; color: var(--text-muted); font-weight: 700;
+            font-size: 11px; cursor: pointer; padding: 8px 5px; position: relative;
+            text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+        }
+        .tab-btn.active { color: var(--orange); }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background: var(--orange); border-radius: 10px;
+        }
+
+        .sheet-body { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+        .content-section { padding: 25px 20px; position: relative; }
+        .section-grey { background: var(--soft-grey); border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+
+        /* --- Rest Stop Background Image --- */
+        #stops {
+            background: linear-gradient(rgba(202, 175, 175, 0.85), rgba(220, 110, 110, 0.85)), 
+                        url('hotel.png'); 
+            background-size: cover;
+            background-position: center;
+        }
+
+        .section-title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 15px; }
+        .section-title i { color: var(--orange); }
+
+        .amenity-img { width: 22px; height: 22px; object-fit: contain; }
+
+        /* Container for the clickable summary */
+.route-summary-box { 
+    background: var(--white); 
+    border: 1.5px solid var(--border); 
+    border-radius: 12px; 
+    padding: 15px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    cursor: pointer; 
+    transition: background 0.2s;
+}
+
+.route-summary-box:active { background: #f9f9f9; }
+
+/* Arrow Rotation */
+#routeArrow { 
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    color: var(--orange);
+}
+
+.route-summary-box.open #routeArrow { transform: rotate(180deg); }
+
+/* Smooth expanding container */
+.route-details { 
+    max-height: 0; 
+    overflow: hidden; 
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease;
+    padding: 0 10px; 
+    background: #fff;
+}
+
+.route-details.show { 
+    max-height: 800px; /* Large enough to fit the route */
+    padding-top: 20px; 
+    padding-bottom: 10px;
+}
+        
+
+        .route-step { display: flex; gap: 15px; padding-bottom: 20px; position: relative; }
+        .route-step::before { content: ''; position: absolute; left: 7px; top: 20px; width: 2px; height: calc(100% - 20px); background: #dfe6e9; }
+        .route-step:last-child::before { display: none; }
+        .dot { width: 16px; height: 16px; background: var(--orange); border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--orange); z-index: 1; flex-shrink: 0; }
+        .time-tag { background: #fff4e6; color: var(--orange); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #ffe8cc; display: inline-block; margin-top: 4px; }
+
+        /* Updated Points Card Styling */
+.card { 
+    background: white; 
+    padding: 12px 15px; 
+    border-radius: 12px; 
+    border: 1px solid var(--border); 
+    margin-bottom: 8px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    text-align: left; /* Ensures text stays left */
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    border-color: #ddd;
+    background: #fafafa;
+}
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.card strong { 
+    color: var(--text-dark); 
+    font-size: 14px; 
+    margin-bottom: 0; 
+    padding-right: 0; 
+}
+
+.point-subtext {
+    font-size: 11px;
+    color: #999;
+    font-weight: 500;
+}
+
+.card .side-time { 
+    background: #f0f0f0; 
+    color: var(--text-dark); 
+    padding: 5px 10px; 
+    border-radius: 6px; 
+    font-size: 11px; 
+    font-weight: 700;
+    min-width: 70px;
+    text-align: center;
+}
+
+.points-header {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin: 15px 0 8px 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+        .amenities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .amenity-item { background: #fff; padding: 15px 12px; border-radius: 18px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-dark); }
+        .amenity-item i { font-size: 16px; color: var(--orange); width: 20px; text-align: center; }
+
+        .policy-group { margin-bottom: 25px; }
+        .policy-sub-title { font-size: 14px; font-weight: 800; color: var(--text-dark); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .policy-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .policy-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .policy-table td { padding: 12px; border-bottom: 1px solid #f1f1f1; color: var(--text-muted); }
+        .policy-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    padding: 14px 14px 14px 18px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: left;
+    position: relative;
+}
+
+/* Bullet-style clean look */
+.policy-text::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 18px;
+    width: 5px;
+    height: 5px;
+    background: var(--orange);
+    border-radius: 50%;
+}
+
+        .policy-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 18px;
+            background: var(--white);
+            border: 1.5px solid var(--orange);
+            color: var(--orange);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .policy-link-btn:hover { background: var(--orange); color: var(--white); }
+
+        .fleet-img { width: 100%; height: 180px; border-radius: 15px; object-fit: cover; margin-bottom: 12px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .status { font-weight: 800; font-size: 10px; padding: 3px 8px; border-radius: 6px; }
+        .green { background: #e8f5e9; color: #2e7d32; }
+        .red { background: #ffebee; color: #c62828; }
+        .blue { background: #e3f2fd; color: #1565c0; }
+
 </style>
 </head>
 <body>
@@ -56,7 +305,7 @@ iframe#authFrame { width:100%; height:100%; border:none; }
 <div class="header">
     <button class="back-btn" onclick="window.history.back()">← Back</button>
     <div class="route-info">
-        <div id="route">Loading route...</div>
+        <div id="routeTitle">Loading route...</div>
         <div id="dateTrip">Loading date & trip...</div>
     </div>
 </div>
@@ -65,6 +314,126 @@ iframe#authFrame { width:100%; height:100%; border:none; }
     <div class="driver"></div>
     <div id="seats"></div>
 </div>
+
+
+
+
+<div class="bottom-sheet" id="sheet">
+    <div class="sheet-header" id="headerArea">
+        <div class="handle"></div>
+        <div class="sheet-tabs" id="tabsParent">
+            <button class="tab-btn active" data-target="route">Route</button>
+            <button class="tab-btn" data-target="points">Points</button>
+            <button class="tab-btn" data-target="stops">Stops</button>
+            <button class="tab-btn" data-target="amenities">Amenities</button>
+            <button class="tab-btn" data-target="photos">Photos</button>
+            <button class="tab-btn" data-target="policies">Policies</button>
+        </div>
+    </div>
+
+    <div class="sheet-body" id="sheetBody">
+        <div class="content-section" id="route">
+            <div class="section-title"><i class="fas fa-route"></i> Journey Map</div>
+            
+            <div class="route-summary-box" onclick="toggleRoute()">
+                <div>
+                    <span id="routeLabel" style="font-weight: 700; color: var(--text-dark);">
+                        Guwahati → Biswanath Charali
+                    </span>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Click to view full route stops</div>
+                </div>
+                <i class="fas fa-chevron-down" id="routeArrow"></i>
+            </div>
+        
+            <div id="dynamicRoute" class="route-details">
+                </div>
+        </div>
+
+        <div class="content-section section-grey" id="points">
+            <div class="section-title"><i class="fas fa-map-marker-alt"></i> Boarding & Dropping</div>
+            <div id="dynamicPoints"></div>
+        </div>
+
+        <div class="content-section" id="stops">
+            <div class="section-title"><i class="fas fa-coffee"></i> Rest Stops</div>
+            <div id="dynamicStops"></div>
+        </div>
+
+        <div class="content-section section-grey" id="amenities">
+            <div class="section-title"><i class="fas fa-star"></i> Premium Amenities</div>
+            <div class="amenities-grid">
+                <div class="amenity-item"><i class="fas fa-shield-alt"></i> AIS-153 Safety</div>
+                <div class="amenity-item"><i class="fas fa-door-open"></i> Emergency Exit</div>
+                <div class="amenity-item"><i class="fas fa-couch"></i> Semi-Sleeper</div>
+                <div class="amenity-item"><i class="fas fa-plug"></i> USB-C Charging</div>
+                <div class="amenity-item"><i class="fas fa-video"></i> CCTV Security</div>
+                <div class="amenity-item">
+                    <img src="waterbottle.png" class="amenity-img"> Water Bottle
+                </div>
+                <div class="amenity-item"><i class="fas fa-cookie"></i> Snacks</div>
+                <div class="amenity-item"><i class="fas fa-user-tie"></i> Trained Staff</div>
+                <div class="amenity-item"><i class="fas fa-female"></i> Woman Safety</div>
+                <div class="amenity-item"><i class="fas fa-snowflake"></i> AC Cooling</div>
+            </div>
+        </div>
+
+        <div class="content-section" id="photos">
+            <div class="section-title"><i class="fas fa-camera"></i> Bus Gallery</div>
+            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600" class="fleet-img">
+            <img src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600" class="fleet-img">
+            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600" class="fleet-img">
+        </div>
+
+        <div class="content-section section-grey" id="policies">
+            <div class="section-title"><i class="fas fa-file-shield"></i> Terms & Policies</div>
+            
+            <div class="policy-group">
+                <div class="policy-sub-title"><i class="fas fa-ban"></i> Cancellation Policy</div>
+                <div class="policy-card">
+                    <table class="policy-table">
+                        <tr><td>Before 12 Hours</td><td align="right"><span class="status green">90% Refund</span></td></tr>
+                        <tr><td>6 to 12 Hours</td><td align="right"><span class="status blue">50% Refund</span></td></tr>
+                        <tr><td>Under 6 Hours</td><td align="right"><span class="status red">No Refund</span></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="policy-group">
+                <div class="policy-sub-title"><i class="fas fa-sync-alt"></i> Reschedule Policy</div>
+                <div class="policy-text">Reschedule available up to 12 hours before departure. One-time limit applies.</div>
+                <div class="policy-text">For Reschedule Visit Your Profile.</div>
+            </div>
+
+            <div class="policy-group">
+                <div class="policy-sub-title"><i class="fas fa-ticket-alt"></i> Booking & Boarding Policy</div>
+                <div class="policy-text">
+                    • Digital or M-Ticket is valid for boarding.<br>
+                    • Reporting time: <strong>15 minutes</strong> prior.<br>
+                    • Valid Govt. Photo ID required.<br>
+                    • Please follow Dreamliner policies for a safe journey.
+                    
+                    <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px;">
+                        <a href="policy.html" class="policy-link-btn">
+                            Check Full Terms & Policy <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="height: 500px;"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
 
 <div id="fareInfo">Selected Seats: 0 | Total Fare: ₹0</div>
 
@@ -79,6 +448,49 @@ iframe#authFrame { width:100%; height:100%; border:none; }
     <button id="bookBtn">Book Selected Seats</button>
 </div>
 
+<div id="detailsOverlay">
+    <div class="details-container">
+        <div class="details-header">
+            <div>
+                <h3 id="modalTitle" style="color:#ff7a00; margin: 0; font-size: 18px;">Select Points</h3>
+                <p id="stepIndicator" style="font-size: 10px; color: #999; margin: 2px 0 0 0; font-weight: bold; text-transform: uppercase;">Step 1 of 2</p>
+            </div>
+            <span onclick="closeBookingModal()" style="font-size:28px; cursor:pointer; color: #999;">&times;</span>
+        </div>
+        
+        <div class="details-body" style="position: relative; min-height: 320px; overflow-x: hidden;">
+            <div id="step1" style="transition: transform 0.4s ease; width: 100%;">
+                <div id="locationPicker"></div>
+                <button id="nextStepBtn" style="margin-top:20px; padding:15px; background:#ff7a00; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; box-shadow: 0 4px 10px rgba(255,122,0,0.2);">Next: Passenger Details</button>
+            </div>
+
+            <div id="step2" style="display:none; position: absolute; top: 0; width: 100%; transition: transform 0.4s ease; transform: translateX(100%);">
+                <div id="passengerInputs"></div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #555;">Remarks (Optional)</label>
+                    <textarea id="bookingRemarks" rows="2" placeholder="e.g. Any special assistance required"></textarea>
+                </div>
+                <button id="backStepBtn" class="btn-box-alt">Change Pickup/Drop Points</button>
+            </div>
+        </div>
+
+        <div class="fare-footer">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-weight: bold; color: #555;">Total Fare</span>
+                    <div id="gstToggle" style="font-size: 10px; color: #ff7a00; cursor: pointer; text-decoration: underline;">View Breakdown</div>
+                </div>
+                <span id="modalTotalFare" style="font-size: 20px; font-weight: 800; color: #ff7a00;">₹0</span>
+            </div>
+            <div id="gstBreakdown" class="gst-breakdown">
+                <div style="display:flex; justify-content: space-between;"><span>Ticket Fare:</span><span id="breakdownBase">₹0</span></div>
+                <div style="display:flex; justify-content: space-between;"><span>GST (18%):</span><span id="breakdownGST">₹0</span></div>
+            </div>
+            <button id="payBtn" style="display:none; padding:15px; background:#28a745; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; margin-top:12px; box-shadow: 0 4px 10px rgba(40,167,69,0.3);">Confirm & Download Ticket</button>
+        </div>
+    </div>
+</div>
+
 <div id="authOverlay">
     <div class="auth-container">
         <span class="close-overlay" onclick="document.getElementById('authOverlay').style.display='none'">&times;</span>
@@ -90,6 +502,33 @@ iframe#authFrame { width:100%; height:100%; border:none; }
     <button id="maleBtn">Male</button>
     <button id="femaleBtn">Female</button>
 </div>
+
+
+<div id="noticeOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:3500;">
+    <div class="details-container" style="max-width: 380px; text-align: center;">
+        <div class="details-header" style="justify-content: center;">
+            <h3 style="color:#ff3b30; margin: 0; font-size: 18px;">⚠️ Seat Reservation Notice</h3>
+        </div>
+        <div class="details-body" style="padding: 25px;">
+            <div style="background: #fff5f5; border-radius: 10px; padding: 15px; border: 1px solid #ffcccc; margin-bottom: 20px;">
+                <p style="font-size: 14px; line-height: 1.6; color: #333; margin: 0;">
+                    <strong>Important:</strong> Seats next to female passengers are <strong>reserved for females</strong> by the Bus Operator. 
+                    <br><br>
+                    You can only book this seat as a male if you are part of the same booking group.
+                </p>
+            </div>
+            
+            <a href="policy.html" target="_blank" style="color: #ff7a00; font-size: 13px; text-decoration: underline; font-weight: bold; display: block; margin-bottom: 20px;">Please check Booking Policy</a>
+            
+            <button onclick="document.getElementById('noticeOverlay').style.display='none'" style="padding:12px; background:#333; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px;">I Understand</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 
 <div id="toastContainer"></div>
 
@@ -118,37 +557,83 @@ const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
 const farePerSeat = Number(params.get("fare")) || 250;
 
-document.getElementById("route").innerText = `${from} → ${to}`;
+document.getElementById("routeTitle").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
+
+const pickupLocations = {
+    "Guwahati": ["ISBT (07:00 PM)", "Khanapara (07:30 PM)", "Tinali (08:00 PM)"],
+    "Biswanath Charali": ["Chariali Bus Stand (05:00 AM)","Police Point(07:30 PM)"],
+    "Jorhat": ["ISBT Jorhat (09:00 PM)", "Bypass (09:15 PM)"],
+    "Moran": ["Moran Town (10:30 PM)"],
+    "Default": ["Select Your Location"]
+};
+
+const dropLocations = {
+    "Guwahati": ["Paltan Bazar (10:30 AM)", "Adabari (07:30 PM)", "ISBT (08:00 PM)"],
+    "Biswanath Charali": ["Chariali Center (07:30 PM)", "Police Point(07:30 PM)"],
+    "Jorhat": ["Jorhat Bypass (09:00 AM)", "ISBT (09:30 AM)"],
+    "Moran": ["Moran Gate (11:00 AM)", "Public Field (11:30 AM)"],
+    "Default": ["Select Your Location"]
+};
+
+function getPoints(cityName, dataset) {
+    const key = Object.keys(dataset).find(k => k.toLowerCase() === cityName.toLowerCase());
+    return dataset[key] || dataset["Default"];
+}
 
 const busDocId = `${date}_${trip}`;
 const docRef = doc(db,"buses",busDocId);
-
 let selectedSeats = []; 
 let currentSeat = null;
 let currentUser = null;
+let passengerData = []; 
+let selectedPickup = "";
+let selectedDrop = "";
 const maxSelect = 6;
+window.lastBusData = {}; // Global storage for safety check
 
 const seatContainer = document.getElementById("seats");
 const genderPopup = document.getElementById("genderPopup");
 
-/* --- SYNC LOGIC UPDATED HERE --- */
+// --- LOGIN SYNC LISTENER ---
 window.addEventListener("message", (event) => {
     if (event.data === "loginSuccess") {
-        // 1. Update global storage so index.html and other tabs sync up
         localStorage.setItem("isLoggedIn", "true");
-        
-        // 2. Hide the overlay
         document.getElementById('authOverlay').style.display = 'none';
-        
-        // 3. Show feedback
         showToast("Logged in successfully!", "success");
+        if(selectedSeats.length > 0) {
+            renderLocationPicker();
+            document.getElementById('detailsOverlay').style.display = 'flex';
+        }
     }
 }, false);
 
-onAuthStateChanged(auth, (user) => { currentUser = user; });
+onAuthStateChanged(auth, (user) => { 
+    currentUser = user; 
+    if(user) localStorage.setItem("isLoggedIn", "true");
+});
 
-function showToast(msg,type="info"){
+window.closeBookingModal = () => {
+    document.getElementById('detailsOverlay').style.display = 'none';
+    resetModal();
+};
+
+function resetModal() {
+    const s1 = document.getElementById('step1');
+    const s2 = document.getElementById('step2');
+    s1.style.display = 'block';
+    s1.style.transform = 'translateX(0)';
+    s2.style.display = 'none';
+    s2.style.transform = 'translateX(100%)';
+    document.getElementById('nextStepBtn').style.display = 'block';
+    document.getElementById('payBtn').style.display = 'none';
+    document.getElementById('modalTitle').innerText = "Select Points";
+    document.getElementById('stepIndicator').innerText = "Step 1 of 2";
+    document.getElementById('gstBreakdown').style.display = 'none';
+    document.getElementById('bookingRemarks').value = "";
+}
+
+function showToast(msg, type="info"){
     const toast = document.createElement("div");
     toast.className=`toast ${type}`;
     toast.innerText=msg;
@@ -158,9 +643,20 @@ function showToast(msg,type="info"){
 }
 
 function updateFareInfo(){
-    const totalFare = selectedSeats.length * farePerSeat;
+    const baseFare = selectedSeats.length * farePerSeat;
+    const gstAmount = Math.round(baseFare * 0.18);
+    const totalFare = baseFare + gstAmount;
+
     document.getElementById("fareInfo").innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${totalFare}`;
+    document.getElementById("modalTotalFare").innerText = `₹${totalFare}`;
+    document.getElementById("breakdownBase").innerText = `₹${baseFare}`;
+    document.getElementById("breakdownGST").innerText = `₹${gstAmount}`;
 }
+
+document.getElementById("gstToggle").onclick = () => {
+    const b = document.getElementById("gstBreakdown");
+    b.style.display = b.style.display === "block" ? "none" : "block";
+};
 
 const allSeats = [];
 for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
@@ -218,113 +714,618 @@ function createSeatDiv(seatObj, bookedSeats){
 
 onSnapshot(docRef,(docSnap)=>{
     const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
-    renderSeats(bookedSeats);
+    window.lastBusData = bookedSeats; 
+    renderSeats(bookedSeats || {});
     updateFareInfo();
 });
 
 document.getElementById("maleBtn").onclick = () => selectGender("male");
 document.getElementById("femaleBtn").onclick = () => selectGender("female");
+document.addEventListener("click",(e)=>{
+if(!e.target.classList.contains("seat") &&
+!genderPopup.contains(e.target)){
+genderPopup.style.display="none";
+}
+});
 
-function selectGender(g){
-    if(selectedSeats.length >= maxSelect){ showToast(`Max ${maxSelect} seats`); return; }
-    currentSeat.classList.add(g);
-    selectedSeats.push({seat: currentSeat.innerText, gender: g});
+// --- FEMALE SAFETY LOGIC (FIREBASE UID VERIFIED) ---
+function getAdjacentSeat(seatName){
+
+const num = parseInt(seatName.replace("A",""));
+
+/* TOP ROW */
+if(num === 2) return "A3";
+if(num === 3) return "A2";
+
+/* NORMAL ROWS (4 seats pattern) */
+
+if(num >= 4 && num <= 47){
+
+let pos = (num - 4) % 4;
+
+/*
+pattern:
+A4 A5 | A6 A7
+A8 A9 | A10 A11
+*/
+
+if(pos === 0) return `A${num+1}`;   // left pair first seat
+if(pos === 1) return `A${num-1}`;   // left pair second seat
+if(pos === 2) return `A${num+1}`;   // right pair first seat
+if(pos === 3) return `A${num-1}`;   // right pair second seat
+
+}
+
+/* LAST ROW (5 seats) */
+/*
+A48 A49 | A50 A51 | A52
+*/
+
+if(num === 48) return "A49";
+if(num === 49) return "A48";
+
+if(num === 50) return "A51";
+if(num === 51) return "A50";
+
+return null; // A1 or A52 has no horizontal neighbour
+}
+
+function checkFemaleSafety(targetSeatName, gender){
+
+const adjacentSeat = getAdjacentSeat(targetSeatName);
+if(!adjacentSeat) return false;
+/* ---------- FIREBASE SEATS ---------- */
+const neighborSeat = window.lastBusData[adjacentSeat];
+
+if(neighborSeat && neighborSeat.gender === "female"){
+    if(currentUser && neighborSeat.userUid === currentUser.uid){
+        return false;
+    }
+    if(gender === "male"){
+        return true; // BLOCK ONLY MALE
+    }
+}
+const localSeat = selectedSeats.find(s => s.seat === adjacentSeat);
+if(localSeat && localSeat.gender === "female"){
+
+    if(gender === "male"){
+        return true; // BLOCK ONLY MALE
+    }
+}
+return false;
+}
+function selectGender(g) {
+    if (selectedSeats.length >= maxSelect) { 
+        showToast(`Max ${maxSelect} seats`); 
+        return; 
+    }
+    const seatName = currentSeat.innerText;
+    if (checkFemaleSafety(seatName, g)) {
+        genderPopup.style.display = "none"; // Hide small popup
+        document.getElementById('noticeOverlay').style.display = 'flex'; // Show full notice screen
+        return;
+    }
+   currentSeat.classList.add(g);
+  selectedSeats.push({
+        seat: seatName,
+        gender: g
+    });
+
     genderPopup.style.display = "none";
     updateFareInfo();
 }
 
-document.getElementById("bookBtn").addEventListener("click", async ()=>{
-    if(selectedSeats.length===0){ showToast("Select a seat first!","info"); return; }
-    if(!currentUser){
-        document.getElementById('authOverlay').style.display = 'flex';
-        return;
-    }
+document.getElementById("bookBtn").onclick = () => {
+    if (selectedSeats.length === 0) { showToast("Select a seat first!", "info"); return; }
+    if (!currentUser) { document.getElementById('authOverlay').style.display = 'flex'; return; }
+    renderLocationPicker();
+    document.getElementById('detailsOverlay').style.display = 'flex';
+};
 
-    try{
+function renderLocationPicker() {
+    const container = document.getElementById("locationPicker");
+    const pickupOpts = getPoints(from, pickupLocations);
+    const dropOpts = getPoints(to, dropLocations);
+    selectedPickup = pickupOpts[0];
+    selectedDrop = dropOpts[0];
+
+    container.innerHTML = `
+        <div class="points-grid">
+            <div class="point-box pickup">
+                <span class="point-label">Pickup</span>
+                <div class="point-city-name">${from}</div>
+                <div class="point-list">
+                    ${pickupOpts.map((opt, i) => `
+                        <div class="point-item ${i===0?'selected':''}" onclick="selectPoint(this, 'pickup')">${opt}</div>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="point-box drop">
+                <span class="point-label">Drop</span>
+                <div class="point-city-name">${to}</div>
+                <div class="point-list">
+                    ${dropOpts.map((opt, i) => `
+                        <div class="point-item ${i===0?'selected-drop':''}" onclick="selectPoint(this, 'drop')">${opt}</div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+window.selectPoint = (el, type) => {
+    const parent = el.parentElement;
+    parent.querySelectorAll('.point-item').forEach(item => item.classList.remove('selected', 'selected-drop'));
+    if(type === 'pickup') { el.classList.add('selected'); selectedPickup = el.innerText; }
+    else { el.classList.add('selected-drop'); selectedDrop = el.innerText; }
+};
+
+document.getElementById("nextStepBtn").onclick = () => {
+    const s1 = document.getElementById('step1');
+    const s2 = document.getElementById('step2');
+    s1.style.transform = 'translateX(-100%)';
+    setTimeout(() => {
+        s1.style.display = 'none';
+        s2.style.display = 'block';
+        setTimeout(() => s2.style.transform = 'translateX(0)', 50);
+    }, 400);
+    renderPassengerInputs();
+    document.getElementById('modalTitle').innerText = "Passenger Details";
+    document.getElementById('stepIndicator').innerText = "Step 2 of 2";
+    document.getElementById('nextStepBtn').style.display = 'none';
+    document.getElementById('payBtn').style.display = 'block';
+};
+
+document.getElementById("backStepBtn").onclick = resetModal;
+
+function renderPassengerInputs() {
+    const container = document.getElementById("passengerInputs");
+    container.innerHTML = "";
+    selectedSeats.forEach((s) => {
+        const card = document.createElement("div");
+        card.className = "passenger-card";
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-weight: bold; color: #ff7a00; font-size: 14px;">SEAT ${s.seat}</span>
+                <span style="font-size: 11px; color: #999;">${s.gender.toUpperCase()}</span>
+            </div>
+            <div class="details-row">
+                <div style="flex: 3;"><input type="text" class="p-name" placeholder="Full Name"></div>
+                <div style="flex: 1;"><input type="number" class="p-age" placeholder="Age"></div>
+            </div>
+            <div class="input-group"><input type="tel" class="p-phone" placeholder="Mobile Number"></div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+document.getElementById("payBtn").onclick = async () => {
+    const names = document.querySelectorAll(".p-name");
+    const phones = document.querySelectorAll(".p-phone");
+    const ages = document.querySelectorAll(".p-age");
+    const remarks = document.getElementById("bookingRemarks").value || "N/A";
+
+    let valid = true;
+    passengerData = selectedSeats.map((s, i) => {
+        if(!names[i].value || !phones[i].value) valid = false;
+        return { ...s, name: names[i].value, phone: phones[i].value, age: ages[i].value || "N/A", remarks: remarks };
+    });
+
+    if(!valid) { showToast("Fill all required fields", "error"); return; }
+    await finalizeBooking(selectedPickup, selectedDrop, remarks);
+};
+
+// --- UPDATED FINALIZATION WITH FARE STORAGE ---
+async function finalizeBooking(pickup, drop, remarks) {
+    try {
         const docSnap = await getDoc(docRef);
-        let seats = docSnap.exists()? docSnap.data().seats : {};
-        for(const s of selectedSeats){
-            seats[s.seat] = { status:"booked", gender:s.gender, customerEmail:currentUser.email, from, to, timestamp:new Date().toISOString() };
-        }
-        await setDoc(docRef,{seats},{merge:true});
-        showToast("Booked successfully!","success");
-        downloadTicketPDF([...selectedSeats]);
-        selectedSeats=[]; updateFareInfo();
-    } catch(e){ showToast("Booking failed","error"); }
-});
+        let seats = docSnap.exists() ? docSnap.data().seats : {};
+        
+        const bId = `BK-${Date.now()}`; 
+        const uId = currentUser ? currentUser.uid : "GUEST";
+        const gstRate = 0.18;
+        const basePerSeat = farePerSeat;
+        const gstPerSeat = Math.round(basePerSeat * gstRate);
+        const totalPerSeat = basePerSeat + gstPerSeat;
 
+        passengerData.forEach(p => {
+            seats[p.seat] = {
+                status: "booked", 
+                gender: p.gender, 
+                name: p.name, 
+                age: p.age, 
+                phone: p.phone,
+                pickup, drop, from, to, remarks, 
+                customerEmail: currentUser.email, 
+                bookingUid: bId,
+                userUid: uId,
+                // Storage of fares
+                baseFare: basePerSeat,
+                gstAmount: gstPerSeat,
+                totalFare: totalPerSeat,
+                timestamp: new Date().toISOString()
+            };
+        });
 
+        await setDoc(docRef, { seats }, { merge: true });
 
+        const grandTotal = passengerData.length * totalPerSeat;
+        await setDoc(doc(db, "bookings", bId), {
+            bookingUid: bId,
+            userId: uId,
+            from, to, date, trip, pickup, drop,
+            passengers: passengerData, remarks, totalFare: grandTotal, timestamp: new Date().toISOString()
+        });
+        
+        showToast("Booking Successful!", "success");
+        closeBookingModal();
+        await downloadTicketPDF(passengerData, pickup, drop, remarks, bId);
+        selectedSeats = [];
+        updateFareInfo();
+    } catch (e) { 
+        console.error(e);
+        showToast("Booking Error", "error"); 
+    }
+}
 
-
-
-
-async function downloadTicketPDF(selectedSeatsCopy){
+async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const baseFare = passengers.length * farePerSeat;
+    const gstAmount = Math.round(baseFare * 0.18);
+    const totalFare = baseFare + gstAmount;
+
+    const pLoc = pickup.split('(')[0].trim();
+    const pTime = pickup.includes('(') ? pickup.match(/\(([^)]+)\)/)[1] : "N/A";
+    const dLoc = drop.split('(')[0].trim();
+    const dTime = drop.includes('(') ? drop.match(/\(([^)]+)\)/)[1] : "N/A";
+
     doc.setFillColor(255, 122, 0);
-    doc.rect(0,0,210,30,'F'); 
-    doc.setTextColor(255,255,255);
-    doc.setFont("helvetica","bold");
+    doc.rect(0, 0, 210, 40, 'F');
+
+    try {
+        doc.setFillColor(255,255,255);
+        doc.circle(27, 20, 13, 'F');  
+        doc.addImage('logo-modified.png', 'PNG', 14, 7, 26, 26);
+    } catch(e) {}
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("DREAMLINER BUS TICKET", 105, 18, {align:"center"});
-    let startY = 40;
-    const seatsHeight = selectedSeatsCopy.length * 6;
-    const detailsBoxHeight = 90 + seatsHeight;
-    doc.setFillColor(245,245,245);
-    doc.roundedRect(10, startY-5, 190, detailsBoxHeight, 3, 3, 'F');
-    doc.setTextColor(0,0,0);
-    doc.setFont("helvetica","bold");
+    doc.text("DREAMLINER BUS E-TICKET", 105, 18, { align: "center" });
+    
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text("Bharat Benz 2X2 A/C Semi Sleeper", 105, 25, { align: "center" });
+    doc.text("Fully Air Suspension", 105, 31, { align: "center" });
+    let startY = 50;
+    doc.setFillColor(245, 245, 245);
+    doc.roundedRect(10, startY - 5, 190, 125 + (passengers.length * 7), 3, 3, 'F');
+    
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
-    doc.text("Passenger & Fare Details", 15, startY);
-    startY += 7;
-    doc.setFont("helvetica","normal");
+    doc.setFont("helvetica", "bold");
+    doc.text("Travel & Passenger Details", 15, startY);
+    startY += 10;
+
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.text(`From: ${from}`, 15, startY);
     doc.text(`To: ${to}`, 110, startY);
     startY += 6;
-    doc.text(`Date: ${date}`, 15, startY);
-    doc.text(`Trip: ${trip} Trip`, 110, startY);
-    startY += 6;
-    doc.text(`Email: ${currentUser.email}`, 15, startY);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Point: ${pLoc}`, 15, startY);
+    doc.text(`Point: ${dLoc}`, 110, startY);
+    startY += 5;
+    doc.text(`Time: ${pTime}`, 15, startY);
+    doc.text(`Time: ${dTime}`, 110, startY);
     startY += 8;
-    doc.setFont("helvetica","bold");
-    doc.text("Seats Booked:", 15, startY);
-    startY += 6;
-    doc.setFont("helvetica","normal");
-    selectedSeatsCopy.forEach(s=>{
-        const gender = s.gender === "male" ? "M" : "F";
-        doc.text(`${s.seat} (${gender})`, 15, startY);
-        startY += 6;
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.text(`Date of Journey: ${date}`, 15, startY);
+    doc.text(`Trip: ${trip} Trip`, 110, startY);
+    startY += 12;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Passengers:", 15, startY);
+    startY += 7;
+    doc.setFont("helvetica", "normal");
+    passengers.forEach(p => {
+        const gender = p.gender === "male" ? "M" : "F";
+        doc.text(`${p.seat}: ${p.name} (${gender}), Age: ${p.age}, Ph: ${p.phone}`, 15, startY);
+        startY += 7;
     });
-    startY += 4;
-    doc.setFont("helvetica","bold");
-    doc.text("Fare Details:", 15, startY);
+
+    startY += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text("Remarks:", 15, startY);
     startY += 6;
-    doc.setFont("helvetica","normal");
-    const totalFare = selectedSeatsCopy.length * farePerSeat;
-    doc.text(`Fare per Seat: ${farePerSeat}`, 15, startY);
-    startY += 6;
-    doc.text(`Total Fare: ${totalFare}`, 15, startY);
-    startY += 10;
-    doc.setFont("helvetica","italic");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    const bookingTime = new Date().toLocaleString();
-    doc.text(`Booking Time: ${bookingTime}`, 15, startY);
-    const qrCanvas = document.createElement("canvas");
-    await QRCode.toCanvas(qrCanvas, JSON.stringify({
-        from,to,date,trip,seats:selectedSeatsCopy,
-        passenger:currentUser.email,
-        fare:totalFare,
-        bookingTime
-    }), {width:80});
-    const qrImg = qrCanvas.toDataURL("image/png");
-    doc.addImage(qrImg,"PNG",160, startY-10, 35, 35);
-    doc.setFont("helvetica","bold");
+    doc.text(remarks || "N/A", 15, startY, { maxWidth: 180 });
+    startY += 12;
+
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, startY - 5, 195, startY - 5); 
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Fare Breakdown:", 15, startY);
+    startY += 7;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Ticket Base Fare:`, 15, startY);
+    doc.text(`INR ${baseFare}`, 110, startY);
+    startY += 7;
+    doc.text(`GST (18%):`, 15, startY);
+    doc.text(`INR ${gstAmount}`, 110, startY);
+    startY += 8;
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 122, 0); 
+    doc.text(`Total Fare Paid:`, 15, startY);
+    doc.text(`INR ${totalFare}`, 110, startY);
+
+    doc.setTextColor(0, 0, 0);
+    startY += 27;
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text("Thank You for Choosing DREAMLINER", 105, 40 + detailsBoxHeight - 10, {align:"center"});
-    doc.save(`Ticket_${from}_${to}_${date}.pdf`);
+    doc.text("Thanks for choosing Dreamliner!", 105, startY, { align: "center" });
+    startY += 6;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.text("This ticket will help you in your journey", 105, startY, { align: "center" });
+    
+    startY += 8;
+    doc.setDrawColor(255, 122, 0);
+    doc.roundedRect(55, startY, 100, 25, 2, 2, 'D');
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Need Help?", 105, startY + 7, { align: "center" });
+    
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 100, 255);
+    
+    const supportText = "Dreamliner Support";
+    doc.text(supportText, 105, startY + 13, { align: "center" });
+
+    // --- DIRECT APP LINK LOGIC ---
+    const phoneNumber = "919954506113"; // Replace with your number
+    const message = encodeURIComponent("Hello Dreamliner support");
+    
+    // Using whatsapp:// instead of https://wa.me/
+    const whatsappAppUrl = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+
+    // The clickable box (centered over the text)
+    doc.link(80, startY + 9, 50, 7, { url: whatsappAppUrl });
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("24*7 Service | Quick Response | Multilingual", 105, startY + 20, { align: "center" });
+
+    startY += 35;
+    doc.setFontSize(9);
+    doc.text(`Date of Issue: ${new Date().toLocaleDateString()}`, 15, startY - 5);
+    doc.text(`Booking ID: ${bookingId}`, 15, startY); 
+    const shortUid = currentUser ? currentUser.uid.substring(0, 6) : "GUEST";
+    doc.text(`User ID: ${shortUid}`, 15, startY + 5); 
+
+    const qrCanvas = document.createElement("canvas");
+    await QRCode.toCanvas(qrCanvas, JSON.stringify({id: bookingId, f: from, t: to, d: date}), {width:80});
+    const qrImg = qrCanvas.toDataURL("image/png");
+    doc.addImage(qrImg, "PNG", 160, startY - 25, 35, 35);
+
+
+    doc.addPage();
+
+    // 2. BOOKING POLICIES SECTION
+    let polY = 25;
+    // Header bar
+    doc.setFillColor(242, 245, 255);
+    doc.rect(10, polY - 10, 190, 10, 'F');
+    doc.setTextColor(0, 50, 150);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("BOOKING POLICIES", 15, polY - 3);
+
+    const policies = [
+        { title: "Child Passenger Policy", desc: "Children above the age of 6 will need a ticket.", icon: "C" },
+        { title: "Luggage Policy", desc: "2 pieces of luggage accepted free per passenger. Excess baggage over 20kg is chargeable.", icon: "L" },
+        { title: "Pets Policy", desc: "Pets are strictly not allowed inside the bus cabin.", icon: "P" },
+        { title: "Reporting Time", desc: "Please report at the boarding point 15 minutes prior to departure.", icon: "R" }
+    ];
+
+    policies.forEach((p, index) => {
+        let boxY = polY + (index * 28);
+        doc.setDrawColor(240, 240, 240);
+        doc.rect(10, boxY, 190, 28, 'D');
+
+        // Circular Icon Placeholder
+        doc.setDrawColor(200, 200, 200);
+        doc.circle(22, boxY + 14, 5, 'D');
+        doc.setTextColor(80, 80, 80);
+        doc.setFontSize(8);
+        doc.text(p.icon, 21, boxY + 17);
+
+        // Policy Title
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text(p.title, 35, boxY + 11);
+
+        // Policy Description
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(9);
+        const splitText = doc.splitTextToSize(p.desc, 155);
+        doc.text(splitText, 35, boxY + 18);
+    });
+
+    // Final Footer
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(8);
+    doc.text("This is a computer-generated e-ticket. Physical signature not required.", 105, 285, { align: "center" });
+
+    doc.save(`Dreamliner_Ticket_${bookingId}.pdf`);
 }
+
+
+const journeyData = {
+
+"Guwahati-Biswanath Charali": {
+label: "Guwahati → Biswanath Charali",
+route: [
+{ loc: "Guwahati (ISBT)", time: "08:00 PM" },
+{ loc: "Nagaon (Bypass)", time: "10:30 PM" },
+{ loc: "Tezpur (Mission Chariali)", time: "12:15 AM" },
+{ loc: "Biswanath Chariali", time: "01:45 AM" }
+],
+boardingPoints: [
+{ loc: "Guwahati ISBT, Platform 4", time: "08:00 PM" },
+{ loc: "Khanapara Footbridge", time: "08:05 PM" }
+],
+droppingPoints: [
+{ loc: "Biswanath Main Chowk", time: "01:40 AM" },
+{ loc: "Biswanath Chariali Bus Stand", time: "01:45 AM" }
+],
+rest: "Nagaon  Plaza (20 Mins)"
+},
+
+"Biswanath Charali-Guwahati": {
+label: "Biswanath Charali→ Guwahati",
+route: [
+{ loc: "Jorhat ISBT", time: "06:00 PM" },
+{ loc: "Dergaon", time: "07:10 PM" },
+{ loc: "Nagaon", time: "09:30 PM" },
+{ loc: "Guwahati ISBT", time: "11:30 PM" }
+],
+boardingPoints: [
+{ loc: "Jorhat ISBT Gate", time: "06:00 PM" }
+],
+droppingPoints: [
+{ loc: "Adabari Bus Stand", time: "11:20 PM" },
+{ loc: "ISBT Guwahati", time: "11:30 PM" }
+],
+rest: "Nagaon Restaurant Stop"
+}
+
+};
+// SMOOTH TOGGLE LOGIC
+// Defined as a window property to ensure it's accessible from the HTML onclick attribute
+window.toggleRoute = function() {
+    const details = document.getElementById('dynamicRoute');
+    const box = document.querySelector('.route-summary-box');
+    
+    details.classList.toggle('show');
+    box.classList.toggle('open');
+};
+
+function loadJourneyInfo() {
+    const routeKey = `${from}-${to}`;
+    const data = journeyData[routeKey];
+
+    if (!data) return;
+
+    // 1. Update the label inside the summary box
+    document.getElementById("routeLabel").innerText = data.label;
+
+    // 2. Inject the route steps into the collapsible container
+    document.getElementById("dynamicRoute").innerHTML =
+        data.route.map(r => `
+        <div class="route-step">
+            <div class="dot"></div>
+            <div>
+                <strong>${r.loc}</strong>
+                <div class="time-tag">${r.time}</div>
+            </div>
+        </div>
+        `).join("");
+
+    // 3. Keep enhanced Boarding and Dropping points layout
+    let points = `<div class="points-header" style="color:var(--orange);"><i class="fas fa-arrow-up"></i> BOARDING POINTS</div>`;
+    data.boardingPoints.forEach(p => {
+        points += `
+            <div class="card">
+                <div class="card-info">
+                    <strong>${p.loc}</strong>
+                    <span class="point-subtext">Boarding point</span>
+                </div>
+                <div class="side-time">${p.time}</div>
+            </div>`;
+    });
+
+    points += `<div class="points-header" style="color:#28a745; margin-top:20px;"><i class="fas fa-arrow-down"></i> DROPPING POINTS</div>`;
+    data.droppingPoints.forEach(p => {
+        points += `
+            <div class="card">
+                <div class="card-info">
+                    <strong>${p.loc}</strong>
+                    <span class="point-subtext">Arrival point</span>
+                </div>
+                <div class="side-time">${p.time}</div>
+            </div>`;
+    });
+
+    document.getElementById("dynamicPoints").innerHTML = points;
+
+    // 4. Keep enhanced Rest Stop layout
+    document.getElementById("dynamicStops").innerHTML =
+        `<div class="card">
+            <div class="card-info">
+                <strong>Rest Stop</strong>
+                <span class="point-subtext">${data.rest}</span>
+            </div>
+            <i class="fas fa-coffee" style="color:#6d4c41"></i>
+        </div>`;
+}
+
+// Bottom Sheet Scroll and Tab Logic
+const sheetBody = document.getElementById('sheetBody');
+const tabs = document.querySelectorAll('.tab-btn');
+const sections = document.querySelectorAll('.content-section');
+
+sheetBody.addEventListener('scroll', () => {
+    let current = "";
+    const scrollPos = sheetBody.scrollTop + 150; 
+
+    sections.forEach(section => {
+        if (scrollPos >= section.offsetTop) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-target') === current) {
+            tab.classList.add('active');
+            tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    });
+});
+
+tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const targetSection = document.getElementById(targetId);
+        sheetBody.scrollTo({ top: targetSection.offsetTop - 10, behavior: 'smooth' });
+    });
+});
+
+// Header Area Toggle Logic
+document.getElementById('headerArea').addEventListener('click', (e) => {
+    const sheet = document.getElementById('sheet');
+    if (!e.target.classList.contains('tab-btn')) {
+        sheet.classList.toggle('active');
+        
+        if(sheet.classList.contains('active')) {
+            document.getElementById('sheetBody').scrollTop = 0;
+        }
+    }
+});
+        
+window.onload = loadJourneyInfo;
+
+        
 </script>
 </body>
 </html>
