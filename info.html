@@ -3,117 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamliner Dashboard</title>
+    <title>Dreamliner Executive Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f2f2f2; }
+        :root {
+            --primary: #ff7a00;
+            --secondary: #ff512f;
+            --bg: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body { margin: 0; font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-main); line-height: 1.6; }
         
         /* HEADER */
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 18px; background: linear-gradient(to right, #ff7a00, #ff512f);
-            color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            padding: 12px 20px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; box-shadow: 0 4px 20px rgba(255, 81, 47, 0.2);
+            position: sticky; top: 0; z-index: 1000;
         }
-        .logo { font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+        .logo { font-weight: 800; font-size: 20px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Added Logo Styling */
+        .logo-img {
+            height: 32px; /* Adjust size as needed */
+            width: auto;
+            border-radius: 6px;
+        }
+
         .logout-btn {
-            background: white; color: #ff512f; border: none;
-            padding: 6px 16px; border-radius: 20px; font-weight: 600; cursor: pointer;
+            background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.3s;
         }
 
-        /* CONTAINER */
-        .container { max-width: 420px; margin: auto; padding: 166px; padding-top: 16px; }
+        .container { max-width: 480px; margin: auto; padding: 20px; }
 
-        /* CARD */
-        .card {
-            background: white; border-radius: 18px; padding: 18px;
-            margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        /* PROFILE CARD */
+        .profile-card {
+            background: var(--card-bg); border-radius: 24px; padding: 30px 20px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            margin-bottom: 25px; border: 1px solid var(--border);
         }
-
-        /* PROFILE */
-        .profile { text-align: center; margin-bottom: 15px; }
-        .avatar-container { position: relative; width: 85px; height: 85px; margin: auto; }
+        .avatar-container { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; }
         .avatar-img {
-            width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-            border: 3px solid #ff7a00; transition: all 0.3s ease; background: #eee;
+            width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+            border: 3px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .upload-btn {
-            position: absolute; bottom: 0; right: 0; background: #ff7a00;
-            color: white; width: 28px; height: 28px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            position: absolute; bottom: 0; right: 0; background: var(--primary);
+            color: white; width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        #fileInput { display: none; }
-        .profile h3 { margin: 10px 0 2px; color: #333; }
-        .phone { font-size: 13px; color: #777; }
 
-        /* FORM */
-        .info-item { margin-bottom: 12px; }
-        .info-item b { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-left: 5px; }
-        .info-item input {
-            width: 100%; padding: 11px; border-radius: 10px;
-            border: 1px solid #eee; margin-top: 4px; font-size: 14px; 
-            box-sizing: border-box; background: #fcfcfc;
+        .uid-tag { 
+            display: inline-block; background: #f1f5f9; color: #475569; 
+            padding: 6px 14px; border-radius: 8px; font-size: 11px; 
+            font-weight: 700; margin-top: 10px; border: 1px solid #e2e8f0;
         }
-        .info-item input:focus { border-color: #ff7a00; outline: none; background: #fff; }
 
-        .save-btn {
-            width: 100%; background: #ff7a00; color: white; border: none;
-            padding: 14px; border-radius: 12px; font-weight: bold;
-            cursor: pointer; margin-top: 10px; transition: 0.3s;
+        /* ACTIONS */
+        .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+        .action-item {
+            background: white; padding: 18px 10px; border-radius: 16px; text-align: center;
+            border: 1px solid var(--border); cursor: pointer; transition: 0.2s; text-decoration: none; color: inherit;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-        .save-btn:hover { background: #ff512f; transform: translateY(-1px); }
-        .save-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .action-item:active { transform: scale(0.95); background: #f8fafc; }
+        .action-item i { color: var(--primary); width: 22px; height: 22px; }
+        .action-item span { font-size: 11px; font-weight: 700; color: var(--text-main); }
 
         /* SUMMARY */
         .summary {
-            display: flex; justify-content: space-around; margin-top: 20px;
-            background: #f9f9f9; padding: 15px; border-radius: 15px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
+            margin-top: 25px; background: #f8fafc; padding: 15px; border-radius: 20px;
         }
-        .summary-box { text-align: center; }
-        .summary-box span { display: block; font-size: 22px; font-weight: bold; color: #ff512f; }
-        .summary-box small { font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; }
+        .summary-box span { display: block; font-size: 20px; font-weight: 800; color: var(--text-main); }
+        .summary-box small { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
 
-        /* BOOKINGS */
-        .history-title { font-size: 17px; font-weight: bold; margin-bottom: 12px; color: #333; }
+        /* ACCORDIONS */
+        .expand-box {
+            background: white; border-radius: 16px; margin-bottom: 12px;
+            border: 1px solid var(--border); overflow: hidden; transition: 0.3s;
+        }
+        .expand-header {
+            padding: 16px 20px; display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer; font-weight: 700; font-size: 14px;
+            text-decoration: none; color: var(--text-main);
+        }
+        .expand-header .label-wrap { display: flex; align-items: center; gap: 12px; }
+        .expand-header i { width: 18px; height: 18px; color: var(--text-muted); }
+        .icon-chevron { transition: 0.3s; }
+        .expand-box.active .icon-chevron { transform: rotate(180deg); }
+        .expand-content { max-height: 0; padding: 0 20px; overflow: hidden; transition: 0.4s ease-out; }
+        .expand-box.active .expand-content { max-height: 800px; padding-bottom: 20px; }
+
+        /* JOURNEY HISTORY CARDS */
         .booking-card {
-            border: 1px solid #f0f0f0; border-radius: 14px; padding: 14px;
-            margin-bottom: 12px; background: #fff;
+            background: white; border-radius: 24px; padding: 20px;
+            margin-bottom: 18px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
-        .route { font-weight: bold; font-size: 15px; color: #222; }
-        .meta { font-size: 13px; color: #666; margin-top: 4px; }
-        .status {
-            display: inline-block; margin-top: 8px; background: #e8f5e9;
-            color: #2e7d32; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
-        }
-        .booking-id { font-size: 11px; color: #bbb; margin-top: 8px; }
-    </style>
-</head>
+        .booking-on-text { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .route-row { font-weight: 800; font-size: 17px; display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .status-badge { background: #f0fdf4; color: #166534; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; border: 1px solid #bbf7d0; }
+        
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .meta strong { display: block; font-size: 9px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; }
+        .meta span { font-size: 13px; font-weight: 600; color: var(--text-main); }
 
+        .id-details-box { background: #f8fafc; padding: 12px; border-radius: 15px; margin-top: 15px; border: 1px solid #f1f5f9; }
+        .id-row { margin-bottom: 8px; }
+        .id-row:last-child { margin-bottom: 0; }
+        .id-label { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; }
+        .id-value { font-family: monospace; font-size: 11px; color: var(--text-main); word-break: break-all; }
+
+        /* JOURNEY ACTIONS */
+        .journey-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+        .j-btn {
+            border: none; padding: 10px 4px; border-radius: 12px; font-size: 10px; 
+            font-weight: 700; cursor: pointer; display: flex; flex-direction: column; 
+            align-items: center; gap: 4px; transition: 0.2s;
+        }
+        .btn-download { background: #1e293b; color: white; }
+        .btn-reschedule { background: #f1f5f9; color: #1e293b; border: 1px solid #e2e8f0; }
+        .btn-cancel { background: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; }
+
+        .qr-section { border-top: 1px dashed #e2e8f0; margin-top: 18px; padding-top: 18px; display: flex; align-items: center; justify-content: space-between; }
+        
+        /* SEARCH FEATURE */
+        .journey-header { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 15px; }
+        .search-trigger {
+            background: white; width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border); cursor: pointer; color: var(--text-muted);
+        }
+        #search-container { background: white; border-radius: 20px; padding: 15px; margin-bottom: 20px; display: none; border: 1px solid var(--primary); }
+        .search-tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .search-tab { padding: 6px 12px; background: #f1f5f9; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .search-tab.active { background: var(--primary); color: white; }
+        .search-input-box input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; box-sizing: border-box; }
+        .save-btn { width: 100%; background: #1e293b; color: white; border: none; padding: 15px; border-radius: 14px; font-weight: 700; cursor: pointer; }
+    </style>
+
+</head>
 <body>
 
 <div class="header">
-    <div class="logo">DREAMLINER</div>
+    <div class="logo">
+        <img src="logo-modified.png" alt="Logo" class="logo-img"> DREAMLINER PROFILE
+    </div>
     <button class="logout-btn" id="logoutBtn">Logout</button>
 </div>
 
 <div class="container">
-    <div class="card">
-        <div class="profile">
-            <div class="avatar-container">
-                <img id="profileImg" class="avatar-img" src="https://via.placeholder.com/80">
-                <label for="fileInput" class="upload-btn">📷</label>
-                <input type="file" id="fileInput" accept="image/*">
-            </div>
-            <h3 id="usernameDisplay">Passenger</h3>
-            <div class="phone" id="display-phone">Loading...</div>
+    <div class="profile-card">
+        <div class="avatar-container">
+            <img id="profileImg" class="avatar-img" src="https://via.placeholder.com/100">
+            <label for="fileInput" class="upload-btn"><i data-lucide="camera" style="width: 16px;"></i></label>
+            <input type="file" id="fileInput" accept="image/*" style="display:none;">
         </div>
-
-        <div class="info-item"><b>Full Name</b><input id="name" placeholder="Enter Name"></div>
-        <div class="info-item"><b>Age</b><input id="age" placeholder="Enter Age"></div>
-        <div class="info-item"><b>Address</b><input id="address" placeholder="Enter Address"></div>
-        <div class="info-item"><b>Alternate Phone</b><input id="altphone" placeholder="Optional"></div>
-
-        <button class="save-btn" id="saveProfile">Save Profile</button>
-
+        <h3 id="usernameDisplay" style="margin:0; font-weight: 800;">Passenger</h3>
+        <div id="display-phone" style="font-size: 14px; color: var(--text-muted);">---</div>
+        <div class="uid-tag" id="display-uid">MEMBER ID: ------</div>
+        
         <div class="summary">
             <div class="summary-box"><span id="totalTrips">0</span><small>Trips</small></div>
             <div class="summary-box"><span id="totalSeats">0</span><small>Seats</small></div>
@@ -121,17 +177,70 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="history-title">My Bookings</div>
-        <div id="history-content">Searching for bookings...</div>
+    <div class="action-grid">
+        <a href="trackbus.html" class="action-item"><i data-lucide="bus-front"></i> <span>Track Bus</span> </a>
+        <a href="aboutus.html" class="action-item"><i data-lucide="building-2"></i><span>About Us</span></a>
+        <a href="support.html" class="action-item"><i data-lucide="headset"></i><span>Support</span></a>
     </div>
+
+    <div class="expand-box">
+        <div class="expand-header" onclick="toggleExpand(this)">
+            <div class="label-wrap"><i data-lucide="user-cog"></i> <span>Profile Settings</span></div>
+            <i data-lucide="chevron-down" class="icon-chevron"></i>
+        </div>
+        <div class="expand-content">
+            <div style="padding-top:10px;">
+                <div class="info-item" style="margin-bottom:15px;"><b>Full Name</b><input id="name" placeholder="Full Name" style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid #e2e8f0;"></div>
+                <div class="info-item" style="margin-bottom:15px;"><b>Contact & Age</b>
+                    <div style="display: flex; gap: 10px;"><input id="altphone" placeholder="Alt Phone" style="flex: 2; padding: 12px; border-radius: 12px; border: 1.5px solid #e2e8f0;"><input id="age" placeholder="Age" style="flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid #e2e8f0;"></div>
+                </div>
+                <div class="info-item" style="margin-bottom:15px;"><b>Address</b><input id="address" placeholder="Residential Address" style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid #e2e8f0;"></div>
+                <button class="save-btn" id="saveProfile">Update Account</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="expand-box">
+        <a href="guide.html" class="expand-header">
+            <div class="label-wrap"><i data-lucide="book-open"></i> <span>How to Use</span></div>
+            <i data-lucide="chevron-right"></i>
+        </a>
+    </div>
+
+    <div class="expand-box">
+        <a href="policy.html" class="expand-header">
+            <div class="label-wrap"><i data-lucide="shield-check"></i> <span>Travel Policy</span></div>
+            <i data-lucide="chevron-right"></i>
+        </a>
+    </div>
+    
+
+    <div class="journey-header">
+        <div style="font-weight: 800; font-size: 20px;">My Journeys</div>
+        <div class="search-trigger" id="searchTrigger"><i data-lucide="search" style="width: 18px;"></i></div>
+    </div>
+
+    <div id="search-container">
+        <div class="search-tabs">
+            <div class="search-tab active" data-type="route">From-To</div>
+            <div class="search-tab" data-type="date">Date</div>
+            <div class="search-tab" data-type="id">Booking ID</div>
+        </div>
+        <div class="search-input-box">
+            <input id="searchInput" placeholder="Search by Route (e.g. Delhi-Goa)...">
+        </div>
+    </div>
+
+    <div id="history-content"></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    lucide.createIcons();
 
     const firebaseConfig = {
         apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
@@ -147,161 +256,594 @@
     const auth = getAuth(app);
     const storage = getStorage(app);
 
-    const phoneSpan = document.getElementById("display-phone");
-    const historyBox = document.getElementById("history-content");
-    const profileImg = document.getElementById("profileImg");
-    const usernameDisplay = document.getElementById("usernameDisplay");
+    let allBookings = [];
+    let currentSearchType = 'route';
 
-    // --- LOAD PROFILE ---
-    async function loadUserProfile(uid) {
-        try {
-            const docRef = doc(db, "profiles", uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                document.getElementById("name").value = data.name || "";
-                document.getElementById("age").value = data.age || "";
-                document.getElementById("address").value = data.address || "";
-                document.getElementById("altphone").value = data.altphone || "";
-                usernameDisplay.innerText = data.name || "Passenger";
-                if (data.photoURL) profileImg.src = data.photoURL;
-            }
-        } catch (e) { console.error("Error loading profile:", e); }
-    }
+    window.toggleExpand = (el) => el.parentElement.classList.toggle('active');
 
-    // --- SAVE TEXT DATA ---
-    document.getElementById("saveProfile").onclick = async () => {
-        const user = auth.currentUser;
-        if(!user) return;
-        
-        const btn = document.getElementById("saveProfile");
-        btn.disabled = true;
-        btn.innerText = "Saving...";
-
-        try {
-            const nameVal = document.getElementById("name").value;
-            await setDoc(doc(db, "profiles", user.uid), {
-                name: nameVal,
-                age: document.getElementById("age").value,
-                address: document.getElementById("address").value,
-                altphone: document.getElementById("altphone").value,
-                phone: user.phoneNumber
-            }, { merge: true });
-            
-            usernameDisplay.innerText = nameVal || "Passenger";
-            alert("Profile Saved!");
-        } catch (e) {
-            alert("Error saving data: " + e.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Save Profile";
-        }
-    };
-
-    // --- PHOTO UPLOAD ---
-    document.getElementById("fileInput").addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        const user = auth.currentUser;
-        if (!file || !user) return;
-
-        if (file.size > 2 * 1024 * 1024) {
-            alert("File is too large. Please select an image under 2MB.");
-            return;
-        }
-
-        try {
-            profileImg.style.opacity = "0.3";
-            const storageRef = ref(storage, `profilePhotos/${user.uid}`);
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
-            profileImg.src = url;
-            await setDoc(doc(db, "profiles", user.uid), { photoURL: url }, { merge: true });
-            alert("Photo Updated Successfully!");
-        } catch (error) {
-            console.error(error);
-            alert("Upload failed.");
-        } finally {
-            profileImg.style.opacity = "1";
-        }
-    });
-
-    // --- BOOKING HISTORY ---
-    async function loadBookingHistory(uid) {
-        try {
-            const q = query(collection(db, "bookings"), where("userId", "==", uid));
-            const snap = await getDocs(q);
-
-            if (snap.empty) {
-                historyBox.innerHTML = "<p style='color:#999; text-align:center;'>No bookings found.</p>";
-                return;
-            }
-
-            historyBox.innerHTML = "";
-            let trips = 0, seats = 0, routes = new Set();
-
-            snap.forEach(docItem => {
-                const d = docItem.data();
-                trips++;
-                seats += (d.seatsSelected ? d.seatsSelected.length : 1);
-                routes.add(`${d.from}-${d.to}`);
-
-                historyBox.innerHTML += `
-                    <div class="booking-card">
-                        <div class="route">${d.from} → ${d.to}</div>
-                        <div class="meta">Seat: ${d.seatNumber || 'N/A'}</div>
-                        <span class="status">Confirmed</span>
-                        <div class="booking-id">Booking ID: ${docItem.id.slice(0, 8)}</div>
-                    </div>`;
-            });
-
-            document.getElementById("totalTrips").innerText = trips;
-            document.getElementById("totalSeats").innerText = seats;
-            document.getElementById("totalRoutes").innerText = routes.size;
-        } catch (e) {
-            historyBox.innerHTML = "Error loading history.";
-        }
-    }
-
-    // --- AUTH OBSERVER ---
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            phoneSpan.textContent = user.phoneNumber;
+            document.getElementById("display-phone").textContent = user.phoneNumber;
+            document.getElementById("display-uid").textContent = `MEMBER ID: ${user.uid.substring(0, 8).toUpperCase()}`;
             loadUserProfile(user.uid);
             loadBookingHistory(user.uid);
-        } else {
-            window.location.href = "index.html";
-        }
+        } else { window.location.href = "index.html"; }
     });
 
-// Listen for changes in localStorage from other tabs
-window.addEventListener('storage', (event) => {
-    if (event.key === 'isLoggedIn') {
-        if (event.newValue === 'true') {
-            // User logged in in another tab
-            showProfileIcon(); 
-        } else {
-            // User logged out in another tab
-            // Hide icon and show login button
-            document.getElementById("login-btn").style.display = "block";
-            document.getElementById("user-profile").style.display = "none";
-            
-            // Optional: If they are on a private page like info.html, redirect them
-            if (window.location.pathname.includes("info.html")) {
-                window.location.href = "index.html";
-            }
-        }
+    document.getElementById('fileInput').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const storageRef = ref(storage, `profilePhotos/${user.uid}.jpg`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        document.getElementById('profileImg').src = downloadURL;
+        await setDoc(doc(db, "profiles", user.uid), {
+            photoURL: downloadURL
+        }, { merge: true });
+     } catch (err) {
+        console.error("Upload failed:", err);
     }
 });
 
+    async function loadUserProfile(uid) {
+        const docSnap = await getDoc(doc(db, "profiles", uid));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("name").value = data.name || "";
+            document.getElementById("age").value = data.age || "";
+            document.getElementById("address").value = data.address || "";
+            document.getElementById("altphone").value = data.altphone || "";
+            document.getElementById("usernameDisplay").innerText = data.name || "Passenger";
+            if (data.photoURL) document.getElementById("profileImg").src = data.photoURL;
+        }
+    }
 
-    // --- LOGOUT (UPDATED FEATURE) ---
+    document.getElementById('searchTrigger').onclick = () => {
+        const panel = document.getElementById('search-container');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    };
+
+    document.querySelectorAll('.search-tab').forEach(tab => {
+        tab.onclick = () => {
+            document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentSearchType = tab.dataset.type;
+            const input = document.getElementById('searchInput');
+            input.value = "";
+            if(currentSearchType === 'route') {
+                input.type = "text"; input.placeholder = "Search Route (e.g. Delhi-Goa)";
+            } else if(currentSearchType === 'date') {
+                input.type = "date";
+            } else {
+                input.type = "text"; input.placeholder = "Enter Booking ID";
+            }
+        };
+    });
+
+    document.getElementById('searchInput').oninput = (e) => {
+        const val = e.target.value.toLowerCase();
+        const filtered = allBookings.filter(d => {
+            if(currentSearchType === 'route') {
+                const route = `${d.from}-${d.to}`.toLowerCase();
+                return route.includes(val);
+            } else if(currentSearchType === 'date') {
+                return d.date === val;
+            } else {
+                return (d.bookingUid || d.id).toLowerCase().includes(val);
+            }
+        });
+        renderBookings(filtered, auth.currentUser.uid);
+    };
+
+    async function loadBookingHistory(uid) {
+    try {
+        const q = query(collection(db, "bookings"), where("userUid", "==", uid));
+        const snap = await getDocs(q);
+
+        allBookings = [];
+
+        snap.forEach(docItem => {
+            allBookings.push({ id: docItem.id, ...docItem.data() });
+        });
+
+        // ✅ SORT: Latest booking first
+        allBookings.sort((a, b) => {
+            const dateA = new Date(a.bookingDate || a.date || 0);
+            const dateB = new Date(b.bookingDate || b.date || 0);
+            return dateB - dateA; // DESCENDING (latest first)
+        });
+
+        renderBookings(allBookings, uid);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function renderBookings(bookings, uid) {
+    const historyBox = document.getElementById("history-content");
+    if (bookings.length === 0) {
+        historyBox.innerHTML = "<p style='text-align:center;color:var(--text-muted); padding: 20px;'>No matching journeys found.</p>";
+        return;
+    }
+
+    historyBox.innerHTML = "";
+    let trips = 0, seats = 0, routes = new Set();
+    
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    bookings.forEach(d => {
+        trips++;
+
+        let seatDisplay = d.passengers && Array.isArray(d.passengers)
+            ? d.passengers.map(p => p.seat).join(", ")
+            : d.seatNumber || "A1";
+
+        seats += d.passengers ? d.passengers.length : 1;
+        routes.add(`${d.from}-${d.to}`);
+
+        const bId = d.bookingUid || d.id;
+
+        const paymentId = d.paymentUid || d.paymentId || d.razorpay_payment_id || "N/A";
+
+        const travelDate = new Date(d.date);
+        const isPast = travelDate < now;
+
+        // ✅ FIXED BOOKING DATE LOGIC
+        const bookingDate = d.bookingDate
+            ? d.bookingDate
+            : (d.timestamp
+                ? new Date(d.timestamp).toLocaleDateString('en-GB')
+                : new Date().toLocaleDateString('en-GB'));
+
+        historyBox.innerHTML += `
+            <div class="booking-card">
+                <span class="booking-on-text">Booked On: ${bookingDate}</span>
+
+                <div class="route-row">
+                    <span>${d.from} → ${d.to}</span>
+                    <span class="status-badge">${isPast ? 'Completed' : 'Confirmed'}</span>
+                </div>
+
+                <div class="meta-grid">
+                    <div class="meta"><strong>Travel Date</strong><span>${d.date || '2026-04-12'}</span></div>
+                    <div class="meta"><strong>Bus Type</strong><span>${d.busName || 'Premium AC'}</span></div>
+                    <div class="meta"><strong>Seat Nos</strong><span>${seatDisplay}</span></div>
+                    <div class="meta"><strong>Fare</strong><span>₹${d.totalFare || '549'}</span></div>
+                    <div class="meta"><strong>Pickup</strong><span>${d.pickup || 'ISBT'}</span></div>
+                    <div class="meta"><strong>Drop</strong><span>${d.drop || 'Center'}</span></div>
+                </div>
+
+                <div class="id-details-box">
+                    <div class="id-row">
+                        <span class="id-label">Full Booking ID</span>
+                        <span class="id-value">${bId}</span>
+                    </div>
+
+                    <div class="id-row">
+                        <span class="id-label">User UID</span>
+                        <span class="id-value">${uid}</span>
+                    </div>
+
+                    <div class="id-row">
+                        <span class="id-label">Payment UID</span>
+                        <span class="id-value">${paymentId}</span>
+                    </div>
+                </div>
+
+                <div class="qr-section">
+                    <div style="font-size:12px; color:var(--text-muted);">Digital Boarding Pass</div>
+                    <div class="qr-preview"><canvas id="qr-${bId}"></canvas></div>
+                </div>
+
+                ${!isPast ? `
+                <div class="journey-actions">
+                    <button class="j-btn btn-download" data-id="${bId}">
+    <i data-lucide="download" style="width:14px;"></i>Ticket
+</button>
+                   <button class="j-btn btn-reschedule" onclick="window.location.href='reshedulebus.html'">
+    <i data-lucide="calendar-clock" style="width:14px;"></i>
+    Reschedule
+</button>
+
+<button class="j-btn btn-cancel" onclick="window.location.href='cancelbus.html'">
+    <i data-lucide="ban" style="width:14px;"></i>
+    Cancel
+</button> 
+                </div>
+                ` : '<div style="margin-top:15px; font-size:11px; color:var(--text-muted); font-style:italic; text-align:center;">This journey has concluded. Actions are disabled.</div>'}
+            </div>
+        `;
+
+        setTimeout(() => {
+            const canvas = document.getElementById(`qr-${bId}`);
+            if (canvas) QRCode.toCanvas(canvas, bId, { width: 70, margin: 0 });
+            lucide.createIcons();
+        }, 150);
+    });
+
+    if (bookings.length === allBookings.length) {
+        document.getElementById("totalTrips").innerText = trips;
+        document.getElementById("totalSeats").innerText = seats;
+        document.getElementById("totalRoutes").innerText = routes.size;
+    }
+}
+    document.getElementById("saveProfile").onclick = async () => {
+        const user = auth.currentUser;
+        if(!user) return;
+        try {
+            await setDoc(doc(db, "profiles", user.uid), {
+                name: document.getElementById("name").value,
+                age: document.getElementById("age").value,
+                address: document.getElementById("address").value,
+                altphone: document.getElementById("altphone").value,
+            }, { merge: true });
+            alert("Updated!");
+            location.reload();
+        } catch (e) { alert("Error."); }
+    };
+
     document.getElementById("logoutBtn").onclick = () => {
         signOut(auth).then(() => {
-            // Signal all tabs that the user is logged out
             localStorage.setItem("isLoggedIn", "false"); 
             window.location.href = "index.html";
         });
     };
+    document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-download");
+    if (!btn) return;
+
+    const bookingId = btn.getAttribute("data-id");
+
+    const booking = allBookings.find(b =>
+        (b.bookingUid || b.id) === bookingId
+    );
+
+    if (!booking) return;
+
+    // ================= FIX PICKUP & DROP =================
+    booking.pickup =
+        booking.pickup ||
+        booking.pickupPoint ||
+        booking.boarding ||
+        booking.boardingPoint ||
+        booking.pickup_location ||
+        booking.fromPoint ||
+        "N/A";
+
+    booking.drop =
+        booking.drop ||
+        booking.dropPoint ||
+        booking.dropping ||
+        booking.droppingPoint ||
+        booking.drop_location ||
+        booking.toPoint ||
+        "N/A";
+
+    downloadTicketPDF(booking, auth.currentUser);
+});
+async function downloadTicketPDF(booking, currentUser) {
+
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+// ================= DEBUG =================
+console.log("PDF Booking Data:", booking);
+
+// ================= BOOKING DATA =================
+const passengers = booking.passengers || [];
+
+const from = booking.from || "N/A";
+const to = booking.to || "N/A";
+const date = booking.date || "N/A";
+const trip = booking.trip || "1";
+
+const pickup = booking.pickup;
+const drop = booking.drop;
+
+const remarks = booking.remarks || "N/A";
+
+const bookingId = booking.bookingUid || booking.id;
+
+const paymentId =
+    booking.paymentUid ||
+    booking.paymentId ||
+    booking.razorpay_payment_id ||
+    "N/A";
+
+const farePerSeat = booking.farePerSeat || 549;
+
+// ================= FARE (FIXED GST LOGIC) =================
+
+// IMPORTANT:
+// booking.totalFare already includes GST (your system behavior)
+const storedTotalFare =
+    booking.totalFare ||
+    (passengers.length * farePerSeat);
+
+// Remove GST to get base price
+const baseFare = Math.round(storedTotalFare / 1.18);
+
+// GST portion
+const gstAmount = storedTotalFare - baseFare;
+
+// Final total (no recalculation, use stored value)
+const totalFare = storedTotalFare;
+// ================= PARSE PICKUP / DROP =================
+const pLoc = pickup.split("(")[0]?.trim() || pickup;
+const pTime = pickup.match(/\((.*?)\)/)?.[1] || "N/A";
+
+const dLoc = drop.split("(")[0]?.trim() || drop;
+const dTime = drop.match(/\((.*?)\)/)?.[1] || "N/A";
+
+// ================= HEADER =================
+doc.setFillColor(255,122,0);
+doc.rect(0,0,210,40,'F');
+
+try {
+    doc.addImage("logo-modified.png","PNG",14,7,26,26);
+} catch(e){}
+
+doc.setTextColor(255);
+doc.setFont("helvetica","bold");
+doc.setFontSize(18);
+doc.text("DREAMLINER BUS E-TICKET",105,18,{align:"center"});
+
+doc.setFontSize(11);
+doc.setFont("helvetica","normal");
+doc.text("Bharat Benz AC Semi Sleeper",105,27,{align:"center"});
+
+// ================= MAIN BOX =================
+let y = 50;
+
+doc.setFillColor(245,245,245);
+doc.roundedRect(10,y-5,190,130+(passengers.length*7),3,3,'F');
+
+doc.setTextColor(0);
+doc.setFont("helvetica","bold");
+doc.setFontSize(12);
+doc.text("Travel Details",15,y);
+
+y += 10;
+
+doc.setFont("helvetica","normal");
+doc.setFontSize(11);
+
+doc.text(`From: ${from}`,15,y);
+doc.text(`To: ${to}`,110,y);
+
+y += 7;
+
+doc.setTextColor(100);
+doc.setFontSize(9);
+
+doc.text(`Pickup: ${pLoc}`,15,y);
+doc.text(`Drop: ${dLoc}`,110,y);
+
+y += 5;
+
+doc.text(`Time: ${pTime}`,15,y);
+doc.text(`Time: ${dTime}`,110,y);
+
+y += 8;
+
+doc.setTextColor(0);
+doc.setFontSize(11);
+
+doc.text(`Journey Date: ${date}`,15,y);
+doc.text(`Trip: ${trip}`,110,y);
+
+y += 12;
+
+// ================= PASSENGERS =================
+doc.setFont("helvetica","bold");
+doc.text("Passenger List",15,y);
+
+y += 7;
+
+doc.setFont("helvetica","normal");
+
+passengers.forEach(p => {
+    const gender = p.gender === "male" ? "M" : "F";
+    doc.text(
+        `${p.seat} ${p.name} (${gender}) Age:${p.age} Ph:${p.phone}`,
+        15,
+        y
+    );
+    y += 7;
+});
+
+y += 5;
+
+// ================= REMARKS =================
+doc.setFont("helvetica","bold");
+doc.text("Remarks",15,y);
+
+y += 6;
+
+doc.setFont("helvetica","normal");
+doc.setFontSize(10);
+doc.text(remarks,15,y,{maxWidth:180});
+
+y += 12;
+
+// ================= FARE =================
+doc.setDrawColor(210);
+doc.line(15,y-5,195,y-5);
+
+doc.setFont("helvetica","bold");
+doc.setFontSize(11);
+doc.text("Fare Summary",15,y);
+
+y += 7;
+
+doc.setFont("helvetica","normal");
+
+doc.text("Base Fare",15,y);
+doc.text(`${baseFare}`,110,y);
+
+y += 7;
+
+doc.text("GST 18%",15,y);
+doc.text(`${gstAmount}`,110,y);
+
+y += 8;
+
+doc.setFont("helvetica","bold");
+doc.setFontSize(13);
+doc.setTextColor(255,122,0);
+
+doc.text("Total Paid",15,y);
+doc.text(`${totalFare}`,110,y);
+doc.setTextColor(0);
+
+doc.text(`Payment ID: ${paymentId}`,15,y+15);
+
+
+// ================= THANK YOU (BELOW PAYMENT ID) =================
+y += 23;
+
+// top divider line (keeps it in same container flow)
+doc.setDrawColor(220);
+doc.line(15, y + 2, 195, y + 2);
+
+y += 8;
+
+// THANK YOU TEXT (BLACK as requested)
+doc.setFont("helvetica", "bold");
+doc.setFontSize(12);
+doc.setTextColor(255, 0, 0);
+
+doc.text("Thank you for choosing Dreamliner!", 105, y, {
+    align: "center"
+});
+
+y += 6;
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(9);
+doc.setTextColor(80);
+
+doc.text("This ticket will help you in your journey.", 105, y, {
+    align: "center"
+});
+
+y += 10;
+
+
+// ================= SUPPORT BOX =================
+y += 10;
+
+doc.setDrawColor(255, 122, 0);
+doc.setTextColor(0, 0, 0);
+
+doc.roundedRect(55, y, 100, 25, 3, 3, 'D');
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+doc.text("Need Help?", 105, y + 8, { align: "center" });
+
+doc.setFont("helvetica", "bold");
+doc.setTextColor(0, 100, 255);
+
+doc.text("Dreamliner Support", 105, y + 14, { align: "center" });
+
+const whatsapp =
+`whatsapp://send?phone=919954506113&text=Hello%20Dreamliner`;
+
+doc.link(80, y + 10, 50, 8, { url: whatsapp });
+
+doc.setTextColor(120);
+doc.setFontSize(8);
+doc.text("24×7 Service | Multilingual Support", 105, y + 20, { align: "center" });
+
+y += 35;
+
+
+
+
+doc.setFontSize(9);
+
+doc.text(`Booking ID: ${bookingId}`,15,y);
+
+const uid = currentUser?.uid?.substring(0,6) || "GUEST";
+doc.text(`User ID: ${uid}`,15,y+5);
+
+doc.text(`Date Issued: ${new Date().toLocaleDateString()}`,15,y-5);
+
+// ================= QR =================
+const qrCanvas = document.createElement("canvas");
+
+await QRCode.toCanvas(qrCanvas,
+JSON.stringify({bookingId,from,to,date}),
+{width:80});
+
+doc.addImage(qrCanvas.toDataURL("image/png"),"PNG",160,y-25,35,35);
+
+// ================= POLICY PAGE =================
+doc.addPage();
+
+doc.setFillColor(240,244,255);
+doc.rect(10,15,190,10,'F');
+
+doc.setTextColor(0,60,150);
+doc.setFont("helvetica","bold");
+doc.setFontSize(12);
+
+doc.text("BOOKING POLICIES",15,22);
+
+// policies with icons (circle style)
+const policies = [
+{icon:"C",title:"Child Policy",desc:"Children above 6 years require ticket"},
+{icon:"L",title:"Luggage Policy",desc:"2 bags allowed per passenger"},
+{icon:"P",title:"Pet Policy",desc:"Pets not allowed in bus"},
+{icon:"R",title:"Reporting Time",desc:"Arrive 15 mins before departure"}
+];
+
+let py = 35;
+
+policies.forEach(p => {
+
+doc.setDrawColor(220);
+doc.roundedRect(10,py-8,190,24,3,3);
+
+doc.setDrawColor(180);
+doc.circle(20,py,5,'D');
+
+doc.setFontSize(9);
+doc.setTextColor(0);
+doc.text(p.icon,19,py+2);
+
+doc.setFont("helvetica","bold");
+doc.setFontSize(10);
+doc.text(p.title,30,py-1);
+
+doc.setFont("helvetica","normal");
+doc.setFontSize(9);
+doc.setTextColor(100);
+doc.text(p.desc,30,py+6);
+
+py += 30;
+});
+
+// ================= FOOTER =================
+doc.setTextColor(150);
+doc.setFontSize(8);
+
+doc.text(
+"This is a computer generated e-ticket. No signature required.",
+105,285,{align:"center"}
+);
+
+// ================= SAVE =================
+doc.save(`Dreamliner_Ticket_${bookingId}.pdf`);
+}
+
 </script>
 </body>
-</html>
+</html>  
