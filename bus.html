@@ -1,363 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Available Bus</title>
-<style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding-bottom: 80px; /* space for bottom buttons */
-}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamliner - Available Buses</title>
+    <style>
+        :root {
+            --primary: #ff7a00;
+            --secondary: #ff512f;
+            --text-dark: #1a1a1a;
+            --text-light: #757575;
+            --bg-gray: #f4f7f8;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+        }
 
-/* HEADER */
-.header {
-    background: linear-gradient(to right, #ff7a00, #ff512f);
-    color: white;
-    padding: 12px 15px;
-    font-weight: bold;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-gray);
+            margin: 0;
+            color: var(--text-dark);
+        }
 
-/* ROUTE CONTAINER */
-.route-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-left: 10px;
-}
+        /* PREMIUM HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 81, 47, 0.2);
+        }
 
-#routeHeader { font-size: 16px; }
-#routeDate { font-size: 13px; color: #ffe0b2; margin-top: 2px; }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 15px;
+        }
 
-/* BACK BUTTON */
-.back-btn {
-    margin-right: 10px;
-    background: rgba(255,255,255,0.9);
-    color: #ff512f;
-    border: none;
-    padding: 3px 12px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-.back-btn:hover {
-    background: white;
-    transform: translateX(-2px);
-}
+        .route-container { display: flex; flex-direction: column; }
+        #routeHeader { font-size: 17px; font-weight: 700; }
+        #routeDate { font-size: 12px; opacity: 0.9; }
 
-/* BUS CARD */
-.bus-card {
-    background: white;
-    margin: 15px;
-    padding: 18px;
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
+        /* BUS CARD */
+        .bus-card {
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #eee;
+        }
 
-/* TOP */
-.bus-top { display: flex; justify-content: space-between; align-items: center; }
-.bus-title { font-size: 17px; font-weight: 700; }
-.rating { background: #28a745; color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px; }
+        .brand-section { margin-bottom: 20px; }
+        .brand-name { font-size: 19px; font-weight: 800; color: var(--text-dark); letter-spacing: 0.3px; }
+        .bus-type { font-size: 13px; color: var(--text-light); display: block; margin-top: 2px; }
 
-/* STOPS */
-.stop { display: flex; justify-content: space-between; margin: 10px 0; padding-bottom: 8px; border-bottom: 1px dashed #ddd; }
-.stop-name { font-weight: 600; }
-.stop-time { font-size: 12px; color: gray; }
+        /* JOURNEY VISUALS */
+        .journey-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
 
-/* BOTTOM */
-.bottom-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
-.bus-price { font-size: 16px; font-weight: bold; color: #ff512f; }
-.view-btn { background: #ff7a00; color: white; border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .time-box {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 12px;
+            min-width: 80px;
+            text-align: center;
+            border: 1px solid #f0f0f0;
+        }
 
-/* BUS DETAILS */
-.bus-details { margin-top: 8px; font-size: 13px; color: gray; }
+        .time { font-size: 18px; font-weight: 800; color: #000; display: block; }
+        .location { font-size: 11px; color: var(--text-light); font-weight: 700; margin-top: 4px; display: block; text-transform: uppercase; }
 
-/* NO RESULT */
-.no-result { text-align: center; padding: 50px; color: #777; }
+        .duration-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 10px;
+        }
 
-/* TIME ROW */
-.time-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
-.time-block { text-align: center; }
-.time { font-size: 18px; font-weight: bold; }
-.label { font-size: 12px; color: gray; }
-.duration { font-size: 12px; color: gray; }
+        .duration-text { font-size: 11px; color: var(--text-light); font-weight: 700; margin-bottom: 5px; }
+        .line-visual { height: 2px; background: #e0e0e0; width: 80%; position: relative; }
+        .line-visual::after {
+            content: "\f206";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 5px;
+            font-size: 12px;
+            color: #ccc;
+        }
 
-/* ROUTE TOGGLE */
-.route-toggle { color: #ff512f; font-weight: 600; cursor: pointer; margin-top: 10px; }
-.route { display: none; margin-top: 10px; }
+        .seat-tag {
+            font-size: 11px;
+            font-weight: 800;
+            margin-top: 8px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
 
-/* BOTTOM FIXED BUTTONS */
-.bottom-options {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #fff;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    box-shadow: 0 -3px 10px rgba(0,0,0,0.15);
-    z-index: 100;
-}
+        /* FOOTER & ACTION AREA */
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f8f9fa;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
 
-.bottom-options button {
-    background: #ffd699;
-    padding: 12px 20px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.bottom-options button:hover { background: #ffcc80; }
+        .status-box {
+            background: var(--success-bg);
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+        .status-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--success);
+            text-transform: uppercase;
+        }
 
-/* AMENITIES MODAL */
-.modal {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    background: rgba(0,0,0,0.5);
-    z-index: 50;
-}
-.modal.show { display: block; }
-.modal-content {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: white;
-    border-radius: 16px 16px 0 0;
-    padding: 20px;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-    max-height: 60%;
-    overflow-y: auto;
-}
-.modal-content h3 { margin-top: 0; }
-.modal-content ul { padding-left: 20px; }
+        .action-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-/* Close button top-right */
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: #ff7a00;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-</style>
+        .fare-info {
+            text-align: right;
+        }
+
+        .fare-label { font-size: 10px; color: var(--text-light); font-weight: 700; display: block; }
+        .fare-amount { font-size: 20px; font-weight: 900; color: var(--text-dark); }
+
+        .book-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.25);
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .book-btn:active { transform: scale(0.96); }
+    </style>
 </head>
-
 <body>
 
 <div class="header">
-    <button class="back-btn" onclick="goBack()">← Back</button>
+    <button class="back-btn" onclick="window.history.back()"><i class="fas fa-chevron-left"></i></button>
     <div class="route-container">
-        <div id="routeHeader"></div>
-        <div id="routeDate"></div>
+        <div id="routeHeader">...</div>
+        <div id="routeDate">...</div>
     </div>
 </div>
 
 <div id="busList"></div>
 
-<!-- BOTTOM BUTTONS -->
-<div class="bottom-options">
-    <button onclick="openAmenities()">Amenities</button>
-    <button onclick="alert('Dreamliner Info')">Info</button>
-</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<!-- AMENITIES POPUP -->
-<div id="amenitiesModal" class="modal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeAmenities()">×</button>
-        <h3>Amenities</h3>
-        <ul>
-            <li>AC</li>
-            <li>Wi-Fi</li>
-            <li>Charging Points</li>
-            <li>Reclining Seats</li>
-            <li>Refreshments</li>
-        </ul>
-    </div>
-</div>
+const firebaseConfig = {
+    apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+    authDomain: "dreamliner-421b0.firebaseapp.com",
+    projectId: "dreamliner-421b0",
+    storageBucket: "dreamliner-421b0.appspot.com",
+    messagingSenderId: "454472970770",
+    appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+};
 
-<script>
-// GET URL DATA
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const params = new URLSearchParams(window.location.search);
-const from = params.get("from");
-const to = params.get("to");
-const date = params.get("date");
+const from = params.get("from") || "";
+const to = params.get("to") || "";
+const date = params.get("date") || "";
+const womenSafety = params.get("womenSafety") || "false"; // Retrieve current toggle state
 
-// SHOW ROUTE
 document.getElementById("routeHeader").innerText = `${from} → ${to}`;
-document.getElementById("routeDate").innerText = `Date: ${date}`;
+document.getElementById("routeDate").innerText = date;
 
-// ROUTES DATABASE
 const routes = [
-{
-    from: "Guwahati",
-    to: "Biswanath Charali",
-    fare: 465,
-    bus: {
-        name: "Dreamliner AC Sleeper",
-        details: "Mercedes Bench 2*2 Semi Sleeper",
-        stops: [
-            {place: "Paltan Bazar", time: "04:15 PM"},
-            {place: "ISBT Guwahati", time: "06:30 PM"},
-            {place: "Nongpoh", time: "08:00 PM"},
-            {place: "Shillong Police Bazar", time: "09:30 PM"},
-            {place: "Charali", time: "09:10 PM"}
-        ]
+    {
+        from: "Guwahati",
+        to: "Biswanath Charali",
+        fare: 100,
+        capacity: 45,
+        busName: "DREAMLINER",
+        busType: "Mercedes-Benz 2X2 Semi Sleeper",
+        dept: "05:00 PM",
+        arr: "09:00 PM"
+    },
+    {
+        from: "Biswanath Charali",
+        to: "Guwahati",
+        fare: 465,
+        capacity: 45,
+        busName: "DREAMLINER",
+        busType: "Mercedes-Benz 2X2 Semi Sleeper",
+        dept: "05:00 AM",
+        arr: "09:00 AM"
     }
-},
-{
-    from: "Biswanath Charali",
-    to: "Guwahati",
-    fare: 100,
-    bus: {
-        name: "Dreamliner Volvo",
-        details: "Mercedes Bench 2*2 Semi Sleeper",
-        stops: [
-            {place: "Guwahati", time: "05:00 AM"},
-            {place: "Kolkata", time: "06:00 AM"},
-            {place: "Delhi", time: "08:00 AM"}
-        ]
-    }
-},
-{
-    from: "Nagaon",
-    to: "Guwahati",
-    fare: 100,
-    bus: {
-        name: "Dreamliner Volvo",
-        details: "Mercedes Bench 2*2 Semi Sleeper",
-        stops: [
-            {place: "Guwahati", time: "05:00 AM"},
-            {place: "Kolkata", time: "06:00 AM"},
-            {place: "Delhi", time: "08:00 AM"}
-        ]
-    }
-}
 ];
 
-// FIND MATCH
-const matchedRoute = routes.find(r => r.from === from && r.to === to);
-const container = document.getElementById("busList");
+function calculateDuration(start, end) {
+    const parse = (t) => {
+        let [time, mod] = t.split(' ');
+        let [h, m] = time.split(':').map(Number);
+        if (h === 12) h = 0;
+        if (mod === 'PM') h += 12;
+        return h * 60 + m;
+    };
+    let d = parse(end) - parse(start);
+    if (d < 0) d += 1440;
+    return `${Math.floor(d/60)}h ${d%60}m`;
+}
 
-if (!matchedRoute) {
-    container.innerHTML = `<div class="no-result"><h2>No Buses Found 😔</h2><p>Try another route</p></div>`;
-} else {
-    const bus = matchedRoute.bus;
-    const firstStop = bus.stops[0];
-    const lastStop = bus.stops[bus.stops.length - 1];
+const matched = routes.find(r => r.from === from && r.to === to);
 
+if (matched) {
+    const trip = matched.dept.includes("PM") ? "PM" : "AM";
+    const dbPath = `${date}_${trip}`;
+    
     const card = document.createElement("div");
     card.className = "bus-card";
-
     card.innerHTML = `
-        <div class="bus-top">
-            <div class="bus-title">${bus.name}</div>
+        <div class="brand-section">
+            <span class="brand-name">${matched.busName}</span>
+            <span class="bus-type">${matched.busType}</span>
         </div>
 
-        <div class="time-row">
-            <div class="time-block">
-                <div class="time">${firstStop.time}</div>
-                <div class="label">${firstStop.place}</div>
+        <div class="journey-row">
+            <div class="time-box">
+                <span class="time">${matched.dept}</span>
+                <span class="location">${matched.from}</span>
             </div>
 
-            <div class="duration">→ ${bus.stops.length - 1} Stops</div>
+            <div class="duration-container">
+                <span class="duration-text">${calculateDuration(matched.dept, matched.arr)}</span>
+                <div class="line-visual"></div>
+                <span class="seat-tag" id="avail-txt">Checking...</span>
+            </div>
 
-            <div class="time-block">
-                <div class="time">${lastStop.time}</div>
-                <div class="label">${lastStop.place}</div>
+            <div class="time-box">
+                <span class="time">${matched.arr}</span>
+                <span class="location">${matched.to}</span>
             </div>
         </div>
 
-        <div style="text-align:center; color: gray; font-size: 13px; margin-bottom: 10px;">
-            Date: ${date}
+        <div class="footer-row">
+            <div class="status-box">
+                <div class="status-dot"></div>
+                <span class="status-text">On Time</span>
+            </div>
+
+            <div class="action-area">
+                <div class="fare-info">
+                    <span class="fare-label">Fare</span>
+                    <span class="fare-amount">₹${matched.fare}</span>
+                </div>
+                <button class="book-btn" id="bookBtn">View Seats</button>
+            </div>
         </div>
-
-        <div class="bottom-row">
-            <div class="bus-price">₹${matchedRoute.fare}</div>
-            <button class="view-btn" onclick="goToSeats('${firstStop.time}', ${matchedRoute.fare})">View Seats</button>
-        </div>
-
-        <div class="bus-details">${bus.details}</div>
-
-        <div class="route-toggle" onclick="toggleRoute(this)">View Route ▼</div>
-        <div class="route"></div>
     `;
+    document.getElementById("busList").appendChild(card);
 
-    container.appendChild(card);
+    let unsubscribe; 
 
-    // ADD STOPS
-    const routeDiv = card.querySelector(".route");
-    bus.stops.forEach(stop => {
-        const div = document.createElement("div");
-        div.className = "stop";
-        div.innerHTML = `
-            <div>
-                <div class="stop-name">${stop.place}</div>
-                <div class="stop-time">${stop.time}</div>
-            </div>
-        `;
-        routeDiv.appendChild(div);
+    function startListening() {
+        if (unsubscribe) unsubscribe();
+
+        unsubscribe = onSnapshot(doc(db, "buses", dbPath), (snap) => {
+            let booked = 0;
+            if (snap.exists()) {
+                const data = snap.data();
+                const seatSource = data.seats ? data.seats : data;
+                booked = Object.keys(seatSource).filter(key => /^[A-Z]\d+$/.test(key)).length;
+            }
+
+            const avail = matched.capacity - booked;
+            const txt = document.getElementById("avail-txt");
+
+            if (avail <= 0) {
+                txt.innerText = "Sold Out";
+                txt.style.color = "#dc3545";
+                txt.style.background = "#fff1f2";
+            } else {
+                txt.innerText = `${avail} Seats`;
+                txt.style.color = avail < 10 ? "#dc3545" : "#16a34a";
+                txt.style.background = avail < 10 ? "#fff1f2" : "#f0fdf4";
+            }
+        });
+    }
+
+    window.addEventListener('pageshow', (event) => {
+        startListening();
     });
-}
 
-// NAVIGATION
-function goBack() { window.history.back(); }
-function goToSeats(departureTime, fare) {
-    const trip = departureTime.toUpperCase().includes("PM") ? "PM" : "AM";
-    window.location.href = `seat.html?from=${from}&to=${to}&date=${date}&trip=${trip}&fare=${fare}`;
+    // FIXED: The redirection now correctly includes the womenSafety parameter
+    document.getElementById("bookBtn").onclick = () => {
+        window.location.href = `seat.html?from=${from}&to=${to}&date=${date}&trip=${trip}&fare=${matched.fare}&womenSafety=${womenSafety}`;
+    };
 }
-function toggleRoute(btn) {
-    const route = btn.nextElementSibling;
-    if (route.style.display === "block") {
-        route.style.display = "none";
-        btn.innerText = "View Route ▼";
-    } else {
-        route.style.display = "block";
-        btn.innerText = "Hide Route ▲";
-    }
-}
-
-// AMENITIES FUNCTIONS
-function openAmenities() {
-    document.getElementById("amenitiesModal").classList.add("show");
-}
-function closeAmenities() {
-    document.getElementById("amenitiesModal").classList.remove("show");
-}
-// close if clicked outside content
-document.getElementById("amenitiesModal").addEventListener("click", function(e){
-    if(e.target === this){
-        closeAmenities();
-    }
-});
 </script>
-
 </body>
 </html>
