@@ -4,13 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Select Seats - Dreamliner</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-
-<style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+   <style>
     :root{
 --orange:#ff7a00;
 --text-dark:#222;
@@ -33,6 +31,10 @@ body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:
 .driver { text-align:right; font-size:18px; margin-bottom:6px; }
 .driver::before { content:""; display:inline-block; width:30px; height:30px; background-image:url('driver.jpg'); background-size:cover; background-position:center; margin-right:3px; }
 .row { display:flex; justify-content:space-between; margin:3px 0; flex-wrap:wrap; }
+.last-row .group { justify-content: space-between; width: 100%;
+    padding: 0 10px;
+}
+
 .group { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; }
 .seat { width:30px; height:30px; cursor:pointer; display:flex; justify-content:center; align-items:center; font-size:10px; font-weight:bold; color:#333; border-radius:4px; background-image:url('seatfree.png'); background-size:cover; background-position:center; transition:transform 0.15s, box-shadow 0.15s; }
 .seat:hover { transform:scale(1.1); box-shadow:0 3px 6px rgba(0,0,0,0.2); }
@@ -298,6 +300,81 @@ iframe#authFrame { width:100%; height:100%; border:none; }
         .red { background: #ffebee; color: #c62828; }
         .blue { background: #e3f2fd; color: #1565c0; }
 
+        .safety-btn-group{
+display:flex;
+gap:10px;
+}
+
+/* Toggle container */
+.safety-toggle-box{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#fff;
+border:1px solid #eee;
+border-radius:10px;
+padding:14px;
+margin-bottom:15px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Label */
+.safety-toggle-label{
+font-size:14px;
+font-weight:700;
+color:#333;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+/* Switch */
+.switch{
+position:relative;
+display:inline-block;
+width:50px;
+height:26px;
+}
+
+.switch input{
+opacity:0;
+width:0;
+height:0;
+}
+
+.slider{
+position:absolute;
+cursor:pointer;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background-color:#ff7a00;
+transition:0.3s;
+border-radius:34px;
+}
+
+.slider:before{
+position:absolute;
+content:"";
+height:20px;
+width:20px;
+left:3px;
+bottom:3px;
+background:white;
+transition:0.3s;
+border-radius:50%;
+}
+
+input:checked + .slider{
+background-color:#ccc;
+}
+
+input:checked + .slider:before{
+transform:translateX(24px);
+}
+        
+
 </style>
 </head>
 <body>
@@ -314,7 +391,6 @@ iframe#authFrame { width:100%; height:100%; border:none; }
     <div class="driver"></div>
     <div id="seats"></div>
 </div>
-
 
 
 
@@ -466,6 +542,9 @@ iframe#authFrame { width:100%; height:100%; border:none; }
 
             <div id="step2" style="display:none; position: absolute; top: 0; width: 100%; transition: transform 0.4s ease; transform: translateX(100%);">
                 <div id="passengerInputs"></div>
+                <div style="margin:10px 0; font-size:14px; font-weight:bold; color:#333;">
+                    Total Fare: <span id="step2Fare">₹0</span>
+                </div>
                 <div class="input-group" style="margin-top: 15px;">
                     <label style="font-size: 12px; font-weight: bold; color: #555;">Remarks (Optional)</label>
                     <textarea id="bookingRemarks" rows="2" placeholder="e.g. Any special assistance required"></textarea>
@@ -486,7 +565,10 @@ iframe#authFrame { width:100%; height:100%; border:none; }
                 <div style="display:flex; justify-content: space-between;"><span>Ticket Fare:</span><span id="breakdownBase">₹0</span></div>
                 <div style="display:flex; justify-content: space-between;"><span>GST (18%):</span><span id="breakdownGST">₹0</span></div>
             </div>
-            <button id="payBtn" style="display:none; padding:15px; background:#28a745; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; margin-top:12px; box-shadow: 0 4px 10px rgba(40,167,69,0.3);">Confirm & Download Ticket</button>
+            <button id="payBtn" style="display:none; padding:15px;background:#ff7a00;color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;width:100%;font-size:16px;">
+                <i class="fas fa-credit-card"></i>
+                Pay ₹<span id="payAmount">--</span> & Download
+            </button>
         </div>
     </div>
 </div>
@@ -512,9 +594,9 @@ iframe#authFrame { width:100%; height:100%; border:none; }
         <div class="details-body" style="padding: 25px;">
             <div style="background: #fff5f5; border-radius: 10px; padding: 15px; border: 1px solid #ffcccc; margin-bottom: 20px;">
                 <p style="font-size: 14px; line-height: 1.6; color: #333; margin: 0;">
-                    <strong>Important:</strong> Seats next to female passengers are <strong>reserved for females</strong> by the Bus Operator. 
+                    <strong>Important:</strong> Seats next to passengers are <strong>reserved for the same Gender</strong> by the Bus Operator. 
                     <br><br>
-                    You can only book this seat as a male if you are part of the same booking group.
+                    Mixed gender seating is allowed only if booked under the same booking group.
                 </p>
             </div>
             
@@ -524,8 +606,6 @@ iframe#authFrame { width:100%; height:100%; border:none; }
         </div>
     </div>
 </div>
-
-
 
 
 
@@ -556,6 +636,7 @@ const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
 const trip = (params.get("trip") || "AM").toUpperCase();
 const farePerSeat = Number(params.get("fare")) || 250;
+
 
 document.getElementById("routeTitle").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
@@ -647,10 +728,26 @@ function updateFareInfo(){
     const gstAmount = Math.round(baseFare * 0.18);
     const totalFare = baseFare + gstAmount;
 
-    document.getElementById("fareInfo").innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${totalFare}`;
-    document.getElementById("modalTotalFare").innerText = `₹${totalFare}`;
+    const totalText = `₹${totalFare}`;
+
+    // Modal display
+    document.getElementById("modalTotalFare").innerText = totalText;
     document.getElementById("breakdownBase").innerText = `₹${baseFare}`;
     document.getElementById("breakdownGST").innerText = `₹${gstAmount}`;
+
+    // Step 2 (Passenger Details)
+    const step2Fare = document.getElementById("step2Fare");
+    if(step2Fare) step2Fare.innerText = totalText;
+
+    // Pay button
+    const payAmount = document.getElementById("payAmount");
+    if(payAmount) payAmount.innerText = totalFare;
+
+    // Hidden summary (optional safety)
+    const fareInfo = document.getElementById("fareInfo");
+    if(fareInfo){
+        fareInfo.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${totalFare}`;
+    }
 }
 
 document.getElementById("gstToggle").onclick = () => {
@@ -659,34 +756,47 @@ document.getElementById("gstToggle").onclick = () => {
 };
 
 const allSeats = [];
-for(let i=1;i<=52;i++) allSeats.push({name:`A${i}`});
+for(let i=1;i<=45;i++) allSeats.push({name:`A${i}`});
 
 function renderSeats(bookedSeats){
     seatContainer.innerHTML='';
-    let index=0;
-    const topRow = document.createElement("div"); topRow.className="row";
-    const leftG = document.createElement("div"); leftG.className="group";
-    leftG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    topRow.appendChild(leftG);
-    const rightG = document.createElement("div"); rightG.className="group";
-    rightG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    rightG.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    topRow.appendChild(rightG);
-    seatContainer.appendChild(topRow);
+    let index = 0;
 
-    for(let r=0;r<11;r++){
-        const row = document.createElement("div"); row.className="row";
-        const left = document.createElement("div"); left.className="group";
+    // Normal rows (2x2 layout) until seat 40
+    while(index < 40){
+
+        const row = document.createElement("div");
+        row.className="row";
+
+        const left = document.createElement("div");
+        left.className="group";
+
+        const right = document.createElement("div");
+        right.className="group";
+
         left.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
         left.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-        const right = document.createElement("div"); right.className="group";
+
         right.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
         right.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-        row.appendChild(left); row.appendChild(right);
+
+        row.appendChild(left);
+        row.appendChild(right);
+
         seatContainer.appendChild(row);
     }
-    const lastRow = document.createElement("div"); lastRow.className="row";
-    for(;index<allSeats.length;index++){ lastRow.appendChild(createSeatDiv(allSeats[index], bookedSeats)); }
+
+    // Last row with 5 seats
+    const lastRow = document.createElement("div");
+lastRow.className = "row last-row";
+
+const group = document.createElement("div");
+group.className = "group last-group";
+    while(index < allSeats.length){
+        group.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+    }
+
+    lastRow.appendChild(group);
     seatContainer.appendChild(lastRow);
 }
 
@@ -733,87 +843,99 @@ function getAdjacentSeat(seatName){
 
 const num = parseInt(seatName.replace("A",""));
 
-/* TOP ROW */
-if(num === 2) return "A3";
-if(num === 3) return "A2";
-
-/* NORMAL ROWS (4 seats pattern) */
-
-if(num >= 4 && num <= 47){
-
-let pos = (num - 4) % 4;
-
-/*
-pattern:
-A4 A5 | A6 A7
-A8 A9 | A10 A11
+/* NORMAL ROWS (2x2 pattern)
+A1 A2 | A3 A4
 */
 
-if(pos === 0) return `A${num+1}`;   // left pair first seat
-if(pos === 1) return `A${num-1}`;   // left pair second seat
-if(pos === 2) return `A${num+1}`;   // right pair first seat
-if(pos === 3) return `A${num-1}`;   // right pair second seat
+if(num <= 40){
+
+let pos = (num - 1) % 4;
+
+if(pos === 0) return [`A${num+1}`]; 
+if(pos === 1) return [`A${num-1}`];
+if(pos === 2) return [`A${num+1}`];
+if(pos === 3) return [`A${num-1}`];
 
 }
 
-/* LAST ROW (5 seats) */
-/*
-A48 A49 | A50 A51 | A52
+/* LAST ROW (5 seats)
+A41 A42 A43 A44 A45
 */
 
-if(num === 48) return "A49";
-if(num === 49) return "A48";
+if(num === 41) return ["A42"];
+if(num === 42) return ["A41","A43"];
+if(num === 43) return ["A42","A44"];
+if(num === 44) return ["A43","A45"];
+if(num === 45) return ["A44"];
 
-if(num === 50) return "A51";
-if(num === 51) return "A50";
-
-return null; // A1 or A52 has no horizontal neighbour
+return [];
 }
 
+// 1. Get the safety status from the URL (passed from index -> bus -> seat)
+const urlParams = new URLSearchParams(window.location.search);
 function checkFemaleSafety(targetSeatName, gender){
 
 const adjacentSeat = getAdjacentSeat(targetSeatName);
-if(!adjacentSeat) return false;
-/* ---------- FIREBASE SEATS ---------- */
-const neighborSeat = window.lastBusData[adjacentSeat];
 
-if(neighborSeat && neighborSeat.gender === "female"){
-    if(currentUser && neighborSeat.userUid === currentUser.uid){
-        return false;
-    }
-    if(gender === "male"){
-        return true; // BLOCK ONLY MALE
-    }
-}
-const localSeat = selectedSeats.find(s => s.seat === adjacentSeat);
-if(localSeat && localSeat.gender === "female"){
+for(let seat of adjacentSeat){
 
-    if(gender === "male"){
-        return true; // BLOCK ONLY MALE
-    }
+const neighborSeat = window.lastBusData?.[seat];
+
+if(!neighborSeat) continue;
+
+const neighborGender = neighborSeat.gender;
+const neighborUid = neighborSeat.userUid;
+
+// SAME USER GROUP → allow mixed gender
+if(currentUser && neighborUid === currentUser.uid){
+continue;
 }
+
+// Different user → only same gender allowed
+if(neighborGender && neighborGender !== gender){
+return "blocked";
+}
+
+}
+
 return false;
+
 }
+
+
+
+
+
+
+
 function selectGender(g) {
     if (selectedSeats.length >= maxSelect) { 
         showToast(`Max ${maxSelect} seats`); 
         return; 
     }
+
     const seatName = currentSeat.innerText;
-    if (checkFemaleSafety(seatName, g)) {
-        genderPopup.style.display = "none"; // Hide small popup
-        document.getElementById('noticeOverlay').style.display = 'flex'; // Show full notice screen
-        return;
-    }
-   currentSeat.classList.add(g);
-  selectedSeats.push({
+
+    // The check now respects both existing safety and the new toggle-based restriction
+    const safetyResult = checkFemaleSafety(seatName, g);
+
+    if (safetyResult === "blocked") {
+    genderPopup.style.display = "none";
+    document.getElementById('noticeOverlay').style.display = 'flex';
+    return;
+}
+    selectedSeats.push({
         seat: seatName,
-        gender: g
+        gender: g,
+        userUid: currentUser ? currentUser.uid : null
     });
 
+    currentSeat.classList.add(g);
     genderPopup.style.display = "none";
     updateFareInfo();
 }
+
+
 
 document.getElementById("bookBtn").onclick = () => {
     if (selectedSeats.length === 0) { showToast("Select a seat first!", "info"); return; }
@@ -860,22 +982,38 @@ window.selectPoint = (el, type) => {
 };
 
 document.getElementById("nextStepBtn").onclick = () => {
-    const s1 = document.getElementById('step1');
-    const s2 = document.getElementById('step2');
-    s1.style.transform = 'translateX(-100%)';
-    setTimeout(() => {
-        s1.style.display = 'none';
-        s2.style.display = 'block';
-        setTimeout(() => s2.style.transform = 'translateX(0)', 50);
-    }, 400);
-    renderPassengerInputs();
-    document.getElementById('modalTitle').innerText = "Passenger Details";
-    document.getElementById('stepIndicator').innerText = "Step 2 of 2";
-    document.getElementById('nextStepBtn').style.display = 'none';
-    document.getElementById('payBtn').style.display = 'block';
-};
 
-document.getElementById("backStepBtn").onclick = resetModal;
+const s1 = document.getElementById('step1');
+const s2 = document.getElementById('step2');
+
+s1.style.transform = 'translateX(-100%)';
+
+setTimeout(() => {
+    s1.style.display = 'none';
+    s2.style.display = 'block';
+
+    setTimeout(() => s2.style.transform = 'translateX(0)', 50);
+
+}, 400);
+
+renderPassengerInputs();
+updateFareInfo();
+
+document.getElementById('modalTitle').innerText = "Passenger Details";
+document.getElementById('stepIndicator').innerText = "Step 2 of 2";
+
+document.getElementById('nextStepBtn').style.display = 'none';
+
+// ✅ SHOW PAY BUTTON ONLY HERE
+document.getElementById('payBtn').style.display = 'block';
+};
+document.getElementById("backStepBtn").onclick = () => {
+
+resetModal();
+
+// ✅ FORCE HIDE PAY BUTTON
+document.getElementById('payBtn').style.display = 'none';
+};
 
 function renderPassengerInputs() {
     const container = document.getElementById("passengerInputs");
@@ -898,76 +1036,208 @@ function renderPassengerInputs() {
     });
 }
 
+let razorpayInstance = null;
+
 document.getElementById("payBtn").onclick = async () => {
-    const names = document.querySelectorAll(".p-name");
-    const phones = document.querySelectorAll(".p-phone");
-    const ages = document.querySelectorAll(".p-age");
-    const remarks = document.getElementById("bookingRemarks").value || "N/A";
 
-    let valid = true;
-    passengerData = selectedSeats.map((s, i) => {
-        if(!names[i].value || !phones[i].value) valid = false;
-        return { ...s, name: names[i].value, phone: phones[i].value, age: ages[i].value || "N/A", remarks: remarks };
-    });
+const names = document.querySelectorAll(".p-name");
+const phones = document.querySelectorAll(".p-phone");
+const ages = document.querySelectorAll(".p-age");
+const remarks = document.getElementById("bookingRemarks").value || "N/A";
 
-    if(!valid) { showToast("Fill all required fields", "error"); return; }
-    await finalizeBooking(selectedPickup, selectedDrop, remarks);
+let valid = true;
+
+passengerData = selectedSeats.map((s, i) => {
+    if (!names[i].value || !phones[i].value) valid = false;
+
+    return {
+        seat: s.seat,
+        gender: s.gender,
+        name: names[i].value,
+        phone: phones[i].value,
+        age: ages[i].value || "N/A",
+        remarks
+    };
+});
+
+if (!valid) {
+    showToast("Fill all required fields", "error");
+    return;
+}
+
+/* ================= SAFE ORDER CREATION ================= */
+
+const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        seats: selectedSeats.length,
+        from,
+        to,
+        trip
+    })
+});
+
+const orderData = await orderRes.json();
+
+if (!orderData.success) {
+    showToast("Order creation failed", "error");
+    return;
+}
+
+const order = orderData.order;
+const totalAmount = orderData.amount; // amount calculated by backend
+
+document.getElementById("payAmount").textContent = totalAmount;
+
+/* ================= OPEN RAZORPAY ================= */
+
+const options = {
+    key: "rzp_test_SdEPueUZWPIWqh",
+    amount: order.amount,
+    currency: "INR",
+    name: "Dreamliner Bus",
+    order_id: order.id,
+    description: `${selectedSeats.length} Seat(s)`,
+
+    prefill: {
+        email: currentUser?.email || "",
+        contact: ""
+    },
+
+    theme: { color: "#ff7a00" },
+
+    handler: async function (response) {
+
+        const verifyRes = await fetch("https://backend-1-ci0t.onrender.com/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingData: {
+                    from,
+                    to,
+                    date,
+                    trip,
+                    passengers: passengerData,
+                    remarks,
+                    uid: currentUser?.uid || "guest"
+                }
+            })
+        });
+
+        const verifyData = await verifyRes.json();
+
+        if (verifyData.success) {
+
+            showToast("Payment Verified! Booking Confirmed", "success");
+
+            await finalizeBookingAfterPayment(
+                verifyData.bookingId,
+                response.razorpay_payment_id,
+                totalAmount
+            );
+
+        } else {
+            showToast("Payment verification failed", "error");
+        }
+    },
+
+    modal: {
+        ondismiss: () => {
+            showToast("Payment cancelled", "error");
+        }
+    }
 };
 
-// --- UPDATED FINALIZATION WITH FARE STORAGE ---
-async function finalizeBooking(pickup, drop, remarks) {
+const rzp = new Razorpay(options);
+rzp.open();
+};
+
+// Update finalizeBooking to accept payment ID
+async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
     try {
         const docSnap = await getDoc(docRef);
         let seats = docSnap.exists() ? docSnap.data().seats : {};
-        
-        const bId = `BK-${Date.now()}`; 
+
         const uId = currentUser ? currentUser.uid : "GUEST";
-        const gstRate = 0.18;
-        const basePerSeat = farePerSeat;
-        const gstPerSeat = Math.round(basePerSeat * gstRate);
-        const totalPerSeat = basePerSeat + gstPerSeat;
 
         passengerData.forEach(p => {
             seats[p.seat] = {
-                status: "booked", 
-                gender: p.gender, 
-                name: p.name, 
-                age: p.age, 
-                phone: p.phone,
-                pickup, drop, from, to, remarks, 
-                customerEmail: currentUser.email, 
-                bookingUid: bId,
-                userUid: uId,
-                // Storage of fares
-                baseFare: basePerSeat,
-                gstAmount: gstPerSeat,
-                totalFare: totalPerSeat,
-                timestamp: new Date().toISOString()
-            };
+    status: "booked",
+
+    // passenger info
+    gender: p.gender,
+    name: p.name,
+    phone: p.phone,
+    age: p.age,
+
+    // journey info
+    from,
+    to,
+    pickup: selectedPickup,
+    drop: selectedDrop,
+    date,
+    trip,
+
+    // payment info
+    farePerSeat,
+    seatsCount: selectedSeats.length,
+    baseFare: selectedSeats.length * farePerSeat,
+    gst: Math.round(selectedSeats.length * farePerSeat * 0.18),
+    totalFare: totalFare,
+
+    paymentId: paymentId,
+    bookingUid: bookingId,
+    userUid: uId,
+
+    timestamp: new Date().toISOString()
+};
         });
 
         await setDoc(docRef, { seats }, { merge: true });
+        await setDoc(doc(db, "bookings", bookingId), {
+    bookingUid: bookingId,
+    userUid: uId,
+    paymentId,
 
-        const grandTotal = passengerData.length * totalPerSeat;
-        await setDoc(doc(db, "bookings", bId), {
-            bookingUid: bId,
-            userId: uId,
-            from, to, date, trip, pickup, drop,
-            passengers: passengerData, remarks, totalFare: grandTotal, timestamp: new Date().toISOString()
-        });
+    from,
+    to,
+    date,
+    trip,
+
+    pickup: selectedPickup,
+    drop: selectedDrop,
+
+    passengers: passengerData,
+
+    baseFare: selectedSeats.length * farePerSeat,
+    gstAmount: Math.round(selectedSeats.length * farePerSeat * 0.18),
+    totalFare,
+
+    bookingDate: new Date().toLocaleDateString('en-GB'),
+    timestamp: new Date().toISOString()
+});
         
-        showToast("Booking Successful!", "success");
+
+        showToast("Booking saved successfully!", "success");
+
         closeBookingModal();
-        await downloadTicketPDF(passengerData, pickup, drop, remarks, bId);
         selectedSeats = [];
         updateFareInfo();
-    } catch (e) { 
-        console.error(e);
-        showToast("Booking Error", "error"); 
+
+        await downloadTicketPDF(passengerData, selectedPickup, selectedDrop, "N/A", bookingId, paymentId);
+        window.location.href = `info.html?bookingId=${bookingId}`;
+    } catch (err) {
+        console.error(err);
+        showToast("Booking save failed", "error");
     }
 }
 
-async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId) {
+
+async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const baseFare = passengers.length * farePerSeat;
@@ -1064,6 +1334,14 @@ async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId) {
     doc.setTextColor(255, 122, 0); 
     doc.text(`Total Fare Paid:`, 15, startY);
     doc.text(`INR ${totalFare}`, 110, startY);
+
+
+
+// Add this line after "Total Fare Paid:"
+doc.text(`Payment ID: ${paymentId || 'N/A'}`, 15, startY + 15);
+
+
+
 
     doc.setTextColor(0, 0, 0);
     startY += 27;
@@ -1302,7 +1580,6 @@ sheetBody.addEventListener('scroll', () => {
         }
     });
 });
-
 tabs.forEach(btn => {
     btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-target');
@@ -1310,8 +1587,6 @@ tabs.forEach(btn => {
         sheetBody.scrollTo({ top: targetSection.offsetTop - 10, behavior: 'smooth' });
     });
 });
-
-// Header Area Toggle Logic
 document.getElementById('headerArea').addEventListener('click', (e) => {
     const sheet = document.getElementById('sheet');
     if (!e.target.classList.contains('tab-btn')) {
@@ -1322,10 +1597,9 @@ document.getElementById('headerArea').addEventListener('click', (e) => {
         }
     }
 });
-        
 window.onload = loadJourneyInfo;
-
-        
 </script>
 </body>
 </html>
+
+
