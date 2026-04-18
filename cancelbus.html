@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancellation Portal | Dreamliner</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #e11d48;
+            --primary-hover: #be123c;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-700: #334155;
+            --slate-900: #0f172a;
+            --indigo-600: #4f46e5;
+            --success: #059669;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--slate-900);
+        }
+
+        .container { width: 100%; max-width: 460px; padding: 10px; position: relative; }
+
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            padding: 24px 32px;
+            border: 1px solid var(--slate-200);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--slate-100);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--slate-700);
+            transition: all 0.2s;
+        }
+
+        .header { text-align: center; margin-bottom: 16px; margin-top: -8px; }
+        .header .icon-box {
+            width: 44px; height: 44px; background: #fff1f2; color: var(--primary);
+            border-radius: 12px; display: flex; align-items: center; 
+            justify-content: center; margin: 0 auto 8px;
+        }
+        .header h2 { margin: 0; font-size: 19px; font-weight: 700; }
+        
+        .booking-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--slate-100); padding: 4px 12px;
+            border-radius: 100px; font-size: 11px; color: var(--slate-700);
+            font-weight: 700; margin-top: 6px; border: 1px solid var(--slate-200);
+        }
+
+        .section-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--slate-900);
+        }
+
+        .guidelines-box {
+            background: var(--slate-50); border: 1px solid var(--slate-200);
+            border-radius: 12px; padding: 12px; margin-bottom: 16px;
+        }
+        .guidelines-box ul { margin: 0; padding-left: 18px; font-size: 11px; color: var(--slate-700); line-height: 1.5; }
+        
+        .policy-link {
+            display: block; margin-top: 8px; color: var(--indigo-600);
+            text-decoration: none; font-weight: 700; font-size: 10px;
+        }
+
+        .rule-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
+        }
+        .rule-item {
+            background: #fff; border: 1px solid var(--slate-100);
+            padding: 8px 10px; border-radius: 10px; font-size: 10px;
+            display: flex; flex-direction: column;
+        }
+        .rule-percent { font-weight: 700; color: var(--indigo-600); }
+
+        .receipt {
+            background: var(--slate-900); color: #fff;
+            border-radius: 16px; padding: 16px; margin-bottom: 16px;
+        }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; opacity: 0.8; }
+        
+        .minus-box {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(225, 29, 72, 0.4);
+            padding: 10px; border-radius: 8px; margin: 8px 0;
+            color: #ff8080; font-weight: 700; font-size: 12px;
+        }
+
+        .receipt-total {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 10px; padding-top: 10px;
+            display: flex; justify-content: space-between;
+            font-weight: 700; font-size: 17px;
+        }
+
+        .agreement {
+            display: flex; gap: 10px; margin-bottom: 18px;
+            padding: 4px; align-items: flex-start;
+            cursor: pointer;
+        }
+        .agreement input { width: 16px; height: 16px; margin-top: 1px; accent-color: var(--primary); }
+        .agreement span { font-size: 11px; color: var(--slate-700); line-height: 1.4; }
+
+        .btn-action {
+            width: 100%; padding: 14px; background: var(--primary);
+            color: white; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-action:disabled { background: var(--slate-200); color: var(--slate-700); cursor: not-allowed; }
+        
+        .btn-action.processed { background: var(--success) !important; cursor: default; }
+
+        .processing-note {
+            display: none; margin-top: 12px; text-align: center;
+            font-size: 11px; color: var(--primary); font-weight: 600;
+        }
+        .loader-spin {
+            width: 12px; height: 12px; border: 2px solid rgba(225, 29, 72, 0.2);
+            border-top: 2px solid var(--primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <button class="close-btn" onclick="window.history.back()">
+            <i data-lucide="x" size="18"></i>
+        </button>
+
+        <div class="header">
+            <div class="icon-box"><i data-lucide="ticket-x" size="24"></i></div>
+            <h2>Cancel Journey</h2>
+            <div class="booking-badge" id="bookingIdText">ID: LOADING...</div>
+        </div>
+
+        <div class="section-title"><i data-lucide="shield-alert" size="12"></i> Official Policy</div>
+        <div class="guidelines-box">
+            <ul>
+                <li>Refunds take <b>2-3 working days</b> to be credited.</li>
+                <li>Once initiated, cancellation <b>cannot be reversed</b>.</li>
+            </ul>
+            <a href="policy.html" class="policy-link">Check Detailed Policy →</a>
+        </div>
+
+        <div class="rule-grid">
+            <div class="rule-item">
+                <span>> 48h Left</span>
+                <span class="rule-percent">90% Refund</span>
+            </div>
+        
+            <div class="rule-item">
+                <span>24–48h Left</span>
+                <span class="rule-percent">80% Refund</span>
+            </div>
+        
+            <div class="rule-item">
+                <span>12–24h Left</span>
+                <span class="rule-percent">50% Refund</span>
+            </div>
+        
+            <div class="rule-item">
+                <span>< 12h Left</span>
+                <span class="rule-percent">0% Refund</span>
+            </div>
+        </div>
+
+        <div class="receipt" id="refundBox">
+            <div style="text-align:center; opacity:0.6; font-size:11px;">Syncing with server...</div>
+        </div>
+
+        <label class="agreement">
+            <input type="checkbox" id="acceptTerms">
+            <span>I confirm the cancellation and accept the deduction charges.</span>
+        </label>
+
+        <button id="refundBtn" class="btn-action" disabled>
+            <i data-lucide="check-circle-2" size="18" id="btnIcon"></i> 
+            <span id="btnText">Initiate Refund</span>
+        </button>
+
+        <div class="processing-note" id="loader">
+            <div class="loader-spin"></div> Authorizing Refund...
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+    const API_BASE = "http://localhost:3000";
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get("bookingId");
+    
+    const refundBtn = document.getElementById("refundBtn");
+    const btnText = document.getElementById("btnText");
+    const btnIcon = document.getElementById("btnIcon");
+    const acceptTerms = document.getElementById("acceptTerms");
+    const loader = document.getElementById("loader");
+
+    // ================= PERSISTENCE ADDED =================
+    const storageKey = `refund_status_${bookingId}`;
+    let isProcessed = localStorage.getItem(storageKey) === "true";
+
+    if(bookingId) {
+        document.getElementById("bookingIdText").innerText = "ID: " + bookingId;
+        loadRefundPreview();
+    }
+
+    // ================= RESTORE STATE =================
+    if(isProcessed){
+        refundBtn.classList.add('processed');
+        refundBtn.disabled = true;
+        btnText.innerText = "Refund Processed";
+        acceptTerms.checked = true;
+        acceptTerms.disabled = true;
+    }
+
+    acceptTerms.onchange = (e) => { 
+        if(!refundBtn.classList.contains('processed')) {
+            refundBtn.disabled = !e.target.checked; 
+        }
+    };
+
+    async function loadRefundPreview(){
+    try {
+        const res = await fetch(`${API_BASE}/refund-preview`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ bookingId })
+        });
+
+        const data = await res.json();
+
+        if(data.success){
+
+            const deduction = data.totalAmount - data.refundAmount;
+            const hours = data.hoursLeft;
+
+            // ✅ UPDATED RULE LABELS (MATCH BACKEND)
+            let categoryLabel = "";
+
+            if (hours > 48) {
+                categoryLabel = "> 48 Hours (90% Refund)";
+            }
+            else if (hours > 24) {
+                categoryLabel = "24–48 Hours (80% Refund)";
+            }
+            else if (hours > 12) {
+                categoryLabel = "12–24 Hours (50% Refund)";
+            }
+            else {
+                categoryLabel = "< 12 Hours (No Refund)";
+            }
+
+            document.getElementById("refundBox").innerHTML = `
+                <div class="receipt-row">
+                    <span>Total Paid</span>
+                    <span>₹${data.totalAmount}</span>
+                </div>
+
+                <div class="minus-box">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <i data-lucide="minus-circle" size="14"></i> ${categoryLabel}
+                    </div>
+                    <span>- ₹${deduction}</span>
+                </div>
+
+                <div class="receipt-total">
+                    <span>Net Refund</span>
+                    <span>₹${data.refundAmount}</span>
+                </div>
+            `;
+
+            lucide.createIcons();
+        }
+        else {
+            document.getElementById("refundBox").innerHTML =
+                `<div style="color:#fecaca; text-align:center; font-size:11px;">
+                    ${data.message}
+                </div>`;
+            refundBtn.style.display = "none";
+        }
+
+    } catch(err) { 
+    console.error("Fetch Error:", err); // ADD THIS
+    document.getElementById("refundBox").innerText = "Connection Error: Check Console"; 
+}
+}
+
+refundBtn.onclick = async () => {
+    if(!confirm("Are you sure? This action is permanent.")) return;
+    
+    refundBtn.disabled = true;
+    loader.style.display = "block";
+
+    try {
+        const res = await fetch(`${API_BASE}/refund-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId })
+        });
+        
+        const data = await res.json();
+        loader.style.display = "none";
+        
+        if (data.success) {
+            localStorage.setItem(storageKey, "true");
+            alert(`Success: ₹${data.refundAmount} refunded.`);
+            window.location.href = "profile.html";
+        } else {
+            // THIS SHOWS THE ACTUAL ERROR INSTEAD OF "CONNECTION ERROR"
+            alert("Failed: " + data.message); 
+            refundBtn.disabled = false;
+        }
+    } catch(err) { 
+        loader.style.display = "none";
+        alert("Connection Error. Check Console (F12).");
+        console.error(err);
+        refundBtn.disabled = false;
+    }
+}; 
+</script>
+</body>
+</html>
