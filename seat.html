@@ -141,50 +141,134 @@ iframe#authFrame { width:100%; height:100%; border:none; }
         .amenity-img { width: 22px; height: 22px; object-fit: contain; }
 
         /* Container for the clickable summary */
+
+/* Route Summary Box */
+#route {
+    /* Add this rule to your <style> section */
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                url('route.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+#routeLabel {
+    color: #ffaa00; /* Golden/Deep Orange shade */
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
 .route-summary-box { 
-    background: var(--white); 
-    border: 1.5px solid var(--border); 
-    border-radius: 12px; 
-    padding: 15px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    cursor: pointer; 
-    transition: background 0.2s;
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 15px; 
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
 }
-
-.route-summary-box:active { background: #f9f9f9; }
-
-/* Arrow Rotation */
-#routeArrow { 
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-    color: var(--orange);
-}
-
 .route-summary-box.open #routeArrow { transform: rotate(180deg); }
 
-/* Smooth expanding container */
-.route-details { 
-    max-height: 0; 
-    overflow: hidden; 
-    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease;
-    padding: 0 10px; 
-    background: #fff;
+/* Expansion */
+.route-details { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease; padding: 0 10px; background: #fff; }
+.route-details.show { max-height: 800px; padding-top: 20px; padding-bottom: 10px; }
+
+/* Route Steps */
+.route-step { display: flex; padding-bottom: 5px; }
+.line-container { display: flex; flex-direction: column; align-items: center; width: 20px; margin-right: 15px; flex-shrink: 0; }
+
+.dot { width: 16px; height: 16px; background: var(--orange); border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--orange); z-index: 1; }
+.dot.start { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+.dot.end { background: #ff3b30; box-shadow: 0 0 0 2px #ff3b30; }
+
+.arrow-connector { font-size: 14px; color: var(--orange); margin: 4px 0; line-height: 1; }
+
+.route-content { padding-bottom: 15px; }
+.route-step.first-step strong, .route-step.last-step strong { font-size: 20px; color: var(--text-dark); }
+
+.time-tag { background: #fff4e6; color: var(--orange); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #ffe8cc; display: inline-block; margin-top: 4px; }
+
+
+:root{
+--orange:#ff7a00;
+--text-dark:#222;
+--text-muted:#777;
+--white:#ffffff;
+--border:#e6e6e6;
+--soft-grey:#f7f7f7;
+--red:#ff3b30;
+--primary-gradient:linear-gradient(135deg,#ff7a00,#ff9c40);
 }
 
-.route-details.show { 
-    max-height: 800px; /* Large enough to fit the route */
-    padding-top: 20px; 
-    padding-bottom: 10px;
+body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
+
+/* ================= REST STOP SECTION FIX ================= */
+
+/* ⬆️ TIME ABOVE CONTAINER */
+.rest-time-top {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--orange);
+    margin-bottom: 6px;
+    text-align: left;
 }
-        
 
-        .route-step { display: flex; gap: 15px; padding-bottom: 20px; position: relative; }
-        .route-step::before { content: ''; position: absolute; left: 7px; top: 20px; width: 2px; height: calc(100% - 20px); background: #dfe6e9; }
-        .route-step:last-child::before { display: none; }
-        .dot { width: 16px; height: 16px; background: var(--orange); border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--orange); z-index: 1; flex-shrink: 0; }
-        .time-tag { background: #fff4e6; color: var(--orange); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #ffe8cc; display: inline-block; margin-top: 4px; }
+/* CONTAINER (UNCHANGED LOOK) */
+.rest-stop-container {
+    padding: 15px;
+    border-left: 4px solid var(--orange);
+    background: #fffbf5;
+    border-radius: 12px;
+    margin: 10px 0;
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
 
+/* ❌ FIXED: REMOVE FLEX */
+.rest-title {
+    display: block;   /* IMPORTANT CHANGE */
+    font-size: 15px;
+    font-weight: 700;
+    color: #b8860b;
+    margin-bottom: 4px;
+}
+
+/* ⬇️ HALT BELOW NAME */
+.rest-duration {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* OPTIONAL PREMIUM BADGE STYLE */
+.rest-duration.badge {
+    display: inline-block;
+    background: #fff4e6;
+    color: var(--orange);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+/* KEEP YOUR OLD META SAFE (NOT USED NOW BUT NO BREAK) */
+.rest-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.clock-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #eee;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
         /* Updated Points Card Styling */
 .card { 
     background: white; 
@@ -411,19 +495,15 @@ transform:translateX(24px);
         <div class="content-section" id="route">
             <div class="section-title"><i class="fas fa-route"></i> Journey Map</div>
             
-            <div class="route-summary-box" onclick="toggleRoute()">
-                <div>
-                    <span id="routeLabel" style="font-weight: 700; color: var(--text-dark);">
-                        Guwahati → Biswanath Charali
-                    </span>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Click to view full route stops</div>
+            
+                
+                <div style="font-weight: 700; color: var(--text-dark); margin-bottom: 15px;" id="routeLabel">
+                    Guwahati → Biswanath Charali
                 </div>
-                <i class="fas fa-chevron-down" id="routeArrow"></i>
+            
+                <div id="dynamicRoute">
+                    </div>
             </div>
-        
-            <div id="dynamicRoute" class="route-details">
-                </div>
-        </div>
 
         <div class="content-section section-grey" id="points">
             <div class="section-title"><i class="fas fa-map-marker-alt"></i> Boarding & Dropping</div>
@@ -466,10 +546,38 @@ transform:translateX(24px);
             <div class="policy-group">
                 <div class="policy-sub-title"><i class="fas fa-ban"></i> Cancellation Policy</div>
                 <div class="policy-card">
-                    <table class="policy-table">
-                        <tr><td>Before 12 Hours</td><td align="right"><span class="status green">90% Refund</span></td></tr>
-                        <tr><td>6 to 12 Hours</td><td align="right"><span class="status blue">50% Refund</span></td></tr>
-                        <tr><td>Under 6 Hours</td><td align="right"><span class="status red">No Refund</span></td></tr>
+                    <table class="policy-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="text-align: left; padding: 12px; font-size: 11px; color: #777;">Time Window</th>
+                                <th style="text-align: center; padding: 12px; font-size: 11px; color: #777;">Fee (Deduction)</th>
+                                <th style="text-align: right; padding: 12px; font-size: 11px; color: #777;">Refund</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px;">More than 48 hrs</td>
+                                <td style="text-align: center; color: #555; font-size: 12px;">10%</td>
+                                <td align="right"><span class="status green">90% Refund</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px;">24 to 48 hrs</td>
+                                <td style="text-align: center; color: #555; font-size: 12px;">20%</td>
+                                <td align="right"><span class="status blue">80% Refund</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px;">12 to 24 hrs</td>
+                                <td style="text-align: center; color: #555; font-size: 12px;">50%</td>
+                                <td align="right"><span class="status red">50% Refund</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px;">Less than 12 hrs</td>
+                                <td style="text-align: center; color: #555; font-size: 12px;">100%</td>
+                                <td align="right"><span class="status red">0% Refund</span></td>
+                                <div class="policy-text">Redunds will take 5-6 wroking days for transactions</div>
+                                
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -477,6 +585,7 @@ transform:translateX(24px);
             <div class="policy-group">
                 <div class="policy-sub-title"><i class="fas fa-sync-alt"></i> Reschedule Policy</div>
                 <div class="policy-text">Reschedule available up to 12 hours before departure. One-time limit applies.</div>
+                
                 <div class="policy-text">For Reschedule Visit Your Profile.</div>
             </div>
 
@@ -495,7 +604,63 @@ transform:translateX(24px);
                     </div>
                 </div>
             </div>
+            <div class="policy-group">
+                <div class="policy-sub-title"><i class="fas fa-info-circle"></i> Other Policy</div>
+                <div class="policy-card">
+                    <div class="policy-text">
+                        <i class="fas fa-suitcase" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Luggage Policy:</strong> 2 pieces accepted free. Excess over 15kg is chargeable.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-paw" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Pets Policy:</strong> Pets are strictly not allowed on board.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-wine-bottle" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Liquor Policy:</strong> Carrying/consuming liquor is prohibited. Deboarding strictly enforced for intoxicated passengers.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-clock" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Pickup Policy:</strong> Operator not obligated to wait past departure time. No refunds for late arrivals.
+                    </div>
+                </div>
+            </div>
+            <div class="policy-group">
+                <div class="policy-sub-title"><i class="fas fa-bus"></i> Bus Policies</div>
+                <div class="policy-card">
+                    <div class="policy-text">
+                        <i class="fas fa-percentage" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Non-Refundables:</strong> Service fees, convenience charges, GST, and insurance premiums are strictly non-refundable. Promo code discounts are deducted from the refund calculation.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-user-times" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">No-Show:</strong> Failure to board at the designated pickup point by the scheduled time results in a 'lapsed' ticket with no refund or rescheduling.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-ticket-alt" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Partial Cancellation:</strong> Passengers may cancel specific seats from a multi-seat booking. The standard slab-based deduction applies to each cancelled seat.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-tools" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Trip Cancellation:</strong> In the event of mechanical issues, we offer a 100% full refund or immediate re-booking. Notifications are sent 4-6 hours in advance.
+                    </div>
+            
+                    <div class="policy-text">
+                        <i class="fas fa-calendar-alt" style="color:var(--orange); margin-right:8px;"></i> 
+                        <strong style="color:var(--text-dark);">Refund Time:</strong> Approved refunds for online payments are processed within 5-7 working days to the original payment method.
+                    </div>
+                </div>
+            </div>
 
+
+
+            
             <div style="height: 500px;"></div>
         </div>
     </div>
@@ -642,18 +807,26 @@ document.getElementById("routeTitle").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
 
 const pickupLocations = {
-    "Guwahati": ["ISBT (07:00 PM)", "Khanapara (07:30 PM)", "Tinali (08:00 PM)"],
-    "Biswanath Charali": ["Chariali Bus Stand (05:00 AM)","Police Point(07:30 PM)"],
-    "Jorhat": ["ISBT Jorhat (09:00 PM)", "Bypass (09:15 PM)"],
-    "Moran": ["Moran Town (10:30 PM)"],
+    "Guwahati": ["ISBT (03:30 PM)", "Games Village(03:40 PM)" , "Khanapara (04:40 AM)"],
+    "Nagaon": ["Borghat ByPass (06:55 PM)"],
+    "Nagaon": ["Borghat ByPass (08:35 AM)"],
+    "Biswanath Charali": ["ASTC Bus Stand (06:15 AM)"],
+    "Sootea": ["Sootea(06:35 AM)"],
+    "Jamagurihat": ["Near FlyOver(07:00 AM)"],
+    "Tezpur": ["Poruwa Chariali(07:10 PM)" ,"Dolabari ByPass(07:20 AM)"],
+    "Kaliabor": ["Kaliabor Tinali (07:40 AM)"],
+    "Nagaon": ["Borghat ByPass(08:35 AM)"],
     "Default": ["Select Your Location"]
 };
 
 const dropLocations = {
-    "Guwahati": ["Paltan Bazar (10:30 AM)", "Adabari (07:30 PM)", "ISBT (08:00 PM)"],
-    "Biswanath Charali": ["Chariali Center (07:30 PM)", "Police Point(07:30 PM)"],
-    "Jorhat": ["Jorhat Bypass (09:00 AM)", "ISBT (09:30 AM)"],
-    "Moran": ["Moran Gate (11:00 AM)", "Public Field (11:30 AM)"],
+    "Guwahati": ["Khanapara (11:15 AM)", "Games Village (11:25 PM)", "ISBT (11:45 PM)"],
+    "Nagaon": ["Borghat ByPass (08:35 AM)"],
+    "Biswanath Charali": ["ASTC Bus Stand (09:45 PM)"],
+    "Sootea": ["Sootea(09:25 PM)"],
+    "Jamagurihat": ["Near FlyOver(09:00 PM)"],
+    "Tezpur": ["Poruwa Chariali(08:50 PM)" ,"Dolabari ByPass(08:40 PM)"],
+    "Kaliabor": ["Kaliabor Tinali (08:15 PM)"],
     "Default": ["Select Your Location"]
 };
 
@@ -725,7 +898,7 @@ function showToast(msg, type="info"){
 
 function updateFareInfo(){
     const baseFare = selectedSeats.length * farePerSeat;
-    const gstAmount = Math.round(baseFare * 0.18);
+    const gstAmount = Math.round(baseFare * 0.05);
     const totalFare = baseFare + gstAmount;
 
     const totalText = `₹${totalFare}`;
@@ -800,22 +973,34 @@ group.className = "group last-group";
     seatContainer.appendChild(lastRow);
 }
 
-function createSeatDiv(seatObj, bookedSeats){
-    const div=document.createElement("div"); div.className="seat"; div.innerText=seatObj.name;
-    if(bookedSeats && bookedSeats[seatObj.name]){
-        div.classList.add("booked");
-        if(bookedSeats[seatObj.name].gender) div.classList.add(bookedSeats[seatObj.name].gender);
+function createSeatDiv(seatObj, bookedSeats) {
+    const div = document.createElement("div");
+    const isBooked = bookedSeats && bookedSeats[seatObj.name];
+    
+    // NEW LOGIC: If you want to hide it completely if it's not in the DB
+    // OR if you want to keep your current logic but ensure 'booked' 
+    // status is accurate:
+    
+    if (isBooked) {
+        div.className = "seat booked";
+        div.innerText = seatObj.name;
+        if (bookedSeats[seatObj.name].gender) div.classList.add(bookedSeats[seatObj.name].gender);
     } else {
-        div.addEventListener("click",()=>{
-            if(selectedSeats.find(s=>s.seat===seatObj.name)){
-                selectedSeats = selectedSeats.filter(s=>s.seat !== seatObj.name);
-                div.classList.remove("male","female");
-                updateFareInfo(); return;
+        // This is an available seat
+        div.className = "seat";
+        div.innerText = seatObj.name;
+        
+        div.addEventListener("click", () => {
+            if (selectedSeats.find(s => s.seat === seatObj.name)) {
+                selectedSeats = selectedSeats.filter(s => s.seat !== seatObj.name);
+                div.classList.remove("male", "female");
+                updateFareInfo(); 
+                return;
             }
             currentSeat = div;
             const rect = div.getBoundingClientRect();
-            genderPopup.style.top = `${rect.top+window.scrollY-35}px`;
-            genderPopup.style.left = `${rect.left+window.scrollX}px`;
+            genderPopup.style.top = `${rect.top + window.scrollY - 35}px`;
+            genderPopup.style.left = `${rect.left + window.scrollX}px`;
             genderPopup.style.display = "block";
         });
     }
@@ -1055,8 +1240,7 @@ passengerData = selectedSeats.map((s, i) => {
         gender: s.gender,
         name: names[i].value,
         phone: phones[i].value,
-        age: ages[i].value || "N/A",
-        remarks
+        age: ages[i].value || "N/A"
     };
 });
 
@@ -1086,7 +1270,7 @@ if (!orderData.success) {
 }
 
 const order = orderData.order;
-const totalAmount = orderData.amount; // amount calculated by backend
+const totalAmount = orderData.amount;
 
 document.getElementById("payAmount").textContent = totalAmount;
 
@@ -1117,11 +1301,17 @@ const options = {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 bookingData: {
+
                     from,
                     to,
                     date,
                     trip,
+
+                    pickup: selectedPickup,
+                    drop: selectedDrop,
+
                     passengers: passengerData,
+
                     remarks,
                     uid: currentUser?.uid || "guest"
                 }
@@ -1156,92 +1346,93 @@ const rzp = new Razorpay(options);
 rzp.open();
 };
 
-// Update finalizeBooking to accept payment ID
+/* FINALIZE BOOKING AFTER PAYMENT */
 async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
     try {
         const docSnap = await getDoc(docRef);
-        let seats = docSnap.exists() ? docSnap.data().seats : {};
-
+        let seats = (docSnap.exists() && docSnap.data().seats) ? docSnap.data().seats : {};
         const uId = currentUser ? currentUser.uid : "GUEST";
+
+        function extractTime(str) {
+            const match = str.match(/\((.*?)\)/);
+            return match ? match[1] : "12:00 PM";
+        }
+        const departureTime = extractTime(selectedPickup);
+
+        function parseDepartureDateTime(dateStr, timeStr) {
+            const [year, month, day] = dateStr.split("-").map(Number);
+            let [time, modifier] = timeStr.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+            return new Date(Date.UTC(year, month - 1, day, hours, minutes));
+        }
+
+        const departureDateTime = parseDepartureDateTime(date, departureTime).toISOString();
 
         passengerData.forEach(p => {
             seats[p.seat] = {
-    status: "booked",
-
-    // passenger info
-    gender: p.gender,
-    name: p.name,
-    phone: p.phone,
-    age: p.age,
-
-    // journey info
-    from,
-    to,
-    pickup: selectedPickup,
-    drop: selectedDrop,
-    date,
-    trip,
-
-    // payment info
-    farePerSeat,
-    seatsCount: selectedSeats.length,
-    baseFare: selectedSeats.length * farePerSeat,
-    gst: Math.round(selectedSeats.length * farePerSeat * 0.18),
-    totalFare: totalFare,
-
-    paymentId: paymentId,
-    bookingUid: bookingId,
-    userUid: uId,
-
-    timestamp: new Date().toISOString()
-};
+                status: "booked",
+                gender: p.gender,
+                name: p.name,
+                phone: p.phone,
+                age: p.age,
+                from,
+                to,
+                pickup: selectedPickup,
+                drop: selectedDrop,
+                date,
+                trip,
+                departureTime,
+                departureDateTime,
+                totalFare,
+                paymentId,
+                bookingUid: bookingId,
+                userUid: uId,
+                timestamp: new Date().toISOString()
+            };
         });
 
-        await setDoc(docRef, { seats }, { merge: true });
+        // Update the Bus Document
+        await setDoc(doc(db, "buses", docRef.id), { seats }, { merge: true });
+
+        // ✅ FIXED: FLAT PATH (No date sub-collection)
+        // This saves data directly to: bookings -> [bookingId]
         await setDoc(doc(db, "bookings", bookingId), {
-    bookingUid: bookingId,
-    userUid: uId,
-    paymentId,
-
-    from,
-    to,
-    date,
-    trip,
-
-    pickup: selectedPickup,
-    drop: selectedDrop,
-
-    passengers: passengerData,
-
-    baseFare: selectedSeats.length * farePerSeat,
-    gstAmount: Math.round(selectedSeats.length * farePerSeat * 0.18),
-    totalFare,
-
-    bookingDate: new Date().toLocaleDateString('en-GB'),
-    timestamp: new Date().toISOString()
-});
-        
+            bookingUid: bookingId,
+            userUid: uId,
+            paymentId,
+            from,
+            to,
+            date,
+            trip,
+            pickup: selectedPickup,
+            drop: selectedDrop,
+            departureTime,
+            departureDateTime,
+            passengers: passengerData,
+            totalFare,
+            bookingDate: new Date().toLocaleDateString('en-GB'),
+            timestamp: new Date().toISOString()
+        });
 
         showToast("Booking saved successfully!", "success");
-
         closeBookingModal();
         selectedSeats = [];
-        updateFareInfo();
-
+        
         await downloadTicketPDF(passengerData, selectedPickup, selectedDrop, "N/A", bookingId, paymentId);
         window.location.href = `info.html?bookingId=${bookingId}`;
+
     } catch (err) {
-        console.error(err);
+        console.error("BOOKING ERROR:", err);
         showToast("Booking save failed", "error");
     }
 }
-
-
 async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const baseFare = passengers.length * farePerSeat;
-    const gstAmount = Math.round(baseFare * 0.18);
+    const gstAmount = Math.round(baseFare * 0.05);
     const totalFare = baseFare + gstAmount;
 
     const pLoc = pickup.split('(')[0].trim();
@@ -1453,29 +1644,39 @@ const journeyData = {
 "Guwahati-Biswanath Charali": {
 label: "Guwahati → Biswanath Charali",
 route: [
-{ loc: "Guwahati (ISBT)", time: "08:00 PM" },
-{ loc: "Nagaon (Bypass)", time: "10:30 PM" },
-{ loc: "Tezpur (Mission Chariali)", time: "12:15 AM" },
-{ loc: "Biswanath Chariali", time: "01:45 AM" }
+{ loc: "Guwahati", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Soote", time: "" },
+{ loc: "Biswanth Charali", time: "" }
 ],
 boardingPoints: [
-{ loc: "Guwahati ISBT, Platform 4", time: "08:00 PM" },
-{ loc: "Khanapara Footbridge", time: "08:05 PM" }
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
 ],
 droppingPoints: [
-{ loc: "Biswanath Main Chowk", time: "01:40 AM" },
-{ loc: "Biswanath Chariali Bus Stand", time: "01:45 AM" }
+{ loc: "Biswanth ASTC Bus Stand", time: "09:45 PM" }
 ],
-rest: "Nagaon  Plaza (20 Mins)"
+rest: "Hotel Raazwaada (15 Mins)"
 },
 
 "Biswanath Charali-Guwahati": {
 label: "Biswanath Charali→ Guwahati",
 route: [
-{ loc: "Jorhat ISBT", time: "06:00 PM" },
-{ loc: "Dergaon", time: "07:10 PM" },
+{ loc: "Biswanath Charali", time: "00:00 PM" },
+{ loc: "Sootea", time: "10:05 AM" },
+{ loc: "Jamagurihat", time: "09:30 PM" },
+{ loc: "Tezpur", time: "11:30 PM" },
+{ loc: "Kaliabor", time: "09:30 PM" },
 { loc: "Nagaon", time: "09:30 PM" },
-{ loc: "Guwahati ISBT", time: "11:30 PM" }
+{ loc: "Raha", time: "09:30 PM" },
+{ loc: "Jagiroad", time: "09:30 PM" },
+{ loc: "Guwahati", time: "09:30 PM" }
 ],
 boardingPoints: [
 { loc: "Jorhat ISBT Gate", time: "06:00 PM" }
@@ -1484,46 +1685,51 @@ droppingPoints: [
 { loc: "Adabari Bus Stand", time: "11:20 PM" },
 { loc: "ISBT Guwahati", time: "11:30 PM" }
 ],
-rest: "Nagaon Restaurant Stop"
+rest: "Kams Restaurant(15 Min)"
 }
-
 };
 // SMOOTH TOGGLE LOGIC
 // Defined as a window property to ensure it's accessible from the HTML onclick attribute
-window.toggleRoute = function() {
-    const details = document.getElementById('dynamicRoute');
-    const box = document.querySelector('.route-summary-box');
-    
-    details.classList.toggle('show');
-    box.classList.toggle('open');
-};
 
 function loadJourneyInfo() {
+    // Ensure 'from' and 'to' variables are correctly defined in your scope
     const routeKey = `${from}-${to}`;
     const data = journeyData[routeKey];
-
+    
     if (!data) return;
 
-    // 1. Update the label inside the summary box
-    document.getElementById("routeLabel").innerText = data.label;
+    // Apply the Golden Heading
+    const labelElement = document.getElementById("routeLabel");
+    labelElement.innerText = data.label; 
 
-    // 2. Inject the route steps into the collapsible container
-    document.getElementById("dynamicRoute").innerHTML =
-        data.route.map(r => `
-        <div class="route-step">
-            <div class="dot"></div>
-            <div>
+    // Build the Route Steps
+    document.getElementById("dynamicRoute").innerHTML = data.route.map((r, index) => {
+        const isFirst = index === 0;
+        const isLast = index === data.route.length - 1;
+        
+        return `
+        <div class="route-step ${isFirst ? 'first-step' : ''} ${isLast ? 'last-step' : ''}">
+            <div class="line-container">
+                <div class="dot ${isFirst ? 'start' : ''} ${isLast ? 'end' : ''}"></div>
+                ${!isLast ? `<div class="arrow-connector"><i class="fas fa-arrow-down"></i></div>` : ""}
+            </div>
+            <div class="route-content">
                 <strong>${r.loc}</strong>
                 <div class="time-tag">${r.time}</div>
             </div>
         </div>
-        `).join("");
+        `;
+    }).join("");
 
-    // 3. Keep enhanced Boarding and Dropping points layout
-    let points = `<div class="points-header" style="color:var(--orange);"><i class="fas fa-arrow-up"></i> BOARDING POINTS</div>`;
+
+    // ... (Keep your existing Boarding/Dropping/Rest Stop logic below this)
+    
+    // BOARDING & DROPPING
+    let points = `<div class="points-header" style="color:var(--orange);">BOARDING POINTS</div>`;
     data.boardingPoints.forEach(p => {
         points += `
             <div class="card">
+                <div class="dot small-dot"></div>
                 <div class="card-info">
                     <strong>${p.loc}</strong>
                     <span class="point-subtext">Boarding point</span>
@@ -1532,10 +1738,11 @@ function loadJourneyInfo() {
             </div>`;
     });
 
-    points += `<div class="points-header" style="color:#28a745; margin-top:20px;"><i class="fas fa-arrow-down"></i> DROPPING POINTS</div>`;
+    points += `<div class="points-header" style="color:#28a745; margin-top:20px;">DROPPING POINTS</div>`;
     data.droppingPoints.forEach(p => {
         points += `
             <div class="card">
+                <div class="dot small-dot"></div>
                 <div class="card-info">
                     <strong>${p.loc}</strong>
                     <span class="point-subtext">Arrival point</span>
@@ -1543,20 +1750,18 @@ function loadJourneyInfo() {
                 <div class="side-time">${p.time}</div>
             </div>`;
     });
-
     document.getElementById("dynamicPoints").innerHTML = points;
 
-    // 4. Keep enhanced Rest Stop layout
-    document.getElementById("dynamicStops").innerHTML =
-        `<div class="card">
-            <div class="card-info">
-                <strong>Rest Stop</strong>
-                <span class="point-subtext">${data.rest}</span>
-            </div>
-            <i class="fas fa-coffee" style="color:#6d4c41"></i>
-        </div>`;
+    // REST STOP
+    document.getElementById("dynamicStops").innerHTML = `
+    <div style="margin-bottom:6px; font-size:12px; font-weight:700; color:var(--text-dark); text-align:left; padding-left:5px;">
+        <i class="fas fa-clock" style="color:var(--orange); margin-right:5px;"></i> 10:30 AM
+    </div>
+    <div class="card rest-stop-container">
+        <div class="rest-title"><i class="fas fa-coffee" style="color:#b8860b;"></i> <span>${data.rest.split('(')[0].trim()}</span></div>
+        <div style="margin-top:6px; font-size:12px; color:#555; font-weight:600; padding-left:26px;">15 mins halt</div>
+    </div>`;
 }
-
 // Bottom Sheet Scroll and Tab Logic
 const sheetBody = document.getElementById('sheetBody');
 const tabs = document.querySelectorAll('.tab-btn');
@@ -1601,5 +1806,6 @@ window.onload = loadJourneyInfo;
 </script>
 </body>
 </html>
+
 
 
