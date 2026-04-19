@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Reschedule Bus</title>
+</head>
+
+<body>
+
+<h2>Reschedule Your Booking</h2>
+
+<!-- Booking Info Auto Loaded -->
+<div id="bookingInfo"></div>
+
+<hr>
+
+<label>Select New Date:</label>
+<input type="date" id="newDate">
+
+<label>Select Trip:</label>
+<select id="newTrip">
+    <option value="AM">AM</option>
+    <option value="PM">PM</option>
+</select>
+
+<button onclick="loadNewBus()">Check Seats</button>
+
+<h3>Select Seats</h3>
+<div id="seats"></div>
+
+<button onclick="confirmReschedule()">Confirm Reschedule</button>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "dreamliner-421b0.firebaseapp.com",
+    projectId: "dreamliner-421b0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ================= STATE ================= */
+let bookingData = null;
+let oldBusId = "";
+let newBusId = "";
+let selectedSeats = [];
+
+const seatContainer = document.getElementById("seats");
+
+/* ================= GET BOOKING ID FROM URL ================= */
+const urlParams = new URLSearchParams(window.location.search);
+const bookingId = urlParams.get("bookingId");
+
+/* ================= AUTO LOAD ================= */
+window.onload = async function () {
+
+    if (!bookingId) {
+        alert("Booking ID missing in URL");
+        return;
+    }
+
+    await loadBooking(bookingId);
+};
+
+/* ================= LOAD BOOKING ================= */
+async function loadBooking(id) {
+
+    const snap = await getDoc(doc(db, "bookings", id));
+
+    if (!snap.exists()) {
+        alert("Booking not found");
+        return;
+    }
+
+    bookingData = snap.data();
+    bookingData.bookingUid = id;
+
+    oldBusId = `${bookingData.date}_${bookingData.trip}`;
+
+    document.getElementById("bookingInfo").innerHTML = `
+        <b>Booking ID:</b> ${id} <br>
+        <b>From:</b> ${bookingData.from} <br>
+        <b>To:</b> ${bookingData.to} <br>
+        <b>Seats:</b> ${bookingData.passengers.length} <br>
+        <b>Fare:</b> ₹${bookingData.totalFare}
+    `;
+}
+
+/* ================= LOAD NEW BUS ================= */
+function loadNewBus() {
+
+    if (!bookingData) {
+        alert("Booking not loaded");
+        return;
+    }
+
+    const newDate = document.getElementById("newDate").value;
+    const newTrip = document.getElementById("newTrip").value;
+
+    if (!newDate) {
+        alert("Select new date");
+        return;
+    }
+
+    newBusId = `${newDate}_${newTrip}`;
+
+    const ref = doc(db, "buses", newBusId);
+
+    onSnapshot(ref, (snap) => {
+
+        const bookedSeats = snap.exists() ? snap.data().seats || {} : {};
+
+        renderSeats(bookedSeats);
+    });
+}
+
+/* ================= RENDER SEATS ================= */
+function renderSeats(bookedSeats) {
+
+    seatContainer.innerHTML = "";
+
+    for (let i = 1; i <= 45; i++) {
+
+        const seatName = `A${i}`;
+        const div = document.createElement("div");
+
+        div.innerText = seatName;
+
+        div.style.display = "inline-block";
+        div.style.margin = "5px";
+        div.style.padding = "10px";
+        div.style.border = "1px solid black";
+        div.style.cursor = "pointer";
+
+        if (bookedSeats && bookedSeats[seatName]) {
+            div.style.background = "gray";
+        } else {
+            div.onclick = () => toggleSeat(seatName, div);
+        }
+
+        seatContainer.appendChild(div);
+    }
+}
+
+/* ================= SELECT SEAT ================= */
+function toggleSeat(seat, div) {
+
+    const maxSeats = bookingData.passengers.length;
+
+    if (selectedSeats.includes(seat)) {
+
+        selectedSeats = selectedSeats.filter(s => s !== seat);
+        div.style.background = "";
+
+    } else {
+
+        if (selectedSeats.length >= maxSeats) {
+            alert("You can select only " + maxSeats + " seats");
+            return;
+        }
+
+        selectedSeats.push(seat);
+        div.style.background = "green";
+    }
+}
+
+/* ================= CONFIRM RESCHEDULE ================= */
+async function confirmReschedule() {
+
+    if (!bookingData) {
+        alert("Booking not loaded");
+        return;
+    }
+
+    if (selectedSeats.length !== bookingData.passengers.length) {
+        alert("Select exact same number of seats");
+        return;
+    }
+
+    /* ================= TIME RULE ================= */
+    const depTime = new Date(bookingData.departureDateTime);
+    const hoursLeft = (depTime - new Date()) / 3600000;
+
+    if (hoursLeft < 12) {
+        alert("Reschedule not allowed within 12 hours");
+        return;
+    }
+
+    const newDate = document.getElementById("newDate").value;
+    const newTrip = document.getElementById("newTrip").value;
+
+    const oldRef = doc(db, "buses", oldBusId);
+    const newRef = doc(db, "buses", newBusId);
+
+    const oldSnap = await getDoc(oldRef);
+    const newSnap = await getDoc(newRef);
+
+    let oldSeats = oldSnap.exists() ? oldSnap.data().seats || {} : {};
+    let newSeats = newSnap.exists() ? newSnap.data().seats || {} : {};
+
+    /* ================= CHECK SEAT ================= */
+    for (let seat of selectedSeats) {
+        if (newSeats[seat]) {
+            alert("Seat " + seat + " already booked");
+            return;
+        }
+    }
+
+    /* ================= GET OLD SEATS ================= */
+    let userSeats = [];
+
+    for (let s in oldSeats) {
+        if (oldSeats[s]?.bookingUid === bookingData.bookingUid) {
+            userSeats.push(oldSeats[s]);
+        }
+    }
+
+    /* ================= REMOVE OLD SEATS ================= */
+    for (let s in oldSeats) {
+        if (oldSeats[s]?.bookingUid === bookingData.bookingUid) {
+            delete oldSeats[s];
+        }
+    }
+
+    /* ================= ADD NEW SEATS ================= */
+    selectedSeats.forEach((seat, i) => {
+        newSeats[seat] = {
+            ...(userSeats[i] || {}),
+            seat,
+            date: newDate,
+            trip: newTrip,
+            bookingUid: bookingData.bookingUid,
+            timestamp: new Date().toISOString()
+        };
+    });
+
+    /* ================= SAVE ================= */
+    await setDoc(oldRef, { seats: oldSeats }, { merge: true });
+    await setDoc(newRef, { seats: newSeats }, { merge: true });
+
+    /* ================= UPDATE BOOKING ================= */
+    await updateDoc(doc(db, "bookings", bookingData.bookingUid), {
+        date: newDate,
+        trip: newTrip,
+        rescheduled: true,
+        rescheduledAt: new Date().toISOString()
+    });
+
+    alert("Rescheduled Successfully!");
+
+    selectedSeats = [];
+    seatContainer.innerHTML = "";
+}
+
+/* ================= GLOBAL ACCESS ================= */
+window.loadNewBus = loadNewBus;
+window.confirmReschedule = confirmReschedule;
+
+</script>
+</body>
+</html>
