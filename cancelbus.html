@@ -219,7 +219,7 @@
     const API_BASE = "https://backend-1-ci0t.onrender.com";
     
     const params = new URLSearchParams(window.location.search);
-    const bookingId = params.get("bookingId");
+    let bookingId = params.get("bookingId");
     
     const refundBtn = document.getElementById("refundBtn");
     const btnText = document.getElementById("btnText");
@@ -231,16 +231,21 @@
     let isProcessed = localStorage.getItem(storageKey) === "true";
 
     /* ================= FIX: VALIDATION ================= */
-    if(!bookingId){
-        document.getElementById("refundBox").innerHTML =
-            `<div style="color:#ef4444;text-align:center;font-size:12px;">
-                Invalid booking link. Booking ID missing.
-            </div>`;
-        refundBtn.style.display = "none";
-    } else {
-        document.getElementById("bookingIdText").innerText = "ID: " + bookingId;
-        loadRefundPreview();
-    }
+    if (!bookingId) {
+    document.body.innerHTML = `
+        <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+            <h3>Booking ID Required</h3>
+            <p>Please enter your Booking ID to proceed:</p>
+            <input type="text" id="manualId" style="padding: 10px; border-radius: 8px;">
+            <button onclick="window.location.href='?bookingId=' + document.getElementById('manualId').value">
+                View Booking
+            </button>
+        </div>
+    `;
+} else {
+    // Only run your existing loadRefundPreview logic if bookingId exists
+    loadRefundPreview(bookingId);
+}
 
     /* ================= RESTORE STATE ================= */
     if(isProcessed){
