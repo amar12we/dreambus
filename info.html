@@ -29,12 +29,7 @@
         }
         .logo { font-weight: 800; font-size: 20px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
         
-        /* Added Logo Styling */
-        .logo-img {
-            height: 32px; /* Adjust size as needed */
-            width: auto;
-            border-radius: 6px;
-        }
+        .logo-img { height: 32px; width: auto; border-radius: 6px; }
 
         .logout-btn {
             background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
@@ -148,7 +143,6 @@
         .search-input-box input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; box-sizing: border-box; }
         .save-btn { width: 100%; background: #1e293b; color: white; border: none; padding: 15px; border-radius: 14px; font-weight: 700; cursor: pointer; }
     </style>
-
 </head>
 <body>
 
@@ -351,11 +345,10 @@
             allBookings.push({ id: docItem.id, ...docItem.data() });
         });
 
-        // ✅ SORT: Latest booking first
         allBookings.sort((a, b) => {
             const dateA = new Date(a.bookingDate || a.date || 0);
             const dateB = new Date(b.bookingDate || b.date || 0);
-            return dateB - dateA; // DESCENDING (latest first)
+            return dateB - dateA;
         });
 
         renderBookings(allBookings, uid);
@@ -388,18 +381,9 @@ function renderBookings(bookings, uid) {
         routes.add(`${d.from}-${d.to}`);
 
         const bId = d.bookingUid || d.id;
-
         const paymentId = d.paymentUid || d.paymentId || d.razorpay_payment_id || "N/A";
-
-        const travelDate = new Date(d.date);
-        const isPast = travelDate < now;
-
-        // ✅ FIXED BOOKING DATE LOGIC
-        const bookingDate = d.bookingDate
-            ? d.bookingDate
-            : (d.timestamp
-                ? new Date(d.timestamp).toLocaleDateString('en-GB')
-                : new Date().toLocaleDateString('en-GB'));
+        const isPast = new Date(d.date) < now;
+        const bookingDate = d.bookingDate ? d.bookingDate : (d.timestamp ? new Date(d.timestamp).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'));
 
         historyBox.innerHTML += `
             <div class="booking-card">
@@ -444,17 +428,14 @@ function renderBookings(bookings, uid) {
                 ${!isPast ? `
                 <div class="journey-actions">
                     <button class="j-btn btn-download" data-id="${bId}">
-    <i data-lucide="download" style="width:14px;"></i>Ticket
-</button>
-                   <button class="j-btn btn-reschedule" onclick="window.location.href='reshedulebus.html'">
-    <i data-lucide="calendar-clock" style="width:14px;"></i>
-    Reschedule
-</button>
-
-<button class="j-btn btn-cancel" onclick="window.location.href='cancelbus.html'">
-    <i data-lucide="ban" style="width:14px;"></i>
-    Cancel
-</button> 
+                        <i data-lucide="download" style="width:14px;"></i>Ticket
+                    </button>
+                    <button class="j-btn btn-reschedule" onclick="window.location.href='reshedulebus.html'">
+                        <i data-lucide="calendar-clock" style="width:14px;"></i>Reschedule
+                    </button>
+                    <button class="j-btn btn-cancel" onclick="window.location.href='cancelbus.html?bookingId=${bId}&paymentId=${paymentId}&amount=${d.totalFare}'">
+                        <i data-lucide="ban" style="width:14px;"></i>Cancel
+                    </button> 
                 </div>
                 ` : '<div style="margin-top:15px; font-size:11px; color:var(--text-muted); font-style:italic; text-align:center;">This journey has concluded. Actions are disabled.</div>'}
             </div>
@@ -497,36 +478,16 @@ function renderBookings(bookings, uid) {
     document.addEventListener("click", (e) => {
     const btn = e.target.closest(".btn-download");
     if (!btn) return;
-
     const bookingId = btn.getAttribute("data-id");
-
-    const booking = allBookings.find(b =>
-        (b.bookingUid || b.id) === bookingId
-    );
-
+    const booking = allBookings.find(b => (b.bookingUid || b.id) === bookingId);
     if (!booking) return;
 
-    // ================= FIX PICKUP & DROP =================
-    booking.pickup =
-        booking.pickup ||
-        booking.pickupPoint ||
-        booking.boarding ||
-        booking.boardingPoint ||
-        booking.pickup_location ||
-        booking.fromPoint ||
-        "N/A";
-
-    booking.drop =
-        booking.drop ||
-        booking.dropPoint ||
-        booking.dropping ||
-        booking.droppingPoint ||
-        booking.drop_location ||
-        booking.toPoint ||
-        "N/A";
+    booking.pickup = booking.pickup || booking.pickupPoint || booking.boarding || "N/A";
+    booking.drop = booking.drop || booking.dropPoint || booking.dropping || "N/A";
 
     downloadTicketPDF(booking, auth.currentUser);
 });
+
 async function downloadTicketPDF(booking, currentUser) {
 
 const { jsPDF } = window.jspdf;
