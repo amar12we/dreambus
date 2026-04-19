@@ -227,25 +227,31 @@
     const acceptTerms = document.getElementById("acceptTerms");
     const loader = document.getElementById("loader");
 
+    const bookingIdText = document.getElementById("bookingIdText"); // ✅ ADDED
+
     const storageKey = `refund_status_${bookingId}`;
     let isProcessed = localStorage.getItem(storageKey) === "true";
 
     /* ================= FIX: VALIDATION ================= */
     if (!bookingId) {
-    document.body.innerHTML = `
-        <div style="padding: 20px; text-align: center; font-family: sans-serif;">
-            <h3>Booking ID Required</h3>
-            <p>Please enter your Booking ID to proceed:</p>
-            <input type="text" id="manualId" style="padding: 10px; border-radius: 8px;">
-            <button onclick="window.location.href='?bookingId=' + document.getElementById('manualId').value">
-                View Booking
-            </button>
-        </div>
-    `;
-} else {
-    // Only run your existing loadRefundPreview logic if bookingId exists
-    loadRefundPreview(bookingId);
-}
+        document.body.innerHTML = `
+            <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+                <h3>Booking ID Required</h3>
+                <p>Please enter your Booking ID to proceed:</p>
+                <input type="text" id="manualId" style="padding: 10px; border-radius: 8px;">
+                <button onclick="window.location.href='?bookingId=' + document.getElementById('manualId').value">
+                    View Booking
+                </button>
+            </div>
+        `;
+    } else {
+
+        // ✅ FIX: SHOW BOOKING ID IN UI
+        bookingIdText.innerText = `ID: ${bookingId}`;
+
+        // ✅ FIX: PASS bookingId properly
+        loadRefundPreview();
+    }
 
     /* ================= RESTORE STATE ================= */
     if(isProcessed){
@@ -267,7 +273,7 @@
             const res = await fetch(`${API_BASE}/refund-preview`, {
                 method:"POST",
                 headers:{ "Content-Type":"application/json" },
-                body: JSON.stringify({ bookingId })
+                body: JSON.stringify({ bookingId }) // already using global bookingId
             });
 
             const data = await res.json();
