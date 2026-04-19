@@ -337,7 +337,7 @@
             if (data.success) {
                 localStorage.setItem(storageKey, "true");
                 alert(`Success: ₹${data.refundAmount} refunded.`);
-                window.location.href = "profile.html";
+                window.location.href = "info.html";
             } else {
                 alert("Failed: " + data.message); 
                 refundBtn.disabled = false;
