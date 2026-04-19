@@ -214,10 +214,8 @@
         </div>
     </div>
 </div>
-
 <script>
     lucide.createIcons();
-    // Use the root URL for API_BASE
     const API_BASE = "https://backend-1-ci0t.onrender.com";
     
     const params = new URLSearchParams(window.location.search);
@@ -229,16 +227,22 @@
     const acceptTerms = document.getElementById("acceptTerms");
     const loader = document.getElementById("loader");
 
-    // ================= PERSISTENCE ADDED =================
     const storageKey = `refund_status_${bookingId}`;
     let isProcessed = localStorage.getItem(storageKey) === "true";
 
-    if(bookingId) {
+    /* ================= FIX: VALIDATION ================= */
+    if(!bookingId){
+        document.getElementById("refundBox").innerHTML =
+            `<div style="color:#ef4444;text-align:center;font-size:12px;">
+                Invalid booking link. Booking ID missing.
+            </div>`;
+        refundBtn.style.display = "none";
+    } else {
         document.getElementById("bookingIdText").innerText = "ID: " + bookingId;
         loadRefundPreview();
     }
 
-    // ================= RESTORE STATE =================
+    /* ================= RESTORE STATE ================= */
     if(isProcessed){
         refundBtn.classList.add('processed');
         refundBtn.disabled = true;
@@ -255,7 +259,6 @@
 
     async function loadRefundPreview(){
         try {
-            // Correct path usage: API_BASE + /endpoint
             const res = await fetch(`${API_BASE}/refund-preview`, {
                 method:"POST",
                 headers:{ "Content-Type":"application/json" },
@@ -293,12 +296,14 @@
                 lucide.createIcons();
             } else {
                 document.getElementById("refundBox").innerHTML =
-                    `<div style="color:#fecaca; text-align:center; font-size:11px;">${data.message}</div>`;
+                    `<div style="color:#fecaca;text-align:center;font-size:11px;">
+                        ${data.message || "Unable to fetch refund data"}
+                    </div>`;
                 refundBtn.style.display = "none";
             }
         } catch(err) { 
-            console.error("Fetch Error:", err);
-            document.getElementById("refundBox").innerText = "Connection Error: Check Console"; 
+            console.error(err);
+            document.getElementById("refundBox").innerText = "Server connection error"; 
         }
     }
 
@@ -309,7 +314,6 @@
         loader.style.display = "block";
 
         try {
-            // Correct path usage: API_BASE + /endpoint
             const res = await fetch(`${API_BASE}/refund-payment`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -329,11 +333,12 @@
             }
         } catch(err) { 
             loader.style.display = "none";
-            alert("Connection Error. Check Console (F12).");
+            alert("Connection Error.");
             console.error(err);
             refundBtn.disabled = false;
         }
     }; 
 </script>
+
 </body>
 </html>
