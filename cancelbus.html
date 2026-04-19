@@ -217,7 +217,9 @@
 
 <script>
     lucide.createIcons();
+    // Use the root URL for API_BASE
     const API_BASE = "https://backend-1-ci0t.onrender.com";
+    
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get("bookingId");
     
@@ -252,103 +254,86 @@
     };
 
     async function loadRefundPreview(){
-    try {
-        const res = await fetch(`${API_BASE}/refund-preview`, {
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({ bookingId })
-        });
+        try {
+            // Correct path usage: API_BASE + /endpoint
+            const res = await fetch(`${API_BASE}/refund-preview`, {
+                method:"POST",
+                headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify({ bookingId })
+            });
 
-        const data = await res.json();
+            const data = await res.json();
 
-        if(data.success){
+            if(data.success){
+                const deduction = data.totalAmount - data.refundAmount;
+                const hours = data.hoursLeft;
 
-            const deduction = data.totalAmount - data.refundAmount;
-            const hours = data.hoursLeft;
+                let categoryLabel = "";
+                if (hours > 48) categoryLabel = "> 48 Hours (90% Refund)";
+                else if (hours > 24) categoryLabel = "24–48 Hours (80% Refund)";
+                else if (hours > 12) categoryLabel = "12–24 Hours (50% Refund)";
+                else categoryLabel = "< 12 Hours (No Refund)";
 
-            // ✅ UPDATED RULE LABELS (MATCH BACKEND)
-            let categoryLabel = "";
-
-            if (hours > 48) {
-                categoryLabel = "> 48 Hours (90% Refund)";
-            }
-            else if (hours > 24) {
-                categoryLabel = "24–48 Hours (80% Refund)";
-            }
-            else if (hours > 12) {
-                categoryLabel = "12–24 Hours (50% Refund)";
-            }
-            else {
-                categoryLabel = "< 12 Hours (No Refund)";
-            }
-
-            document.getElementById("refundBox").innerHTML = `
-                <div class="receipt-row">
-                    <span>Total Paid</span>
-                    <span>₹${data.totalAmount}</span>
-                </div>
-
-                <div class="minus-box">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <i data-lucide="minus-circle" size="14"></i> ${categoryLabel}
+                document.getElementById("refundBox").innerHTML = `
+                    <div class="receipt-row">
+                        <span>Total Paid</span>
+                        <span>₹${data.totalAmount}</span>
                     </div>
-                    <span>- ₹${deduction}</span>
-                </div>
-
-                <div class="receipt-total">
-                    <span>Net Refund</span>
-                    <span>₹${data.refundAmount}</span>
-                </div>
-            `;
-
-            lucide.createIcons();
+                    <div class="minus-box">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <i data-lucide="minus-circle" size="14"></i> ${categoryLabel}
+                        </div>
+                        <span>- ₹${deduction}</span>
+                    </div>
+                    <div class="receipt-total">
+                        <span>Net Refund</span>
+                        <span>₹${data.refundAmount}</span>
+                    </div>
+                `;
+                lucide.createIcons();
+            } else {
+                document.getElementById("refundBox").innerHTML =
+                    `<div style="color:#fecaca; text-align:center; font-size:11px;">${data.message}</div>`;
+                refundBtn.style.display = "none";
+            }
+        } catch(err) { 
+            console.error("Fetch Error:", err);
+            document.getElementById("refundBox").innerText = "Connection Error: Check Console"; 
         }
-        else {
-            document.getElementById("refundBox").innerHTML =
-                `<div style="color:#fecaca; text-align:center; font-size:11px;">
-                    ${data.message}
-                </div>`;
-            refundBtn.style.display = "none";
-        }
+    }
 
-    } catch(err) { 
-    console.error("Fetch Error:", err); // ADD THIS
-    document.getElementById("refundBox").innerText = "Connection Error: Check Console"; 
-}
-}
-
-refundBtn.onclick = async () => {
-    if(!confirm("Are you sure? This action is permanent.")) return;
-    
-    refundBtn.disabled = true;
-    loader.style.display = "block";
-
-    try {
-        const res = await fetch(`${API_BASE}/refund-payment`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ bookingId })
-        });
+    refundBtn.onclick = async () => {
+        if(!confirm("Are you sure? This action is permanent.")) return;
         
-        const data = await res.json();
-        loader.style.display = "none";
-        
-        if (data.success) {
-            localStorage.setItem(storageKey, "true");
-            alert(`Success: ₹${data.refundAmount} refunded.`);
-            window.location.href = "profile.html";
-        } else {
-            // THIS SHOWS THE ACTUAL ERROR INSTEAD OF "CONNECTION ERROR"
-            alert("Failed: " + data.message); 
+        refundBtn.disabled = true;
+        loader.style.display = "block";
+
+        try {
+            // Correct path usage: API_BASE + /endpoint
+            const res = await fetch(`${API_BASE}/refund-payment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ bookingId })
+            });
+            
+            const data = await res.json();
+            loader.style.display = "none";
+            
+            if (data.success) {
+                localStorage.setItem(storageKey, "true");
+                alert(`Success: ₹${data.refundAmount} refunded.`);
+                window.location.href = "profile.html";
+            } else {
+                alert("Failed: " + data.message); 
+                refundBtn.disabled = false;
+            }
+        } catch(err) { 
+            loader.style.display = "none";
+            alert("Connection Error. Check Console (F12).");
+            console.error(err);
             refundBtn.disabled = false;
         }
-    } catch(err) { 
-        loader.style.display = "none";
-        alert("Connection Error. Check Console (F12).");
-        console.error(err);
-        refundBtn.disabled = false;
-    }
-}; 
+    }; 
 </script>
 </body>
 </html>
