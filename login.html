@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dreamliner Signup</title>
 
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
     authDomain: "dreamliner-421b0.firebaseapp.com",
@@ -26,61 +28,130 @@ const db = getFirestore(app);
 
 let confirmationResult;
 
-// Initialize invisible reCAPTCHA
+/* RECAPTCHA */
 window.onload = () => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible'
+    });
 };
 
-window.sendOTP = async function() {
-    const phone = document.getElementById('phone').value.trim();
-    if (!phone) { 
-        alert("Please enter your phone number."); 
-        return; 
-    }
-
-    try {
-        confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-        document.getElementById('otp-section').style.display = 'block';
-        document.getElementById('send-btn').style.display = 'none';
-        alert("OTP sent to " + phone);
-    } catch (err) {
-        console.error("Error sending OTP:", err);
-        alert("Failed to send OTP: " + err.message);
-    }
+/* LOADER */
+function showLoader(text) {
+    document.getElementById("loaderText").innerText = text;
+    document.getElementById("loader").style.display = "flex";
 }
 
-window.verifyOTP = async function() {
-    const otp = document.getElementById('otp').value.trim();
-    if (!otp) { alert("Please enter the OTP."); return; }
+function hideLoader() {
+    document.getElementById("loader").style.display = "none";
+}
+
+/* ONLY NUMBERS HANDLER (ADDED) */
+function onlyNumbers(el, max) {
+    el.value = el.value.replace(/\D/g, "").slice(0, max);
+}
+
+/* SEND OTP */
+window.sendOTP = async function() {
+    const phoneInput = document.getElementById('phone');
+    const phone = "+91" + phoneInput.value.trim();
+
+    if (phone.length < 13) {
+        alert("Enter valid mobile number");
+        return;
+    }
 
     try {
+        showLoader("Sending OTP...");
+
+        confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+
+        hideLoader();
+
+        document.getElementById('otp-section').style.display = 'block';
+        document.getElementById('send-btn').style.display = 'none';
+
+        /* 🔒 LOCK PHONE */
+        phoneInput.disabled = true;
+        document.getElementById('edit-btn').style.display = 'block';
+
+        alert("OTP sent successfully");
+
+    } catch (err) {
+        hideLoader();
+        alert("Error: " + err.message);
+    }
+}
+/* EDIT PHONE */
+window.editPhone = function() {
+    const phoneInput = document.getElementById('phone');
+
+    /* 🔄 RESET UI */
+    phoneInput.disabled = false;
+
+    document.getElementById('otp-section').style.display = 'none';
+    document.getElementById('send-btn').style.display = 'block';
+    document.getElementById('edit-btn').style.display = 'none';
+
+    /* 🧹 CLEAR OTP BOXES */
+    document.querySelectorAll(".otp-box input").forEach(i => i.value = "");
+
+    /* 🔁 RESET RECAPTCHA (important) */
+    window.recaptchaVerifier.render().then(widgetId => {
+        grecaptcha.reset(widgetId);
+    });
+};
+
+/* OTP AUTO MOVE */
+window.moveNext = function(el, index) {
+    el.value = el.value.replace(/\D/g, "");
+    const inputs = document.querySelectorAll(".otp-box input");
+
+    if (el.value && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+    }
+
+    if (!el.value && index > 0) {
+        inputs[index - 1].focus();
+    }
+};
+/* VERIFY OTP */
+window.verifyOTP = async function() {
+    const inputs = document.querySelectorAll(".otp-box input");
+let otp = "";
+
+inputs.forEach(input => {
+    otp += input.value;
+});
+
+    if (!otp) {
+        alert("Enter OTP");
+        return;
+    }
+
+    try {
+        showLoader("Verifying OTP...");
+
         const result = await confirmationResult.confirm(otp);
         const user = result.user;
 
-        // Save phone to Firestore
-        try {
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, {
-                phone: user.phoneNumber,
-                createdAt: new Date()
-            });
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(userRef, {
+            phone: user.phoneNumber,
+            createdAt: new Date()
+        });
 
-            alert("Signup successful!");
-            
-            /* --- KEY FEATURE START --- */
-            // This notifies the top-level window (index.html) that login is done
-            // It works even if this page is inside an iframe.
-            window.top.postMessage("loginSuccess", "*"); 
-            /* --- KEY FEATURE END --- */
+        showLoader("Creating account...");
 
-        } catch (dbError) {
-            console.error("Firestore Error:", dbError);
-            alert("Account created, but failed to save details to database.");
-        }
+        setTimeout(() => {
+            hideLoader();
+            alert("Login successfully");
 
-    } catch (authError) {
-        console.error("Verification Error:", authError);
-        alert("Invalid OTP. Please try again.");
+            window.top.postMessage("loginSuccess", "*");
+        }, 1200);
+
+    } catch (err) {
+        hideLoader();
+        alert("Invalid OTP");
     }
 }
 </script>
@@ -88,96 +159,187 @@ window.verifyOTP = async function() {
 <style>
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f6f8fb, #eef2f7);
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
+    height: 100vh;
 }
 
+/* CARD */
 .container {
-    background: white;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 350px;
+    width: 350px;
+    background: #fff;
+    padding: 35px;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
     text-align: center;
 }
 
-h2 {
-    color: #ff7a00;
+/* HEADER */
+.title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    color: #111;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: #777;
     margin-bottom: 25px;
-    font-size: 24px;
+}
+
+/* PHONE INPUT */
+.phone-box {
+    display: flex;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.phone-prefix {
+    background: #f5f5f5;
+    padding: 12px;
     font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.input-group {
-    margin-bottom: 20px;
-}
-
-.input-group input {
+.phone-box input {
+    border: none;
+    padding: 12px;
     width: 100%;
-    padding: 14px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 16px;
     outline: none;
-    box-sizing: border-box;
-    transition: border 0.3s;
 }
 
-.input-group input:focus {
-    border-color: #ff7a00;
+/* OTP */
+.otp-box {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
 }
 
+.otp-box input {
+    width: 45px;
+    height: 55px;
+    text-align: center;
+    font-size: 18px;
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+    outline: none;
+}
+
+/* BUTTON */
 button {
     width: 100%;
-    padding: 14px;
+    padding: 13px;
+    margin-top: 15px;
     border: none;
-    border-radius: 8px;
-    background: #ff7a00;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff7a00, #ff512f);
     color: white;
-    font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
 }
 
-button:hover {
-    background: #e66e00;
-}
-
-#otp-section {
+/* LOADER */
+.loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
     display: none;
-    margin-top: 20px;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 999;
 }
 
-#recaptcha-container {
-    margin-top: 10px;
+.spinner {
+    width: 55px;
+    height: 55px;
+    border: 5px solid #eee;
+    border-top: 5px solid #ff7a00;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.loader-text {
+    margin-top: 12px;
+    font-weight: 600;
+    color: #444;
+}
+button#edit-btn {
+    background: #555;
+}
+
 </style>
 </head>
+
 <body>
 
 <div class="container">
-    <h2>Signup with Phone</h2>
-    <div class="input-group">
-        <input type="text" id="phone" placeholder="+91XXXXXXXXXX" />
-    </div>
-    <button id="send-btn" onclick="sendOTP()">Send OTP</button>
 
-    <div id="otp-section">
-        <div class="input-group">
-            <input type="number" id="otp" placeholder="Enter OTP" />
+    <div class="title">Create Account</div>
+    <div class="subtitle">Login securely with your mobile number</div>
+
+    <!-- PHONE INPUT (ONLY 10 DIGITS) -->
+    <div class="phone-box">
+        <div class="phone-prefix">
+            <i class="fa-solid fa-phone"></i> +91
         </div>
-        <button onclick="verifyOTP()">Verify & Finish</button>
+        <input 
+            type="text" 
+            id="phone" 
+            placeholder="Enter mobile number"
+            maxlength="10"
+            oninput="this.value=this.value.replace(/\D/g,'')"
+        >
     </div>
+
+    <button id="edit-btn" onclick="editPhone()" style="display:none; background:#555;">
+        <i class="fa-solid fa-pen"></i> Edit Number
+    </button>
+
+    <button id="send-btn" onclick="sendOTP()">
+        <i class="fa-solid fa-paper-plane"></i> Send OTP
+    </button>
+
+    <!-- OTP INPUT (6 BOXES) -->
+<div id="otp-section" style="display:none;">
+    <div class="otp-box">
+        <input type="text" maxlength="1" oninput="moveNext(this,0)">
+        <input type="text" maxlength="1" oninput="moveNext(this,1)">
+        <input type="text" maxlength="1" oninput="moveNext(this,2)">
+        <input type="text" maxlength="1" oninput="moveNext(this,3)">
+        <input type="text" maxlength="1" oninput="moveNext(this,4)">
+        <input type="text" maxlength="1" oninput="moveNext(this,5)">
+    </div>
+
+    <button onclick="verifyOTP()">
+        <i class="fa-solid fa-shield-halved"></i> Verify OTP
+    </button>
+</div>
 
     <div id="recaptcha-container"></div>
+</div>
+
+<!-- LOADER -->
+<div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loaderText">Processing...</div>
 </div>
 
 </body>
