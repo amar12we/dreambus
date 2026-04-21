@@ -457,7 +457,77 @@ background-color:#ccc;
 input:checked + .slider:before{
 transform:translateX(24px);
 }
-        
+#payBtn {
+    display: none; /* 🔥 hidden by default */
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 12px;
+    background: linear-gradient(135deg,#ff7a00,#ff9c40);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(255,122,0,0.4);
+    transition: 0.3s;
+}
+
+#payBtn:hover {
+    transform: scale(1.03);
+}
+#payAmount {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* PROCESSING */
+.processing-overlay {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+.processing-box {
+    background:#fff;
+    padding:30px;
+    border-radius:12px;
+    text-align:center;
+}
+
+.loader {
+    width:40px;
+    height:40px;
+    border:4px solid #eee;
+    border-top:4px solid #ff7a00;
+    border-radius:50%;
+    animation: spin 1s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* CONFETTI */
+#confettiCanvas {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:9999;
+}
+
+
+
 
 </style>
 </head>
@@ -686,6 +756,9 @@ transform:translateX(24px);
 </div>
 
 <div class="footer-action">
+    <div style="font-size:11px; opacity:0.8; margin-bottom:8px;">
+        Secure Booking • Fast Checkout • Trusted by Travelers
+    </div>
     <button id="bookBtn">Book Selected Seats</button>
 </div>
 
@@ -728,11 +801,17 @@ transform:translateX(24px);
             </div>
             <div id="gstBreakdown" class="gst-breakdown">
                 <div style="display:flex; justify-content: space-between;"><span>Ticket Fare:</span><span id="breakdownBase">₹0</span></div>
-                <div style="display:flex; justify-content: space-between;"><span>GST (18%):</span><span id="breakdownGST">₹0</span></div>
+                <div style="display:flex; justify-content: space-between;"><span>GST (5%):</span><span id="breakdownGST">₹0</span></div>
             </div>
-            <button id="payBtn" style="display:none; padding:15px;background:#ff7a00;color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;width:100%;font-size:16px;">
-                <i class="fas fa-credit-card"></i>
-                Pay ₹<span id="payAmount">--</span> & Download
+            <button id="payBtn">
+                <span id="payText">
+                    <i class="fas fa-credit-card"></i>
+                    Pay ₹<span id="payAmount">--</span> & Download
+                </span>
+            
+                <span id="payLoader" style="display:none;">
+                    <i class="fas fa-spinner fa-spin"></i> Processing...
+                </span>
             </button>
         </div>
     </div>
@@ -772,8 +851,16 @@ transform:translateX(24px);
     </div>
 </div>
 
+<!-- PROCESSING OVERLAY -->
+<div id="processingOverlay" class="processing-overlay">
+    <div class="processing-box">
+        <div class="loader"></div>
+        <p id="processingText">Processing Payment...</p>
+    </div>
+</div>
 
-
+<!-- CONFETTI CANVAS -->
+<canvas id="confettiCanvas"></canvas>
 
 <div id="toastContainer"></div>
 
@@ -808,17 +895,14 @@ document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
 
 const pickupLocations = {
     "Guwahati": ["ISBT (03:30 PM)", "Games Village(03:40 PM)" , "Khanapara (04:40 AM)"],
-    "Nagaon": ["Borghat ByPass (06:55 PM)"],
-    "Nagaon": ["Borghat ByPass (08:35 AM)"],
+    "Nagaon": [], // will be handled dynamically
     "Biswanath Charali": ["ASTC Bus Stand (06:15 AM)"],
     "Sootea": ["Sootea(06:35 AM)"],
     "Jamagurihat": ["Near FlyOver(07:00 AM)"],
     "Tezpur": ["Poruwa Chariali(07:10 PM)" ,"Dolabari ByPass(07:20 AM)"],
     "Kaliabor": ["Kaliabor Tinali (07:40 AM)"],
-    "Nagaon": ["Borghat ByPass(08:35 AM)"],
     "Default": ["Select Your Location"]
 };
-
 const dropLocations = {
     "Guwahati": ["Khanapara (11:15 AM)", "Games Village (11:25 PM)", "ISBT (11:45 PM)"],
     "Nagaon": ["Borghat ByPass (08:35 AM)"],
@@ -831,9 +915,22 @@ const dropLocations = {
 };
 
 function getPoints(cityName, dataset) {
-    const key = Object.keys(dataset).find(k => k.toLowerCase() === cityName.toLowerCase());
+    const key = Object.keys(dataset).find(
+        k => k.toLowerCase() === cityName.toLowerCase()
+    );
+
+    // 🔥 SPECIAL LOGIC FOR NAGAON
+    if (cityName.toLowerCase() === "nagaon") {
+        if (trip === "PM") {
+            return ["Borghat ByPass (06:55 PM)"];
+        } else {
+            return ["Borghat ByPass (08:35 AM)"];
+        }
+    }
+
     return dataset[key] || dataset["Default"];
 }
+
 
 const busDocId = `${date}_${trip}`;
 const docRef = doc(db,"buses",busDocId);
@@ -871,20 +968,73 @@ window.closeBookingModal = () => {
     document.getElementById('detailsOverlay').style.display = 'none';
     resetModal();
 };
+let confettiAnimation = null;
 
+function launchConfetti() {
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = Array.from({length: 120}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 6 + 2,
+        d: Math.random() * 100
+    }));
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = "orange";
+            ctx.fill();
+        });
+
+        particles.forEach(p => {
+            p.y += Math.cos(p.d) + 2;
+            if (p.y > canvas.height) p.y = 0;
+        });
+
+        confettiAnimation = requestAnimationFrame(draw);
+    }
+
+    draw();
+}
+
+function stopConfetti() {
+    if (confettiAnimation) {
+        cancelAnimationFrame(confettiAnimation);
+        confettiAnimation = null;
+    }
+
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 function resetModal() {
-    const s1 = document.getElementById('step1');
-    const s2 = document.getElementById('step2');
-    s1.style.display = 'block';
-    s1.style.transform = 'translateX(0)';
-    s2.style.display = 'none';
-    s2.style.transform = 'translateX(100%)';
-    document.getElementById('nextStepBtn').style.display = 'block';
-    document.getElementById('payBtn').style.display = 'none';
-    document.getElementById('modalTitle').innerText = "Select Points";
-    document.getElementById('stepIndicator').innerText = "Step 1 of 2";
-    document.getElementById('gstBreakdown').style.display = 'none';
-    document.getElementById('bookingRemarks').value = "";
+
+const s1 = document.getElementById('step1');
+const s2 = document.getElementById('step2');
+
+s1.style.display = 'block';
+s1.style.transform = 'translateX(0)';
+
+s2.style.display = 'none';
+s2.style.transform = 'translateX(100%)';
+
+document.getElementById('nextStepBtn').style.display = 'block';
+
+// 🔥 ALWAYS HIDE PAY BUTTON
+document.getElementById('payBtn').style.display = 'none';
+
+document.getElementById('modalTitle').innerText = "Select Points";
+document.getElementById('stepIndicator').innerText = "Step 1 of 2";
+document.getElementById('gstBreakdown').style.display = 'none';
+document.getElementById('bookingRemarks').value = "";
 }
 
 function showToast(msg, type="info"){
@@ -1119,15 +1269,26 @@ function selectGender(g) {
     genderPopup.style.display = "none";
     updateFareInfo();
 }
-
-
-
 document.getElementById("bookBtn").onclick = () => {
-    if (selectedSeats.length === 0) { showToast("Select a seat first!", "info"); return; }
-    if (!currentUser) { document.getElementById('authOverlay').style.display = 'flex'; return; }
+    if (selectedSeats.length === 0) { 
+        showToast("Select a seat first!", "info"); 
+        return; 
+    }
+
+    if (!currentUser) { 
+        document.getElementById('authOverlay').style.display = 'flex'; 
+        return; 
+    }
+
     renderLocationPicker();
     document.getElementById('detailsOverlay').style.display = 'flex';
+
+    // 🔥 FORCE HIDE PAY BUTTON IN STEP 1
+    document.getElementById('payBtn').style.display = 'none';
 };
+
+
+
 
 function renderLocationPicker() {
     const container = document.getElementById("locationPicker");
@@ -1196,27 +1357,52 @@ document.getElementById("backStepBtn").onclick = () => {
 
 resetModal();
 
-// ✅ FORCE HIDE PAY BUTTON
+// 🔥 FORCE HIDE AGAIN
 document.getElementById('payBtn').style.display = 'none';
 };
 
 function renderPassengerInputs() {
     const container = document.getElementById("passengerInputs");
     container.innerHTML = "";
+
     selectedSeats.forEach((s) => {
         const card = document.createElement("div");
         card.className = "passenger-card";
+
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <span style="font-weight: bold; color: #ff7a00; font-size: 14px;">SEAT ${s.seat}</span>
                 <span style="font-size: 11px; color: #999;">${s.gender.toUpperCase()}</span>
             </div>
+
             <div class="details-row">
-                <div style="flex: 3;"><input type="text" class="p-name" placeholder="Full Name"></div>
-                <div style="flex: 1;"><input type="number" class="p-age" placeholder="Age"></div>
+                <div style="flex: 3;">
+                    <input 
+                        type="text" 
+                        class="p-name" 
+                        placeholder="Full Name"
+                        pattern="[A-Za-z ]+"
+                        title="Only letters allowed"
+                        oninput="this.value=this.value.replace(/[^A-Za-z ]/g,'')"
+                    >
+                </div>
+
+                <div style="flex: 1;">
+                    <input type="number" class="p-age" placeholder="Age">
+                </div>
             </div>
-            <div class="input-group"><input type="tel" class="p-phone" placeholder="Mobile Number"></div>
+
+            <div class="input-group">
+                <input 
+                    type="tel" 
+                    class="p-phone" 
+                    placeholder="Mobile Number"
+                    maxlength="10"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                >
+            </div>
         `;
+
         container.appendChild(card);
     });
 }
@@ -1232,8 +1418,24 @@ const remarks = document.getElementById("bookingRemarks").value || "N/A";
 
 let valid = true;
 
+const nameRegex = /^[A-Za-z ]+$/;
+const phoneRegex = /^[0-9]{10}$/;
+
 passengerData = selectedSeats.map((s, i) => {
+
     if (!names[i].value || !phones[i].value) valid = false;
+
+    // ❌ NAME VALIDATION
+    if (!nameRegex.test(names[i].value)) {
+        showToast("Name should contain only letters", "error");
+        valid = false;
+    }
+
+    // ❌ PHONE VALIDATION
+    if (!phoneRegex.test(phones[i].value)) {
+        showToast("Enter valid 10-digit mobile number", "error");
+        valid = false;
+    }
 
     return {
         seat: s.seat,
@@ -1245,12 +1447,15 @@ passengerData = selectedSeats.map((s, i) => {
 });
 
 if (!valid) {
-    showToast("Fill all required fields", "error");
+    showToast("Fix passenger details", "error");
     return;
 }
 
-/* ================= SAFE ORDER CREATION ================= */
+/* PROCESSING */
+document.getElementById("processingOverlay").style.display = "flex";
+document.getElementById("processingText").innerText = "Creating Order...";
 
+/* CREATE ORDER */
 const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1265,6 +1470,7 @@ const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order",
 const orderData = await orderRes.json();
 
 if (!orderData.success) {
+    document.getElementById("processingOverlay").style.display = "none";
     showToast("Order creation failed", "error");
     return;
 }
@@ -1274,8 +1480,7 @@ const totalAmount = orderData.amount;
 
 document.getElementById("payAmount").textContent = totalAmount;
 
-/* ================= OPEN RAZORPAY ================= */
-
+/* RAZORPAY */
 const options = {
     key: "rzp_test_SdEPueUZWPIWqh",
     amount: order.amount,
@@ -1284,14 +1489,10 @@ const options = {
     order_id: order.id,
     description: `${selectedSeats.length} Seat(s)`,
 
-    prefill: {
-        email: currentUser?.email || "",
-        contact: ""
-    },
-
-    theme: { color: "#ff7a00" },
-
     handler: async function (response) {
+
+        document.getElementById("processingOverlay").style.display = "flex";
+        document.getElementById("processingText").innerText = "Verifying Payment...";
 
         const verifyRes = await fetch("https://backend-1-ci0t.onrender.com/verify-payment", {
             method: "POST",
@@ -1301,17 +1502,10 @@ const options = {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 bookingData: {
-
-                    from,
-                    to,
-                    date,
-                    trip,
-
+                    from, to, date, trip,
                     pickup: selectedPickup,
                     drop: selectedDrop,
-
                     passengers: passengerData,
-
                     remarks,
                     uid: currentUser?.uid || "guest"
                 }
@@ -1322,7 +1516,7 @@ const options = {
 
         if (verifyData.success) {
 
-            showToast("Payment Verified! Booking Confirmed", "success");
+            document.getElementById("processingText").innerText = "Booking Seats...";
 
             await finalizeBookingAfterPayment(
                 verifyData.bookingId,
@@ -1331,12 +1525,14 @@ const options = {
             );
 
         } else {
+            document.getElementById("processingOverlay").style.display = "none";
             showToast("Payment verification failed", "error");
         }
     },
 
     modal: {
         ondismiss: () => {
+            document.getElementById("processingOverlay").style.display = "none";
             showToast("Payment cancelled", "error");
         }
     }
@@ -1345,10 +1541,14 @@ const options = {
 const rzp = new Razorpay(options);
 rzp.open();
 };
-
 /* FINALIZE BOOKING AFTER PAYMENT */
 async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
     try {
+
+        const processingOverlay = document.getElementById("processingOverlay");
+        processingOverlay.style.display = "flex";
+        document.getElementById("processingText").innerText = "Saving Booking...";
+
         const docSnap = await getDoc(docRef);
         let seats = (docSnap.exists() && docSnap.data().seats) ? docSnap.data().seats : {};
         const uId = currentUser ? currentUser.uid : "GUEST";
@@ -1357,14 +1557,17 @@ async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
             const match = str.match(/\((.*?)\)/);
             return match ? match[1] : "12:00 PM";
         }
+
         const departureTime = extractTime(selectedPickup);
 
         function parseDepartureDateTime(dateStr, timeStr) {
             const [year, month, day] = dateStr.split("-").map(Number);
             let [time, modifier] = timeStr.split(" ");
             let [hours, minutes] = time.split(":").map(Number);
+
             if (modifier === "PM" && hours !== 12) hours += 12;
             if (modifier === "AM" && hours === 12) hours = 0;
+
             return new Date(Date.UTC(year, month - 1, day, hours, minutes));
         }
 
@@ -1393,11 +1596,8 @@ async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
             };
         });
 
-        // Update the Bus Document
         await setDoc(doc(db, "buses", docRef.id), { seats }, { merge: true });
 
-        // ✅ FIXED: FLAT PATH (No date sub-collection)
-        // This saves data directly to: bookings -> [bookingId]
         await setDoc(doc(db, "bookings", bookingId), {
             bookingUid: bookingId,
             userUid: uId,
@@ -1416,16 +1616,44 @@ async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
             timestamp: new Date().toISOString()
         });
 
-        showToast("Booking saved successfully!", "success");
-        closeBookingModal();
-        selectedSeats = [];
-        
-        await downloadTicketPDF(passengerData, selectedPickup, selectedDrop, "N/A", bookingId, paymentId);
-        window.location.href = `info.html?bookingId=${bookingId}`;
+        // ✅ STOP PROCESSING
+        processingOverlay.style.display = "none";
 
-    } catch (err) {
-        console.error("BOOKING ERROR:", err);
-        showToast("Booking save failed", "error");
+        // ✅ SUCCESS POPUP
+        showToast("Booking saved successfully!", "success");
+
+        // ✅ CONFETTI START
+        launchConfetti();
+
+        // ✅ CONFETTI STOP AFTER 2 SEC (FIXED)
+        setTimeout(() => {
+            stopConfetti();
+        }, 2000);
+
+        // ✅ CONTINUE AFTER ANIMATION
+        setTimeout(async () => {
+
+            closeBookingModal();
+            selectedSeats = [];
+
+            await downloadTicketPDF(
+                passengerData,
+                selectedPickup,
+                selectedDrop,
+                "N/A",
+                bookingId,
+                paymentId
+            );
+
+            window.location.href = `info.html?bookingId=${bookingId}`;
+
+        }, 2200);
+
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("processingOverlay").style.display = "none";
+        showToast("Booking failed!", "error");
     }
 }
 async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId) {
@@ -1686,6 +1914,261 @@ droppingPoints: [
 { loc: "ISBT Guwahati", time: "11:30 PM" }
 ],
 rest: "Kams Restaurant(15 Min)"
+},
+"Sootea-Guwahati": {
+label: "Sootea → Guwahati",
+route: [
+{ loc: "Sootea", time: " " },
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Guwahati", time: "" }
+],
+boardingPoints: [
+{ loc: "SOOTEA", time: "06:30 AM" }
+],
+droppingPoints: [
+{ loc: "KHANAPARA", time: "11:15 AM" },
+{ loc: "GAMES VILLAGE", time: "11:25 AM" },
+{ loc: "ISBT", time: "11:45 AM" }
+],
+rest: "Kam's Restaurant(15 Min)"
+},
+
+"Jamagurihat-Guwahati": {
+label: "Jamagurihat → Guwahati",
+route: [
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Guwahati", time: "" }
+],
+boardingPoints: [
+{ loc: "JAMAGURIHAT FLYOVER", time: "07:00 AM" }
+],
+droppingPoints: [
+{ loc: "KHANAPARA", time: "11:15 AM" },
+{ loc: "GAMES VILLAGE", time: "11:25 AM" },
+{ loc: "ISBT", time: "11:45 AM" }
+],
+rest: "Kam's Restaurant(15 Min)"
+},
+
+"Tezpur-Guwahati": {
+label: "Tezpur → Guwahati",
+route: [
+{ loc: "Tezpur", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Guwahati", time: "" }
+],
+boardingPoints: [
+{ loc: "PORUWA CHARALI", time: "07:10 AM" },
+{ loc: "DOLABARI BYPASS", time: "07:20 AM" }
+],
+droppingPoints: [
+{ loc: "KHANAPARA", time: "11:15 AM" },
+{ loc: "GAMES VILLAGE", time: "11:25 AM" },
+{ loc: "ISBT", time: "11:45 AM" }
+],
+rest: "Kam's Restaurant(15 Min)"
+},
+
+"Kaliabor-Guwahati": {
+label: "Kaliabor → Guwahati",
+route: [
+{ loc: "Kaliabor", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Guwahati", time: "" }
+],
+boardingPoints: [
+{ loc: "KALIABOR TINALI", time: "07:40 AM" }
+],
+droppingPoints: [
+{ loc: "KHANAPARA", time: "11:15 AM" },
+{ loc: "GAMES VILLAGE", time: "11:25 AM" },
+{ loc: "ISBT", time: "11:45 AM" }
+],
+rest: "Kam's Restaurant(15 Min)"
+},
+
+
+"Guwahati-Biswanath Charali": {
+label: "Guwahati → Biswanath Charali",
+route: [
+{ loc: "Guwahati", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Soote", time: "" },
+{ loc: "Biswanth Charali", time: "" }
+],
+boardingPoints: [
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
+],
+droppingPoints: [
+{ loc: "Biswanth ASTC Bus Stand", time: "09:45 PM" }
+],
+rest: "Hotel Raajwaada (15 Mins)"
+},
+
+"Guwahati-Sootea": {
+label: "Guwahati → Sootea",
+route: [
+{ loc: "Guwahati", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Soote", time: "" }
+],
+boardingPoints: [
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
+],
+droppingPoints: [
+{ loc: "SOOTEA", time: "09:25 PM" }
+],
+rest: "Hotel Raajwaada (15 Mins)"
+},
+
+"Guwahati-Jamagurihat": {
+label: "Guwahati → Jamagurihat",
+route: [
+{ loc: "Guwahati", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Jamagurihat", time: "" }
+],
+boardingPoints: [
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
+],
+droppingPoints: [
+{ loc: "JAMAGURIHAT NEAR FLYOVER", time: "09:00 PM" }
+],
+rest: "Hotel Raajwaada (15 Mins)"
+},
+
+"Guwahati-Tezpur": {
+label: "Guwahati → Tezpur",
+route: [
+{ loc: "Guwahati", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Tezpur", time: "" }
+],
+boardingPoints: [
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
+],
+droppingPoints: [
+{ loc: "PORUWA CHARALI", time: "08:50 PM" },
+{ loc: "DOLABARI BYPASS", time: "08:40 PM" }
+],
+rest: "Hotel Raajwaada (15 Mins)"
+},
+
+"Guwahati-Kaliabor": {
+label: "Guwahati → Kaliabor",
+route: [
+{ loc: "Guwahati", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" }
+],
+boardingPoints: [
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
+],
+droppingPoints: [
+{ loc: "KALIABOR TINALI", time: "08:15 PM" }
+],
+rest: "Hotel Raajwaada (15 Mins)"
+},
+
+"Nagaon-Biswanath Charali": {
+label: "Nagaon → Biswanath Charali",
+route: [
+{ loc: "Nagaon", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Soote", time: "" },
+{ loc: "Biswanth Charali", time: "" }
+],
+boardingPoints: [
+{ loc: "BORGHAT BYPASS", time: "06:55 PM" }
+],
+droppingPoints: [
+{ loc: "Biswanth ASTC Bus Stand", time: "09:45 PM" }
+],
+rest: "Hotel Raajwaada (15 Mins)"
+},
+
+"Biswanath Charali-Nagaon": {
+label: "Biswanath Charali → Nagaon",
+route: [
+{ loc: "Biswanath Charali", time: " " },
+{ loc: "Sootea", time: "" },
+{ loc: "Jamagurihat", time: "" },
+{ loc: "Tezpur", time: "" },
+{ loc: "Kaliabor", time: "" },
+{ loc: "Nagaon", time: "" }
+],
+boardingPoints: [
+{ loc: "Biswanth ASTC Bus Stand", time: "06:15 AM" }
+],
+droppingPoints: [
+{ loc: "BORGHAT BYPASS", time: "08:35 AM" }
+],
+rest: "Kam's Restaurant(15 Mins)"
+},
+
+"Nagaon-Guwahati": {
+label: "Nagaon → Guwahati ",
+route: [
+{ loc: "Nagaon", time: "" },
+{ loc: "Raha", time: "" },
+{ loc: "Jagiroad", time: "" },
+{ loc: "Guwahati", time: "" }
+],
+boardingPoints: [
+{ loc: "BORGHAT BYPASS", time: "08:35 AM" } 
+],
+droppingPoints: [
+{ loc: " ISBT", time: "03:30 PM" },
+{ loc: "Games Village", time: "03:40 PM" },
+{ loc: "Khanapara", time: "04:00 PM" } 
+],
+rest: "Kam's Resturant(15 Mins)"
 }
 };
 // SMOOTH TOGGLE LOGIC
@@ -1806,6 +2289,3 @@ window.onload = loadJourneyInfo;
 </script>
 </body>
 </html>
-
-
-
