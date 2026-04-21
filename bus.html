@@ -23,7 +23,6 @@
             color: var(--text-dark);
         }
 
-        /* PREMIUM HEADER */
         .header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
@@ -54,7 +53,6 @@
         #routeHeader { font-size: 17px; font-weight: 700; }
         #routeDate { font-size: 12px; opacity: 0.9; }
 
-        /* BUS CARD */
         .bus-card {
             background: white;
             margin: 15px;
@@ -65,10 +63,9 @@
         }
 
         .brand-section { margin-bottom: 20px; }
-        .brand-name { font-size: 19px; font-weight: 800; color: var(--text-dark); letter-spacing: 0.3px; }
-        .bus-type { font-size: 13px; color: var(--text-light); display: block; margin-top: 2px; }
+        .brand-name { font-size: 19px; font-weight: 800; }
+        .bus-type { font-size: 13px; color: var(--text-light); display: block; }
 
-        /* JOURNEY VISUALS */
         .journey-row {
             display: flex;
             justify-content: space-between;
@@ -96,21 +93,8 @@
             padding: 0 10px;
         }
 
-        .duration-text { font-size: 11px; color: var(--text-light); font-weight: 700; margin-bottom: 5px; }
+        .duration-text { font-size: 11px; color: var(--text-light); }
         .line-visual { height: 2px; background: #e0e0e0; width: 80%; position: relative; }
-        .line-visual::after {
-            content: "\f206";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 0 5px;
-            font-size: 12px;
-            color: #ccc;
-        }
 
         .seat-tag {
             font-size: 11px;
@@ -121,31 +105,30 @@
             text-transform: uppercase;
         }
 
-        /* FOOTER & ACTION AREA */
         .footer-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid #f8f9fa;
             padding-top: 15px;
-            margin-top: 10px;
         }
 
         .status-box {
             background: var(--success-bg);
-            border: 1px solid rgba(22, 163, 74, 0.2);
             padding: 6px 12px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
+
         .status-dot {
             width: 6px;
             height: 6px;
             background: var(--success);
             border-radius: 50%;
         }
+
         .status-text {
             font-size: 12px;
             font-weight: 700;
@@ -153,18 +136,7 @@
             text-transform: uppercase;
         }
 
-        .action-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .fare-info {
-            text-align: right;
-        }
-
-        .fare-label { font-size: 10px; color: var(--text-light); font-weight: 700; display: block; }
-        .fare-amount { font-size: 20px; font-weight: 900; color: var(--text-dark); }
+        .fare-amount { font-size: 20px; font-weight: 900; }
 
         .book-btn {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -173,14 +145,82 @@
             padding: 12px 20px;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 13px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.25);
-            transition: 0.2s;
-            text-transform: uppercase;
         }
 
-        .book-btn:active { transform: scale(0.96); }
+        /* ✅ NO BUS FOUND UI */
+        .no-bus-wrapper {
+    margin: 60px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.no-bus-card {
+    width: 100%;
+    max-width: 360px;
+    background: linear-gradient(145deg, #ffffff, #fff7f0);
+    border-radius: 24px;
+    padding: 35px 25px;
+    text-align: center;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255, 122, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.no-bus-card::before {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255,122,0,0.15), transparent);
+    border-radius: 50%;
+}
+
+.no-bus-icon {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 15px;
+    background: linear-gradient(135deg, #ff7a00, #ff512f);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(255,122,0,0.25);
+}
+
+.no-bus-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.no-bus-title {
+    font-size: 22px;
+    font-weight: 900;
+    margin-top: 10px;
+    color: #1a1a1a;
+}
+
+.no-bus-text {
+    font-size: 13px;
+    color: #6b6b6b;
+    margin-top: 8px;
+    line-height: 1.6;
+}
+
+.no-bus-btn {
+    margin-top: 18px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff7a00, #ff512f);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255,122,0,0.25);
+}
     </style>
 </head>
 <body>
@@ -196,31 +236,32 @@
 <div id="busList"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-    authDomain: "dreamliner-421b0.firebaseapp.com",
-    projectId: "dreamliner-421b0",
-    storageBucket: "dreamliner-421b0.appspot.com",
-    messagingSenderId: "454472970770",
-    appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const params = new URLSearchParams(window.location.search);
-const from = params.get("from") || "";
-const to = params.get("to") || "";
-const date = params.get("date") || "";
-const womenSafety = params.get("womenSafety") || "false"; // Retrieve current toggle state
-
-document.getElementById("routeHeader").innerText = `${from} → ${to}`;
-document.getElementById("routeDate").innerText = date;
-
-const routes = [
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+        authDomain: "dreamliner-421b0.firebaseapp.com",
+        projectId: "dreamliner-421b0",
+        storageBucket: "dreamliner-421b0.appspot.com",
+        messagingSenderId: "454472970770",
+        appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get("from") || "";
+    const to = params.get("to") || "";
+    const date = params.get("date") || "";
+    const womenSafety = params.get("womenSafety") || "false";
+    
+    document.getElementById("routeHeader").innerText = `${from} → ${to}`;
+    document.getElementById("routeDate").innerText = date;
+    
+    /* ROUTES SAME */
+    const routes = [
     {
         from: "Biswanath Charali",
         to: "Guwahati",
@@ -353,106 +394,136 @@ const routes = [
         arr: "11:45 AM"
     },
 ];
-
-function calculateDuration(start, end) {
-    const parse = (t) => {
-        let [time, mod] = t.split(' ');
-        let [h, m] = time.split(':').map(Number);
-        if (h === 12) h = 0;
-        if (mod === 'PM') h += 12;
-        return h * 60 + m;
-    };
-    let d = parse(end) - parse(start);
-    if (d < 0) d += 1440;
-    return `${Math.floor(d/60)}h ${d%60}m`;
-}
-
-const matched = routes.find(r => r.from === from && r.to === to);
-
-if (matched) {
-    const trip = matched.dept.includes("PM") ? "PM" : "AM";
-    const dbPath = `${date}_${trip}`;
     
-    const card = document.createElement("div");
-    card.className = "bus-card";
-    card.innerHTML = `
-        <div class="brand-section">
-            <span class="brand-name">${matched.busName}</span>
-            <span class="bus-type">${matched.busType}</span>
-        </div>
-
-        <div class="journey-row">
-            <div class="time-box">
-                <span class="time">${matched.dept}</span>
-                <span class="location">${matched.from}</span>
-            </div>
-
-            <div class="duration-container">
-                <span class="duration-text">${calculateDuration(matched.dept, matched.arr)}</span>
-                <div class="line-visual"></div>
-                <span class="seat-tag" id="avail-txt">Checking...</span>
-            </div>
-
-            <div class="time-box">
-                <span class="time">${matched.arr}</span>
-                <span class="location">${matched.to}</span>
-            </div>
-        </div>
-
-        <div class="footer-row">
-            <div class="status-box">
-                <div class="status-dot"></div>
-                <span class="status-text">On Time</span>
-            </div>
-
-            <div class="action-area">
-                <div class="fare-info">
-                    <span class="fare-label">Fare</span>
-                    <span class="fare-amount">₹${matched.fare}</span>
+    /* DURATION */
+    function calculateDuration(start, end) {
+        const parse = (t) => {
+            let [time, mod] = t.split(' ');
+            let [h, m] = time.split(':').map(Number);
+            if (h === 12) h = 0;
+            if (mod === 'PM') h += 12;
+            return h * 60 + m;
+        };
+        let d = parse(end) - parse(start);
+        if (d < 0) d += 1440;
+        return `${Math.floor(d/60)}h ${d%60}m`;
+    }
+    
+    /* ✅ USE FILTER (IMPORTANT) */
+    const matchedRoutes = routes.filter(r => r.from === from && r.to === to);
+    
+    /* ❌ NO MATCH CASE */
+    if (matchedRoutes.length === 0) {
+    
+        document.getElementById("busList").innerHTML = `
+        <div class="no-bus-wrapper">
+            <div class="no-bus-card">
+                
+                <div class="no-bus-icon">
+                    <i class="fas fa-route"></i>
                 </div>
-                <button class="book-btn" id="bookBtn">View Seats</button>
+    
+                <div class="no-bus-title">No Buses Found</div>
+    
+                <div class="no-bus-text">
+                    We couldn’t find any buses for this route.<br>
+                    Try changing your source or destination.
+                </div>
+    
+                <button class="no-bus-btn" onclick="window.history.back()">
+                    Search Again
+                </button>
+    
             </div>
         </div>
-    `;
-    document.getElementById("busList").appendChild(card);
-
-    let unsubscribe; 
-
-    function startListening() {
-        if (unsubscribe) unsubscribe();
-
-        unsubscribe = onSnapshot(doc(db, "buses", dbPath), (snap) => {
-            let booked = 0;
-            if (snap.exists()) {
-                const data = snap.data();
-                const seatSource = data.seats ? data.seats : data;
-                booked = Object.keys(seatSource).filter(key => /^[A-Z]\d+$/.test(key)).length;
+        `;
+    
+    } else {
+    
+        /* ✅ LOOP ALL MATCHES */
+        matchedRoutes.forEach((matched, index) => {
+    
+            const trip = matched.dept.includes("PM") ? "PM" : "AM";
+            const dbPath = `${date}_${trip}`;
+    
+            const card = document.createElement("div");
+            card.className = "bus-card";
+    
+            card.innerHTML = `
+                <div class="brand-section">
+                    <span class="brand-name">${matched.busName}</span>
+                    <span class="bus-type">${matched.busType}</span>
+                </div>
+    
+                <div class="journey-row">
+                    <div class="time-box">
+                        <span class="time">${matched.dept}</span>
+                        <span class="location">${matched.from}</span>
+                    </div>
+    
+                    <div class="duration-container">
+                        <span class="duration-text">${calculateDuration(matched.dept, matched.arr)}</span>
+                        <div class="line-visual"></div>
+                        <span class="seat-tag" id="avail-${index}">Checking...</span>
+                    </div>
+    
+                    <div class="time-box">
+                        <span class="time">${matched.arr}</span>
+                        <span class="location">${matched.to}</span>
+                    </div>
+                </div>
+    
+                <div class="footer-row">
+                    <div class="status-box">
+                        <div class="status-dot"></div>
+                        <span class="status-text">On Time</span>
+                    </div>
+    
+                    <div>
+                        <div class="fare-amount">₹${matched.fare}</div>
+                        <button class="book-btn" id="btn-${index}">View Seats</button>
+                    </div>
+                </div>
+            `;
+    
+            document.getElementById("busList").appendChild(card);
+    
+            /* FIREBASE LISTENER */
+            let unsubscribe;
+    
+            function startListening() {
+                if (unsubscribe) unsubscribe();
+    
+                unsubscribe = onSnapshot(doc(db, "buses", dbPath), (snap) => {
+                    let booked = 0;
+    
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        const seatSource = data.seats ? data.seats : data;
+                        booked = Object.keys(seatSource).length;
+                    }
+    
+                    const avail = matched.capacity - booked;
+                    const txt = document.getElementById(`avail-${index}`);
+    
+                    if (avail <= 0) {
+                        txt.innerText = "Sold Out";
+                        txt.style.color = "#dc3545";
+                    } else {
+                        txt.innerText = `${avail} Seats`;
+                        txt.style.color = avail < 10 ? "#dc3545" : "#16a34a";
+                    }
+                });
             }
-
-            const avail = matched.capacity - booked;
-            const txt = document.getElementById("avail-txt");
-
-            if (avail <= 0) {
-                txt.innerText = "Sold Out";
-                txt.style.color = "#dc3545";
-                txt.style.background = "#fff1f2";
-            } else {
-                txt.innerText = `${avail} Seats`;
-                txt.style.color = avail < 10 ? "#dc3545" : "#16a34a";
-                txt.style.background = avail < 10 ? "#fff1f2" : "#f0fdf4";
-            }
+    
+            window.addEventListener('pageshow', startListening);
+    
+            /* ✅ VIEW SEATS BUTTON FIX */
+            document.getElementById(`btn-${index}`).onclick = () => {
+                window.location.href = `seat.html?from=${from}&to=${to}&date=${date}&trip=${trip}&fare=${matched.fare}&womenSafety=${womenSafety}`;
+            };
         });
     }
-
-    window.addEventListener('pageshow', (event) => {
-        startListening();
-    });
-
-    // FIXED: The redirection now correctly includes the womenSafety parameter
-    document.getElementById("bookBtn").onclick = () => {
-        window.location.href = `seat.html?from=${from}&to=${to}&date=${date}&trip=${trip}&fare=${matched.fare}&womenSafety=${womenSafety}`;
-    };
-}
-</script>
+    </script>
 </body>
 </html>
