@@ -224,6 +224,57 @@
             <input id="searchInput" placeholder="Search by Route (e.g. Delhi-Goa)...">
         </div>
     </div>
+    <div id="rescheduleModal" style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+">
+    <div style="
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        width: 300px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    ">
+        <h3 style="margin-bottom: 15px;">Select New Date</h3>
+
+        <input id="rescheduleDate" type="date" style="
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        "/>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button onclick="confirmReschedule()" style="
+                flex:1;
+                padding:10px;
+                background:#ff7a00;
+                color:white;
+                border:none;
+                border-radius:10px;
+                font-weight:700;
+                cursor:pointer;
+            ">Confirm</button>
+
+            <button onclick="closeRescheduleModal()" style="
+                flex:1;
+                padding:10px;
+                background:#f1f5f9;
+                border:none;
+                border-radius:10px;
+                font-weight:700;
+                cursor:pointer;
+            ">Cancel</button>
+        </div>
+    </div>
+</div>
 
     <div id="history-content"></div>
 </div>
@@ -430,9 +481,9 @@ function renderBookings(bookings, uid) {
                     <button class="j-btn btn-download" data-id="${bId}">
                         <i data-lucide="download" style="width:14px;"></i>Ticket
                     </button>
-                    <button class="j-btn btn-reschedule" onclick="window.location.href='reshedulebus.html'">
-                        <i data-lucide="calendar-clock" style="width:14px;"></i>Reschedule
-                    </button>
+                    <button class="j-btn btn-reschedule" onclick="openReschedule('${bId}')">
+    <i data-lucide="calendar-clock"></i>Reschedule
+</button>
                     <button class="j-btn btn-cancel" onclick="window.location.href='cancelbus.html?bookingId=${bId}&paymentId=${paymentId}&amount=${d.totalFare}'">
                         <i data-lucide="ban" style="width:14px;"></i>Cancel
                     </button> 
@@ -468,6 +519,30 @@ function renderBookings(bookings, uid) {
             location.reload();
         } catch (e) { alert("Error."); }
     };
+
+    window.openReschedule = (bookingId) => {
+
+const booking = allBookings.find(b => (b.bookingUid || b.id) === bookingId);
+
+if (!booking) {
+    alert("Booking not found!");
+    return;
+}
+
+const newDate = prompt("Enter new date (YYYY-MM-DD):");
+if (!newDate) return;
+
+const seats = booking.passengers ? booking.passengers.length : 1;
+
+window.location.href = `seat.html?bookingId=${bookingId}
+&reschedule=true
+&newDate=${newDate}
+&from=${booking.from}
+&to=${booking.to}
+&trip=${booking.trip || "AM"}
+&fare=${Math.floor((booking.totalFare || 250) / seats)}`;
+};
+
 
     document.getElementById("logoutBtn").onclick = () => {
         signOut(auth).then(() => {
