@@ -869,6 +869,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+
 const firebaseConfig = {
     apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
     authDomain:"dreamliner-421b0.firebaseapp.com",
@@ -883,6 +884,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const params = new URLSearchParams(window.location.search);
+const urlParams = params;
 const from = params.get("from") || "Start";
 const to = params.get("to") || "End";
 const date = params.get("date") || "Today";
@@ -890,11 +892,33 @@ const trip = (params.get("trip") || "AM").toUpperCase();
 const farePerSeat = Number(params.get("fare")) || 250;
 
 
+
+const isReschedule = urlParams.get("reschedule") === "true";
+const bookingId = urlParams.get("bookingId");
+const newDate = urlParams.get("newDate");
+
+let selectedSeats = []; 
+let currentSeat = null;
+let currentUser = null;
+let passengerData = []; 
+let selectedPickup = "";
+let selectedDrop = "";
+let oldBooking = null;
+
+/* 🔥 FIXED (was const → let) */
+let maxSelect = 6;
+
+window.lastBusData = {}; 
+
+const seatContainer = document.getElementById("seats");
+const genderPopup = document.getElementById("genderPopup");
+
+
 document.getElementById("routeTitle").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${date} | ${trip} Trip`;
 
 const pickupLocations = {
-    "Guwahati": ["ISBT (03:30 PM)", "Games Village(03:40 PM)" , "Khanapara (04:40 AM)"],
+    "Guwahati": ["ISBT (03:30 PM)", "Games Village(03:40 PM)" , "Khanapara (04:40 PM)"],
     "Nagaon": [], // will be handled dynamically
     "Biswanath Charali": ["ASTC Bus Stand (06:15 AM)"],
     "Sootea": ["Sootea(06:35 AM)"],
@@ -904,7 +928,7 @@ const pickupLocations = {
     "Default": ["Select Your Location"]
 };
 const dropLocations = {
-    "Guwahati": ["Khanapara (11:15 AM)", "Games Village (11:25 PM)", "ISBT (11:45 PM)"],
+    "Guwahati": ["Khanapara (11:15 AM)", "Games Village (11:25 AM)", "ISBT (11:45 AM)"],
     "Nagaon": ["Borghat ByPass (08:35 AM)"],
     "Biswanath Charali": ["ASTC Bus Stand (09:45 PM)"],
     "Sootea": ["Sootea(09:25 PM)"],
@@ -932,19 +956,29 @@ function getPoints(cityName, dataset) {
 }
 
 
-const busDocId = `${date}_${trip}`;
-const docRef = doc(db,"buses",busDocId);
-let selectedSeats = []; 
-let currentSeat = null;
-let currentUser = null;
-let passengerData = []; 
-let selectedPickup = "";
-let selectedDrop = "";
-const maxSelect = 6;
-window.lastBusData = {}; // Global storage for safety check
+async function loadOldBooking() {
+    if (!isReschedule || !bookingId) return;
 
-const seatContainer = document.getElementById("seats");
-const genderPopup = document.getElementById("genderPopup");
+    const snap = await getDoc(doc(db, "bookings", bookingId));
+    if (!snap.exists()) {
+        alert("Booking not found");
+        return;
+    }
+
+    oldBooking = snap.data();
+
+    maxSelect = oldBooking.passengers.length;
+
+    showToast(`Rescheduling ${maxSelect} seat(s)`, "info");
+}
+loadOldBooking(); // 🔥 IMPORTANT FIX
+
+/* ================= BUS DOC ID (FIXED) ================= */
+const busDocId = isReschedule
+    ? `${newDate}_${trip}`
+    : `${date}_${trip}`;
+
+const docRef = doc(db,"buses",busDocId);
 
 // --- LOGIN SYNC LISTENER ---
 window.addEventListener("message", (event) => {
@@ -1015,6 +1049,7 @@ function stopConfetti() {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
+
 function resetModal() {
 
 const s1 = document.getElementById('step1');
@@ -1045,6 +1080,66 @@ function showToast(msg, type="info"){
     setTimeout(()=> toast.classList.add("show"),100);
     setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, 3000);
 }
+async function handleReschedule() {
+
+if (!oldBooking) {
+    showToast("Booking not loaded", "error");
+    return;
+}
+
+if (selectedSeats.length !== oldBooking.passengers.length) {
+    showToast(`Select exactly ${oldBooking.passengers.length} seats`, "error");
+    return;
+}
+
+document.getElementById("processingOverlay").style.display = "flex";
+document.getElementById("processingText").innerText = "Rescheduling...";
+
+const res = await fetch("https://backend-1-ci0t.onrender.com/reschedule-booking", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        bookingId,
+        newDate,
+        newTrip: trip,
+        newSeats: selectedSeats.map(s => typeof s === "string" ? s : s.seat),
+        newFare: oldBooking.totalFare
+    })
+});
+
+const data = await res.json();
+
+document.getElementById("processingOverlay").style.display = "none";
+
+if (data.success) {
+    showToast("Rescheduled Successfully!", "success");
+
+    setTimeout(() => {
+        window.location.href = "info.html";
+    }, 1500);
+} else {
+    showToast(data.message || "Failed", "error");
+}
+}
+
+/* ================= PAY BUTTON ================= */
+document.getElementById("payBtn").onclick = async () => {
+
+if (isReschedule) {
+    handleReschedule();
+    return;
+}
+
+/* NORMAL FLOW (UNCHANGED) */
+showToast("Proceed to payment");
+};
+
+/* ================= BUS SNAPSHOT ================= */
+onSnapshot(docRef,(docSnap)=>{
+const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
+window.lastBusData = bookedSeats; 
+renderSeats(bookedSeats || {});
+});
 
 function updateFareInfo(){
     const baseFare = selectedSeats.length * farePerSeat;
@@ -1156,14 +1251,6 @@ function createSeatDiv(seatObj, bookedSeats) {
     }
     return div;
 }
-
-onSnapshot(docRef,(docSnap)=>{
-    const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
-    window.lastBusData = bookedSeats; 
-    renderSeats(bookedSeats || {});
-    updateFareInfo();
-});
-
 document.getElementById("maleBtn").onclick = () => selectGender("male");
 document.getElementById("femaleBtn").onclick = () => selectGender("female");
 document.addEventListener("click",(e)=>{
@@ -1173,7 +1260,6 @@ genderPopup.style.display="none";
 }
 });
 
-// --- FEMALE SAFETY LOGIC (FIREBASE UID VERIFIED) ---
 function getAdjacentSeat(seatName){
 
 const num = parseInt(seatName.replace("A",""));
@@ -1192,11 +1278,6 @@ if(pos === 2) return [`A${num+1}`];
 if(pos === 3) return [`A${num-1}`];
 
 }
-
-/* LAST ROW (5 seats)
-A41 A42 A43 A44 A45
-*/
-
 if(num === 41) return ["A42"];
 if(num === 42) return ["A41","A43"];
 if(num === 43) return ["A42","A44"];
@@ -1205,9 +1286,6 @@ if(num === 45) return ["A44"];
 
 return [];
 }
-
-// 1. Get the safety status from the URL (passed from index -> bus -> seat)
-const urlParams = new URLSearchParams(window.location.search);
 function checkFemaleSafety(targetSeatName, gender){
 
 const adjacentSeat = getAdjacentSeat(targetSeatName);
@@ -1236,13 +1314,6 @@ return "blocked";
 return false;
 
 }
-
-
-
-
-
-
-
 function selectGender(g) {
     if (selectedSeats.length >= maxSelect) { 
         showToast(`Max ${maxSelect} seats`); 
@@ -1328,6 +1399,9 @@ window.selectPoint = (el, type) => {
 };
 
 document.getElementById("nextStepBtn").onclick = () => {
+    if (isReschedule) {
+    document.getElementById("payBtn").innerText = "Confirm Reschedule";
+}
 
 const s1 = document.getElementById('step1');
 const s2 = document.getElementById('step2');
@@ -1407,139 +1481,143 @@ function renderPassengerInputs() {
     });
 }
 
+
+
 let razorpayInstance = null;
 
 document.getElementById("payBtn").onclick = async () => {
 
-const names = document.querySelectorAll(".p-name");
-const phones = document.querySelectorAll(".p-phone");
-const ages = document.querySelectorAll(".p-age");
-const remarks = document.getElementById("bookingRemarks").value || "N/A";
-
-let valid = true;
-
-const nameRegex = /^[A-Za-z ]+$/;
-const phoneRegex = /^[0-9]{10}$/;
-
-passengerData = selectedSeats.map((s, i) => {
-
-    if (!names[i].value || !phones[i].value) valid = false;
-
-    // ❌ NAME VALIDATION
-    if (!nameRegex.test(names[i].value)) {
-        showToast("Name should contain only letters", "error");
-        valid = false;
+    if (isReschedule) {
+        handleReschedule();
+        return;
     }
 
-    // ❌ PHONE VALIDATION
-    if (!phoneRegex.test(phones[i].value)) {
-        showToast("Enter valid 10-digit mobile number", "error");
-        valid = false;
+    const names = document.querySelectorAll(".p-name");
+    const phones = document.querySelectorAll(".p-phone");
+    const ages = document.querySelectorAll(".p-age");
+    const remarks = document.getElementById("bookingRemarks").value || "N/A";
+
+    let valid = true;
+
+    const nameRegex = /^[A-Za-z ]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
+    passengerData = selectedSeats.map((s, i) => {
+
+        if (!names[i].value || !phones[i].value) valid = false;
+
+        if (!nameRegex.test(names[i].value)) {
+            showToast("Name should contain only letters", "error");
+            valid = false;
+        }
+
+        if (!phoneRegex.test(phones[i].value)) {
+            showToast("Enter valid 10-digit mobile number", "error");
+            valid = false;
+        }
+
+        return {
+            seat: s.seat,
+            gender: s.gender,
+            name: names[i].value,
+            phone: phones[i].value,
+            age: ages[i].value || "N/A"
+        };
+    });
+
+    if (!valid) {
+        showToast("Fix passenger details", "error");
+        return;
     }
 
-    return {
-        seat: s.seat,
-        gender: s.gender,
-        name: names[i].value,
-        phone: phones[i].value,
-        age: ages[i].value || "N/A"
+    // PROCESSING
+    document.getElementById("processingOverlay").style.display = "flex";
+    document.getElementById("processingText").innerText = "Creating Order...";
+
+    const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            seats: selectedSeats.length,
+            from,
+            to,
+            trip
+        })
+    });
+
+    const orderData = await orderRes.json();
+
+    if (!orderData.success) {
+        document.getElementById("processingOverlay").style.display = "none";
+        showToast("Order creation failed", "error");
+        return;
+    }
+
+    const order = orderData.order;
+    const totalAmount = orderData.amount;
+
+    document.getElementById("payAmount").textContent = totalAmount;
+
+    const options = {
+        key: "rzp_test_SdEPueUZWPIWqh",
+        amount: order.amount,
+        currency: "INR",
+        name: "Dreamliner Bus",
+        order_id: order.id,
+        description: `${selectedSeats.length} Seat(s)`,
+
+        handler: async function (response) {
+
+            document.getElementById("processingOverlay").style.display = "flex";
+            document.getElementById("processingText").innerText = "Verifying Payment...";
+
+            const verifyRes = await fetch("https://backend-1-ci0t.onrender.com/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    bookingData: {
+                        from, to, date, trip,
+                        pickup: selectedPickup,
+                        drop: selectedDrop,
+                        passengers: passengerData,
+                        remarks,
+                        uid: currentUser?.uid || "guest"
+                    }
+                })
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+
+                document.getElementById("processingText").innerText = "Booking Seats...";
+
+                await finalizeBookingAfterPayment(
+                    verifyData.bookingId,
+                    response.razorpay_payment_id,
+                    totalAmount
+                );
+
+            } else {
+                document.getElementById("processingOverlay").style.display = "none";
+                showToast("Payment verification failed", "error");
+            }
+        },
+
+        modal: {
+            ondismiss: () => {
+                document.getElementById("processingOverlay").style.display = "none";
+                showToast("Payment cancelled", "error");
+            }
+        }
     };
-});
 
-if (!valid) {
-    showToast("Fix passenger details", "error");
-    return;
-}
-
-/* PROCESSING */
-document.getElementById("processingOverlay").style.display = "flex";
-document.getElementById("processingText").innerText = "Creating Order...";
-
-/* CREATE ORDER */
-const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-        seats: selectedSeats.length,
-        from,
-        to,
-        trip
-    })
-});
-
-const orderData = await orderRes.json();
-
-if (!orderData.success) {
-    document.getElementById("processingOverlay").style.display = "none";
-    showToast("Order creation failed", "error");
-    return;
-}
-
-const order = orderData.order;
-const totalAmount = orderData.amount;
-
-document.getElementById("payAmount").textContent = totalAmount;
-
-/* RAZORPAY */
-const options = {
-    key: "rzp_test_SdEPueUZWPIWqh",
-    amount: order.amount,
-    currency: "INR",
-    name: "Dreamliner Bus",
-    order_id: order.id,
-    description: `${selectedSeats.length} Seat(s)`,
-
-    handler: async function (response) {
-
-        document.getElementById("processingOverlay").style.display = "flex";
-        document.getElementById("processingText").innerText = "Verifying Payment...";
-
-        const verifyRes = await fetch("https://backend-1-ci0t.onrender.com/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                bookingData: {
-                    from, to, date, trip,
-                    pickup: selectedPickup,
-                    drop: selectedDrop,
-                    passengers: passengerData,
-                    remarks,
-                    uid: currentUser?.uid || "guest"
-                }
-            })
-        });
-
-        const verifyData = await verifyRes.json();
-
-        if (verifyData.success) {
-
-            document.getElementById("processingText").innerText = "Booking Seats...";
-
-            await finalizeBookingAfterPayment(
-                verifyData.bookingId,
-                response.razorpay_payment_id,
-                totalAmount
-            );
-
-        } else {
-            document.getElementById("processingOverlay").style.display = "none";
-            showToast("Payment verification failed", "error");
-        }
-    },
-
-    modal: {
-        ondismiss: () => {
-            document.getElementById("processingOverlay").style.display = "none";
-            showToast("Payment cancelled", "error");
-        }
-    }
-};
-
-const rzp = new Razorpay(options);
-rzp.open();
+    const rzp = new Razorpay(options);
+    razorpayInstance = rzp; // ✅ correct
+    rzp.open();
 };
 /* FINALIZE BOOKING AFTER PAYMENT */
 async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
