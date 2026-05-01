@@ -3264,13 +3264,55 @@ tabs.forEach(btn => {
         sheetBody.scrollTo({ top: targetSection.offsetTop - 10, behavior: 'smooth' });
     });
 });
-document.getElementById('headerArea').addEventListener('click', (e) => {
-    const sheet = document.getElementById('sheet');
-    if (!e.target.classList.contains('tab-btn')) {
+// --- UPDATED SWIPE & CLICK LOGIC ---
+let startY = 0;
+let currentY = 0;
+const sheet = document.getElementById('sheet');
+const headerArea = document.getElementById('headerArea');
+
+// 1. Swipe Start
+headerArea.addEventListener('touchstart', (e) => {
+    startY = e.touches[0].clientY;
+    sheet.style.transition = 'none'; 
+}, { passive: true });
+
+// 2. Swipe Movement
+headerArea.addEventListener('touchmove', (e) => {
+    currentY = e.touches[0].clientY;
+    let diff = currentY - startY;
+    
+    if (!sheet.classList.contains('active') && diff < 0) {
+        let translateY = `calc(85vh - 65px + ${diff}px)`;
+        sheet.style.transform = `translateY(${translateY})`;
+    } else if (sheet.classList.contains('active') && diff > 0) {
+        sheet.style.transform = `translateY(${diff}px)`;
+    }
+}, { passive: true });
+
+// 3. Swipe Release
+headerArea.addEventListener('touchend', (e) => {
+    sheet.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+    let diff = currentY - startY;
+    if (Math.abs(diff) > 50) {
+        if (diff < 0) { sheet.classList.add('active'); sheetBody.scrollTop = 0; }
+        else { sheet.classList.remove('active'); }
+    }
+    sheet.style.transform = ''; 
+});
+
+// 4. SMART CLICK LOGIC
+headerArea.addEventListener('click', (e) => {
+    // Check if the clicked element is a tab button or inside a tab button
+    const isTabButton = e.target.closest('.tab-btn');
+    
+    if (isTabButton) {
+        // If it's a tab button, ensure the sheet STAYS OPEN
+        sheet.classList.add('active');
+    } else {
+        // If it's the handle or empty space, then toggle (Open/Close)
         sheet.classList.toggle('active');
-        
-        if(sheet.classList.contains('active')) {
-            document.getElementById('sheetBody').scrollTop = 0;
+        if (sheet.classList.contains('active')) {
+            sheetBody.scrollTop = 0;
         }
     }
 });
