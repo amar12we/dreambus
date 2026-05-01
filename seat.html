@@ -2711,22 +2711,15 @@ document.getElementById("payAmount").textContent = totalAmount;
     async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
-    // Logic for Fare Calculations
     const baseFare = passengers.length * farePerSeat;
-    const gstAmount = Math.ceil(baseFare * 0.05);
-    const standardTotal = baseFare + gstAmount;
-    
-    // Final fare logic
-    const finalPaidFare = Math.ceil(discountedFare || standardTotal);
-    const discountValue = (appliedCoupon && discountedFare) ? (standardTotal - discountedFare) : 0;
+    const gstAmount = Math.round(baseFare * 0.05);
+    const totalFare = baseFare + gstAmount;
 
     const pLoc = pickup.split('(')[0].trim();
     const pTime = pickup.includes('(') ? pickup.match(/\(([^)]+)\)/)[1] : "N/A";
     const dLoc = drop.split('(')[0].trim();
     const dTime = drop.includes('(') ? drop.match(/\(([^)]+)\)/)[1] : "N/A";
 
-    // Header Orange Bar
     doc.setFillColor(255, 122, 0);
     doc.rect(0, 0, 210, 40, 'F');
 
@@ -2745,7 +2738,6 @@ document.getElementById("payAmount").textContent = totalAmount;
     doc.setFont("helvetica", "normal");
     doc.text("Bharat Benz 2X2 A/C Semi Sleeper", 105, 25, { align: "center" });
     doc.text("Fully Air Suspension", 105, 31, { align: "center" });
-
     let startY = 50;
     doc.setFillColor(245, 245, 245);
     doc.roundedRect(10, startY - 5, 190, 125 + (passengers.length * 7), 3, 3, 'F');
@@ -2795,59 +2787,70 @@ document.getElementById("payAmount").textContent = totalAmount;
     doc.text(remarks || "N/A", 15, startY, { maxWidth: 180 });
     startY += 12;
 
-    // ================= FARE BREAKDOWN SECTION =================
     doc.setDrawColor(200, 200, 200);
     doc.line(15, startY - 5, 195, startY - 5); 
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.text("Fare Breakdown:", 15, startY);
     startY += 7;
-
     doc.setFont("helvetica", "normal");
     doc.text(`Ticket Base Fare:`, 15, startY);
     doc.text(`INR ${baseFare}`, 110, startY);
     startY += 7;
-    
-    doc.text(`GST (5%):`, 15, startY);
+    doc.text(`GST (18%):`, 15, startY);
     doc.text(`INR ${gstAmount}`, 110, startY);
-    startY += 7;
-
-    // 🔥 FIXED: SHOW DISCOUNT BELOW BASE & GST
-    if (appliedCoupon && discountValue > 0) {
-        doc.setTextColor(46, 125, 50); // Green Color
-        doc.setFont("helvetica", "bold");
-        doc.text(`Discount (${appliedCoupon}):`, 15, startY);
-        doc.text(`- INR ${Math.round(discountValue)}`, 110, startY);
-        doc.setTextColor(0, 0, 0); // Reset color
-        startY += 7;
-    }
-
-    startY += 2;
+    startY += 8;
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 122, 0); 
     doc.text(`Total Fare Paid:`, 15, startY);
-    doc.text(`INR ${finalPaidFare}`, 110, startY);
-    doc.setTextColor(0, 0, 0);
+    doc.text(`INR ${totalFare}`, 110, startY);
 
-    // Payment Info
-    startY += 15;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Payment ID: ${paymentId || 'N/A'}`, 15, startY);
-    doc.text(`Status: SUCCESS / PAID`, 110, startY);
 
-    // ================= FOOTER =================
+
+// Add this line after "Total Fare Paid:"
+doc.text(`Payment ID: ${paymentId || 'N/A'}`, 15, startY + 15);
+
+
+
+
     doc.setTextColor(0, 0, 0);
-    startY += 20;
+    startY += 27;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.text("Thanks for choosing Dreamliner!", 105, startY, { align: "center" });
+    startY += 6;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.text("This ticket will help you in your journey", 105, startY, { align: "center" });
     
-    // Support Links & QR Code
-    const phoneNumber = "919954506113";
-    const whatsappAppUrl = `whatsapp://send?phone=${phoneNumber}&text=Hello Dreamliner Support`;
+    startY += 8;
+    doc.setDrawColor(255, 122, 0);
+    doc.roundedRect(55, startY, 100, 25, 2, 2, 'D');
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Need Help?", 105, startY + 7, { align: "center" });
+    
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 100, 255);
+    
+    const supportText = "Dreamliner Support";
+    doc.text(supportText, 105, startY + 13, { align: "center" });
+
+    // --- DIRECT APP LINK LOGIC ---
+    const phoneNumber = "919954506113"; // Replace with your number
+    const message = encodeURIComponent("Hello Dreamliner support");
+    
+    // Using whatsapp:// instead of https://wa.me/
+    const whatsappAppUrl = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+
+    // The clickable box (centered over the text)
     doc.link(80, startY + 9, 50, 7, { url: whatsappAppUrl });
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("24*7 Service | Quick Response | Multilingual", 105, startY + 20, { align: "center" });
 
     startY += 35;
     doc.setFontSize(9);
@@ -2861,13 +2864,17 @@ document.getElementById("payAmount").textContent = totalAmount;
     const qrImg = qrCanvas.toDataURL("image/png");
     doc.addImage(qrImg, "PNG", 160, startY - 25, 35, 35);
 
-    // Page 2 - Policies
+
     doc.addPage();
+
+    // 2. BOOKING POLICIES SECTION
     let polY = 25;
+    // Header bar
     doc.setFillColor(242, 245, 255);
     doc.rect(10, polY - 10, 190, 10, 'F');
     doc.setTextColor(0, 50, 150);
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
     doc.text("BOOKING POLICIES", 15, polY - 3);
 
     const policies = [
@@ -2881,12 +2888,32 @@ document.getElementById("payAmount").textContent = totalAmount;
         let boxY = polY + (index * 28);
         doc.setDrawColor(240, 240, 240);
         doc.rect(10, boxY, 190, 28, 'D');
+
+        // Circular Icon Placeholder
+        doc.setDrawColor(200, 200, 200);
+        doc.circle(22, boxY + 14, 5, 'D');
+        doc.setTextColor(80, 80, 80);
+        doc.setFontSize(8);
+        doc.text(p.icon, 21, boxY + 17);
+
+        // Policy Title
         doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
         doc.text(p.title, 35, boxY + 11);
+
+        // Policy Description
         doc.setFont("helvetica", "normal");
         doc.setTextColor(100, 100, 100);
-        doc.text(doc.splitTextToSize(p.desc, 155), 35, boxY + 18);
+        doc.setFontSize(9);
+        const splitText = doc.splitTextToSize(p.desc, 155);
+        doc.text(splitText, 35, boxY + 18);
     });
+
+    // Final Footer
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(8);
+    doc.text("This is a computer-generated e-ticket. Physical signature not required.", 105, 285, { align: "center" });
 
     doc.save(`Dreamliner_Ticket_${bookingId}.pdf`);
 }
