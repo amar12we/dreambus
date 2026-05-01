@@ -1288,21 +1288,24 @@ transform:translateX(24px);
             </div>
         </div>
 
-        <!-- PRICE -->
         <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:6px;
-        ">
-            <div>
-                <span style="font-weight:600; color:#555; font-size:12px;">Final Amount</span>
-                <div id="gstToggle" style="font-size:10px; color:#ff7a00; cursor:pointer;">
-                    Breakdown
-                </div>
-            </div>
-            <span id="modalTotalFare" style="font-size:16px; font-weight:900; color:#ff7a00;">₹0</span>
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:6px;
+">
+    <div>
+        <span style="font-weight:600; color:#555; font-size:12px;">Final Amount</span>
+        <div id="gstToggle" style="font-size:10px; color:#ff7a00; cursor:pointer;">
+            Breakdown
         </div>
+    </div>
+
+    <div style="text-align:right;">
+        <span id="oldFare" style="text-decoration:line-through; font-size:12px; color:#999;"></span><br>
+        <span id="modalTotalFare" style="font-size:16px; font-weight:900; color:#ff7a00;">₹0</span>
+    </div>
+</div>
 
         <!-- GST -->
         <div id="gstBreakdown" style="
@@ -1615,7 +1618,6 @@ document.addEventListener("click", (e) => {
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-    
     function resetModal() {
     const container = document.querySelector('.details-container');
     const s1 = document.getElementById('step1');
@@ -1638,11 +1640,24 @@ document.addEventListener("click", (e) => {
     document.getElementById('payBtn').style.display = 'none';
     document.getElementById('modalTitle').innerText = "Select Points";
     document.getElementById('stepIndicator').innerText = "Step 1 of 2";
-    
-    // Clear coupon if necessary
-    const couponInput = document.getElementById('couponCode');
-    if(couponInput) couponInput.value = '';
+
+    // ✅ RESET DISCOUNT UI
+    const discountEl = document.getElementById("breakdownDiscount");
+    if (discountEl) discountEl.innerText = "₹0";
+
+    // ✅ CLEAR COUPON INPUT (FIXED ID)
+    const couponInput = document.getElementById('couponInput');
+    if (couponInput) couponInput.value = '';
+
+    // ✅ RESET LOGIC (VERY IMPORTANT)
     appliedCoupon = null;
+    discountedFare = null;
+
+    // ✅ RESET MESSAGE
+    const msgBox = document.getElementById("couponMessage");
+    if (msgBox) msgBox.innerText = "";
+
+    // ✅ RECALCULATE FARE
     updateFareInfo();
 }
     
@@ -1662,6 +1677,7 @@ document.addEventListener("click", (e) => {
     applyCoupon();
 };
 console.log("Coupon clicked");
+
 async function applyCoupon() {
 
 const list = document.getElementById("couponList");
@@ -1670,34 +1686,26 @@ if (list) list.classList.remove("show");
 const input = document.getElementById("couponInput");
 const couponCode = (input?.value || "").trim();
 const msgBox = document.getElementById("couponMessage");
-const payAmountEl = document.getElementById("payAmount");
 
-if (!msgBox || !payAmountEl) {
-    console.error("Missing UI elements: msgBox or payAmountEl");
-    return;
-}
+const payAmountEl = document.getElementById("payAmount");
 
 const totalFare = Number((payAmountEl.innerText || "0").replace(/[^\d]/g, ""));
 const userUid = currentUser?.uid;
 
-// VALIDATION
 if (!couponCode) {
     msgBox.innerText = "Please enter a coupon code";
-msgBox.style.color = "#e53935";
     msgBox.style.color = "red";
     return;
 }
 
 if (!userUid) {
     msgBox.innerText = "Login required to apply coupon";
-msgBox.style.color = "#e53935";
     msgBox.style.color = "red";
     return;
 }
 
 if (appliedCoupon) {
     msgBox.innerText = "A coupon has already been applied";
-    msgBox.style.color = "#ff9800";
     msgBox.style.color = "orange";
     return;
 }
@@ -1705,7 +1713,7 @@ if (appliedCoupon) {
 try {
 
     msgBox.innerHTML = `<span class="loader"></span> Applying coupon...`;
-msgBox.style.color = "#444";
+    msgBox.style.color = "#444";
 
     const response = await fetch("https://backend-1-ci0t.onrender.com/verify-coupon", {
         method: "POST",
@@ -1721,21 +1729,30 @@ msgBox.style.color = "#444";
 
     if (data.success) {
 
-showDiscountAnimation(data.discount); // 🔥 ADD THIS
+        showDiscountAnimation(data.discount);
 
-appliedCoupon = couponCode;
-discountedFare = data.finalPrice;
+        appliedCoupon = couponCode;
+        discountedFare = data.finalPrice;
 
-msgBox.innerHTML = `
-    <div class="coupon-success">
-        <span class="discount-amount">₹${Math.round(data.discount)} OFF</span>
-        <span class="applied-text">Coupon applied successfully</span>
-    </div>
-`;
-msgBox.style.color = "#2e7d32";
+        // ✅ UI SUCCESS
+        msgBox.innerHTML = `
+            <div class="coupon-success">
+                <span class="discount-amount">₹${Math.round(data.discount)} OFF</span>
+                <span class="applied-text">Coupon applied successfully</span>
+            </div>
+        `;
+        msgBox.style.color = "#2e7d32";
 
+        // ✅ UPDATE FINAL PRICE
         document.getElementById("payAmount").innerText = data.finalPrice;
         document.getElementById("modalTotalFare").innerText = "₹" + data.finalPrice;
+
+        // ✅ UPDATE BREAKDOWN (🔥 MAIN FIX)
+        document.getElementById("breakdownDiscount").innerText = "₹" + Math.round(data.discount);
+
+        // OPTIONAL STRIKETHROUGH
+        const oldFareEl = document.getElementById("oldFare");
+        if (oldFareEl) oldFareEl.innerText = "₹" + totalFare;
 
     } else {
         msgBox.innerText = "❌ " + data.message;
@@ -1745,10 +1762,11 @@ msgBox.style.color = "#2e7d32";
 } catch (err) {
     console.error(err);
     msgBox.innerText = "Something went wrong. Please try again";
-msgBox.style.color = "#e53935";
     msgBox.style.color = "red";
 }
 }
+
+
 function toggleCoupons(event){
     if (event) event.stopPropagation();
 
@@ -1903,75 +1921,91 @@ document.getElementById("couponInput").addEventListener("focus", () => {
     });
     
     function updateFareInfo(){
-    const baseFare = selectedSeats.length * farePerSeat;
-    const gstAmount = Math.ceil(baseFare * 0.05);
 
-    const rawTotal = baseFare + gstAmount;
+const baseFare = selectedSeats.length * farePerSeat;
+const gstAmount = Math.ceil(baseFare * 0.05);
 
-    // 🔥 Round off calculation
-    const roundedTotal = Math.ceil(rawTotal);
-    const roundOff = roundedTotal - rawTotal;
+const rawTotal = baseFare + gstAmount;
 
-    let finalFare = roundedTotal;
+// 🔥 Round off calculation
+const roundedTotal = Math.ceil(rawTotal);
+const roundOff = roundedTotal - rawTotal;
 
-    // 🔥 apply discount only if valid
-    let discountAmount = 0;
+let finalFare = roundedTotal;
 
-    if (appliedCoupon && discountedFare) {
-        discountAmount = roundedTotal - discountedFare;
-        finalFare = discountedFare;
-    }
+// 🔥 FIXED DISCOUNT LOGIC
+let discountAmount = 0;
 
-    // ================= STEP 1 UPDATE =================
-    const step1Ticket = document.getElementById("step1TicketFare");
-    if (step1Ticket) step1Ticket.innerText = `₹${baseFare}`;
+if (appliedCoupon && discountedFare) {
+    finalFare = discountedFare;
 
-    const step1GST = document.getElementById("step1GST");
-    if (step1GST) step1GST.innerText = `₹${gstAmount}`;
-
-    const step1Round = document.getElementById("step1RoundOff");
-    if (step1Round) step1Round.innerText = `₹${Math.abs(roundOff).toFixed(2)}`;
-
-    const step1Discount = document.getElementById("step1Discount");
-    if (step1Discount) {
-        step1Discount.innerText = appliedCoupon && discountedFare
-            ? `-₹${Math.round(discountAmount)}`
-            : `₹0`;
-    }
-
-    const step1Total = document.getElementById("step1Total");
-    if (step1Total) step1Total.innerText = `₹${Math.ceil(finalFare)}`;
-
-    // ================= STEP 2 UPDATE =================
-    document.getElementById("modalTotalFare").innerText = "₹" + Math.ceil(finalFare);
-
-    const breakdownBase = document.getElementById("breakdownBase");
-    if (breakdownBase) breakdownBase.innerText = `₹${baseFare}`;
-
-    const breakdownGST = document.getElementById("breakdownGST");
-    if (breakdownGST) breakdownGST.innerText = `₹${gstAmount}`;
-
-    const breakdownDiscount = document.getElementById("breakdownDiscount");
-    if (breakdownDiscount) {
-        breakdownDiscount.innerText = appliedCoupon && discountedFare
-            ? `-₹${Math.round(discountAmount)}`
-            : `₹0`;
-    }
-
-    const step2Fare = document.getElementById("step2Fare");
-    if(step2Fare) step2Fare.innerText = "₹" + Math.ceil(finalFare);
-
-    const payAmount = document.getElementById("payAmount");
-    if(payAmount) payAmount.innerText = Math.ceil(finalFare);
-
-    // Hidden summary (optional safety)
-    const fareInfo = document.getElementById("fareInfo");
-    if(fareInfo){
-        fareInfo.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${Math.ceil(finalFare)}`;
-    }
+    // ✅ Correct & safe discount calculation
+    discountAmount = Math.max(0, (baseFare + gstAmount) - discountedFare);
 }
-    
-    document.getElementById("gstToggle").onclick = () => {
+
+// ================= STEP 1 UPDATE =================
+const step1Ticket = document.getElementById("step1TicketFare");
+if (step1Ticket) step1Ticket.innerText = `₹${baseFare}`;
+
+const step1GST = document.getElementById("step1GST");
+if (step1GST) step1GST.innerText = `₹${gstAmount}`;
+
+const step1Round = document.getElementById("step1RoundOff");
+if (step1Round) step1Round.innerText = `₹${Math.abs(roundOff).toFixed(2)}`;
+
+const step1Discount = document.getElementById("step1Discount");
+if (step1Discount) {
+    step1Discount.innerText = (appliedCoupon && discountedFare)
+        ? `-₹${Math.ceil(discountAmount)}`
+        : `₹0`;
+}
+
+const step1Total = document.getElementById("step1Total");
+if (step1Total) step1Total.innerText = `₹${Math.ceil(finalFare)}`;
+
+// ================= STEP 2 UPDATE =================
+document.getElementById("modalTotalFare").innerText = "₹" + Math.ceil(finalFare);
+
+const breakdownBase = document.getElementById("breakdownBase");
+if (breakdownBase) breakdownBase.innerText = `₹${baseFare}`;
+
+const breakdownGST = document.getElementById("breakdownGST");
+if (breakdownGST) breakdownGST.innerText = `₹${gstAmount}`;
+
+const breakdownDiscount = document.getElementById("breakdownDiscount");
+if (breakdownDiscount) {
+    breakdownDiscount.innerText = (appliedCoupon && discountedFare)
+        ? `-₹${Math.ceil(discountAmount)}`
+        : `₹0`;
+}
+
+const step2Fare = document.getElementById("step2Fare");
+if(step2Fare) step2Fare.innerText = "₹" + Math.ceil(finalFare);
+
+const payAmount = document.getElementById("payAmount");
+if(payAmount) payAmount.innerText = Math.ceil(finalFare);
+
+// Hidden summary (optional safety)
+const fareInfo = document.getElementById("fareInfo");
+if(fareInfo){
+    fareInfo.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${Math.ceil(finalFare)}`;
+}
+
+// ✅ 🔥 IMPORTANT: STORE FOR PDF USE
+window.currentFareData = {
+    baseFare,
+    gstAmount,
+    discountAmount: Math.ceil(discountAmount),
+    finalFare: Math.ceil(finalFare)
+};
+}
+   
+
+
+
+
+
+document.getElementById("gstToggle").onclick = () => {
         const b = document.getElementById("gstBreakdown");
         b.style.display = b.style.display === "block" ? "none" : "block";
     };
