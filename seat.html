@@ -20,7 +20,7 @@
 --primary-gradient:linear-gradient(135deg,#ff7a00,#ff9c40);
 }
 
-body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
+body {font-family:'Segoe UI',sans-serif; background:#f4f6f8;margin:0; padding:5px 0;text-align:center;overflow: hidden; height: 100dvh;}
 .header { background:#ff7a00; color:white; padding:8px 15px; font-weight:bold; position:sticky; top:0; z-index:1000; display:flex; align-items:center; font-size:13px; gap:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
 .back-btn { background:rgba(255,255,255,0.9); color:#ff7a00; border:none; padding:4px 8px; border-radius:50px; font-weight:bold; cursor:pointer; font-size:12px; flex-shrink:0;}
 .back-btn:hover { background:white; transform:translateX(-2px); }
@@ -74,7 +74,15 @@ button#bookBtn { padding:12px 30px; background:#ff3b30; color:white; border:none
 .details-row { display: flex; gap: 10px; margin-bottom: 8px; }
 .details-container input, .details-container textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; box-sizing: border-box; outline: none; transition: border 0.2s; font-family: inherit; }
 .details-container input:focus, .details-container textarea:focus { border-color: #ff7a00; }
-.fare-footer { background: #fff; padding: 15px; border-top: 1px solid #eee; position: sticky; bottom: 0; }
+.fare-footer {
+    background: #fff;
+    padding: 10px;
+    border-top: 1px solid #eee;
+
+    flex-shrink: 0;
+    position: relative;
+    z-index: 50;
+}
 
 .gst-breakdown { display: none; font-size: 12px; color: #666; background: #f9f9f9; padding: 8px; border-radius: 6px; margin-top: 8px; border: 1px dashed #ccc; }
 
@@ -499,18 +507,18 @@ input:checked + .slider:before{
 transform:translateX(24px);
 }
 #payBtn {
-    display: none; /* 🔥 hidden by default */
+    display: block !important;
     width: 100%;
-    padding: 18px;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 12px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 900;
+    border-radius: 10px;
     background: linear-gradient(135deg,#ff7a00,#ff9c40);
     color: #fff;
     border: none;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(255,122,0,0.4);
-    transition: 0.3s;
+
+    position: relative;
+    z-index: 100;
 }
 
 #payBtn:hover {
@@ -747,30 +755,31 @@ transform:translateX(24px);
 #step1 {
     opacity: 1 !important;
 }
-
 .details-container.full-screen {
     width: 100vw !important;
     max-width: 100% !important;
-    height: 100vh !important;
+    height: 100dvh !important;
     margin: 0 !important;
     border-radius: 0 !important;
-    display: flex; /* Critical: Enables child layout control */
+
+    display: flex;
     flex-direction: column;
+
     position: fixed;
     top: 0;
     left: 0;
     z-index: 2000;
-}
 
-/* 2. The Middle Box (Scrollable Content Area) */
-.step2-scroll-area, 
-.step2-body-wrapper, 
-.step2-body {
-    flex: 1; /* Automatically takes up all available middle space */
-    overflow-y: auto; /* Scroll only inside this box */
-    padding: 20px;
-    background-color: #f4f7f9; /* Light grey app-like background */
+    overflow: hidden;
+}
+.step2-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    min-height: 0;
+
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 /* 3. Contained Passenger Details "Box" */
@@ -1134,32 +1143,73 @@ transform:translateX(24px);
                     Next: Passenger Details
                 </button>
             </div>
+<!-- STEP 2 -->
+<div id="step2" class="details-container full-screen" style="
+    display:none;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
 
-       <!-- STEP 2 -->
-<div id="step2" class="details-container full-screen" style="display:none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2000; background: #f4f7f9; transition: transform 0.4s ease; transform: translateX(100%);">
+    /* 🔥 MOBILE FIX */
+    height: 100vh;
+    height: 100dvh;
+
+    z-index: 2000;
+    background: #f4f7f9;
+    transition: transform 0.4s ease;
+    transform: translateX(100%);
+    overflow: hidden;
+
+    /* IMPORTANT */
+    display: flex;
+">
 
     <!-- FIXED HEADER -->
-    <div class="details-header" style="position: sticky; top: 0; background: white; z-index: 50; padding: 12px 16px; border-bottom: 1px solid #eee;">
+    <div class="details-header" style="
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 50;
+        padding: 12px 16px;
+        border-bottom: 1px solid #eee;
+        flex-shrink: 0;
+    ">
         <h4 style="margin:0; color:#1a2b49; font-weight:700;">Passenger Details</h4>
     </div>
 
     <!-- SCROLL AREA -->
-    <div class="step2-scroll-area" style="flex: 1; overflow-y: auto; padding: 20px; min-height:0;">
-
-        <h4 style="margin-bottom: 15px; color: #1a2b49; font-weight: 700;">Passenger Details</h4>
+    <div class="step2-scroll-area" style="
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
+    ">
 
         <div id="passengerInputs" style="background:#fff; border:1px solid #e6eef5; border-radius:12px; padding:15px;"></div>
 
-        <div style="margin:15px 0; font-size:14px; font-weight:bold; color:#333;">
+        <div style="margin:10px 0; font-size:14px; font-weight:bold; color:#333;">
             Total Ticket Fare: <span id="step2Fare">₹0</span>
         </div>
 
-        <div style="background:#fff; padding:15px; border-radius:12px; border:1px solid #eee;">
-            <label style="font-size:12px; font-weight:bold; color:#555;">Remarks (Optional)</label>
-            <textarea id="bookingRemarks" rows="2" style="width:100%; border:1px solid #ddd; border-radius:8px; padding:10px;"></textarea>
+        <div style="background:#fff; padding:10px; border-radius:10px; border:1px solid #eee;">
+            <label style="font-size:11px; font-weight:bold; color:#555;">Remarks (Optional)</label>
+            <textarea id="bookingRemarks" rows="2" style="width:100%; border:1px solid #ddd; border-radius:6px; padding:6px;"></textarea>
         </div>
 
-        <button id="backStepBtn" style="width:100%; margin:15px 0; border:1px solid #ff7a00; color:#ff7a00; background:white; padding:10px; border-radius:8px; font-weight:600;">
+        <button id="backStepBtn" style="
+            width:100%;
+            margin:10px 0;
+            border:1px solid #ff7a00;
+            color:#ff7a00;
+            background:white;
+            padding:8px;
+            border-radius:8px;
+            font-weight:600;
+            font-size:12px;
+        ">
             <i class="fas fa-arrow-left"></i> Change Pickup/Drop Points
         </button>
 
@@ -1173,92 +1223,129 @@ transform:translateX(24px);
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <div class="fare-footer" style="background:white; padding:12px; border-top:1px solid #eee; box-shadow:0 -6px 14px rgba(0,0,0,0.05);">
+    <!-- FOOTER (FIXED SAFE MOBILE) -->
+    <div class="fare-footer" style="
+        background:white;
+        padding:10px;
+        border-top:1px solid #eee;
+        box-shadow:0 -3px 10px rgba(0,0,0,0.08);
 
-        <!-- COUPON SECTION (MOVED HERE) -->
-        <div class="coupon-box">
+        /* 🔥 CRITICAL FIX */
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+    ">
+
+        <!-- COUPON -->
+        <div class="coupon-box" style="margin-bottom:6px;">
 
             <div class="coupon-input-row">
                 <input 
                     type="text" 
                     id="couponInput" 
-                    placeholder="Enter Coupon Code"
+                    placeholder="Coupon Code"
+                    style="font-size:12px; padding:6px;"
                     onfocus="toggleCoupons()"
                 >
         
                 <button 
                     type="button"
+                    style="padding:6px 10px; font-size:12px;"
                     onclick="applyCouponFromInput(event)">
                     APPLY
                 </button>
             </div>
         
-            <!-- ✅ MESSAGE BOX (IMPORTANT FIX) -->
-            <div id="couponMessage" style="font-size:12px; margin-top:6px;"></div>
+            <div id="couponMessage" style="font-size:11px; margin-top:4px;"></div>
         
-            <!-- COUPON LIST -->
             <div class="coupon-list" id="couponList">
         
                 <div class="coupon-card">
                     <div>
                         <strong>FIRST2026</strong>
-                        <p>Flat 10% OFF on your first booking</p>
+                        <p style="font-size:11px;">₹50 OFF On First Booking</p>
                     </div>
-                    <button onclick="selectCoupon('FIRST2026')">APPLY</button>
+                    <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('FIRST2026')">APPLY</button>
                 </div>
         
                 <div class="coupon-card">
                     <div>
                         <strong>DREAMLINER26</strong>
-                        <p>Get ₹50 instant discount</p>
+                        <p style="font-size:11px;">Upto 15% Discount For Using Dreamliner</p>
                     </div>
-                    <button onclick="selectCoupon('DREAMLINER26')">APPLY</button>
+                    <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('DREAMLINER26')">APPLY</button>
                 </div>
         
                 <div class="coupon-card">
                     <div>
                         <strong>LOYAL26CTM</strong>
-                        <p>Loyalty reward discount</p>
+                        <p style="font-size:11px;">Upto 15% Discount OnLoyalty Reward</p>
                     </div>
-                    <button onclick="selectCoupon('LOYAL26CTM')">APPLY</button>
+                    <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('LOYAL26CTM')">APPLY</button>
                 </div>
         
             </div>
         </div>
+
         <!-- PRICE -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:6px;
+        ">
             <div>
-                <span style="font-weight:bold; color:#555;">Final Amount</span>
-                <div id="gstToggle" style="font-size:11px; color:#ff7a00; cursor:pointer;">
-                    View Breakdown
+                <span style="font-weight:600; color:#555; font-size:12px;">Final Amount</span>
+                <div id="gstToggle" style="font-size:10px; color:#ff7a00; cursor:pointer;">
+                    Breakdown
                 </div>
             </div>
-            <span id="modalTotalFare" style="font-size:20px; font-weight:900; color:#ff7a00;">₹0</span>
+            <span id="modalTotalFare" style="font-size:16px; font-weight:900; color:#ff7a00;">₹0</span>
         </div>
 
         <!-- GST -->
-        <div id="gstBreakdown" style="display:none; background:#fefefe; padding:8px; border-radius:8px; margin-bottom:8px; border:1px solid #eee;">
-            <div style="display:flex; justify-content:space-between; font-size:12px;">
+        <div id="gstBreakdown" style="
+            display:none;
+            background:#fefefe;
+            padding:6px;
+            border-radius:6px;
+            margin-bottom:6px;
+            border:1px solid #eee;
+            font-size:11px;
+        ">
+            <div style="display:flex; justify-content:space-between;">
                 <span>Fare:</span><span id="breakdownBase">₹0</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px;">
-                <span>GST(5%):</span><span id="breakdownGST">₹0</span>
+            <div style="display:flex; justify-content:space-between;">
+                <span>GST:</span><span id="breakdownGST">₹0</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#2e7d32;">
+            <div style="display:flex; justify-content:space-between; color:#2e7d32;">
                 <span>Discount:</span><span id="breakdownDiscount">₹0</span>
             </div>
         </div>
 
-        <!-- PAY BUTTON -->
-        <button id="payBtn" style="width:100%; padding:13px; background:linear-gradient(135deg,#ff7a00,#ff9c40); color:white; border:none; border-radius:10px; font-size:16px; font-weight:800;">
-            <span id="payText">
-                Pay ₹<span id="payAmount">--</span>
-            </span>
-            <span id="payLoader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+        <!-- PAY BUTTON (FORCED VISIBILITY FIX) -->
+        <button id="payBtn" style="
+            width:100%;
+            padding:12px;
+            background:linear-gradient(135deg,#ff7a00,#ff9c40);
+            color:white;
+            border:none;
+            border-radius:10px;
+            font-size:15px;
+            font-weight:900;
+            display:block;
+
+            /* 🔥 IMPORTANT */
+            position: relative;
+            z-index: 200;
+        ">
+            Pay ₹<span id="payAmount">--</span>
         </button>
 
     </div>
+</div>
 </div>
 </div>
         </div>
