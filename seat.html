@@ -1177,22 +1177,29 @@ transform:translateX(24px);
     <div class="fare-footer" style="background:white; padding:12px; border-top:1px solid #eee; box-shadow:0 -6px 14px rgba(0,0,0,0.05);">
 
         <!-- COUPON SECTION (MOVED HERE) -->
-        <div class="coupon-box" style="background:#fff; padding:12px; border:1px solid #eee; border-radius:10px; margin-bottom:10px;">
+        <div class="coupon-box">
 
-            <div class="coupon-input-row" style="display:flex; gap:8px; margin-bottom:10px;">
-                <input type="text" id="couponInput" placeholder="Enter Coupon Code"
-    onfocus="toggleCoupons()"
-    style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
-    <button type="button"
-    id="applyCouponBtn"
-    onclick="applyCouponFromInput(event)"
-    style="background:#ff7a00; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:700; cursor:pointer; position:relative; z-index:10;">
-    APPLY
-</button>
+            <div class="coupon-input-row">
+                <input 
+                    type="text" 
+                    id="couponInput" 
+                    placeholder="Enter Coupon Code"
+                    onfocus="toggleCoupons()"
+                >
+        
+                <button 
+                    type="button"
+                    onclick="applyCouponFromInput(event)">
+                    APPLY
+                </button>
             </div>
-
+        
+            <!-- ✅ MESSAGE BOX (IMPORTANT FIX) -->
+            <div id="couponMessage" style="font-size:12px; margin-top:6px;"></div>
+        
+            <!-- COUPON LIST -->
             <div class="coupon-list" id="couponList">
-
+        
                 <div class="coupon-card">
                     <div>
                         <strong>FIRST2026</strong>
@@ -1200,7 +1207,7 @@ transform:translateX(24px);
                     </div>
                     <button onclick="selectCoupon('FIRST2026')">APPLY</button>
                 </div>
-
+        
                 <div class="coupon-card">
                     <div>
                         <strong>DREAMLINER26</strong>
@@ -1208,18 +1215,17 @@ transform:translateX(24px);
                     </div>
                     <button onclick="selectCoupon('DREAMLINER26')">APPLY</button>
                 </div>
-
+        
                 <div class="coupon-card">
                     <div>
                         <strong>LOYAL26CTM</strong>
-                        <p>Loyalty reward discount for returning users</p>
+                        <p>Loyalty reward discount</p>
                     </div>
                     <button onclick="selectCoupon('LOYAL26CTM')">APPLY</button>
                 </div>
-
+        
             </div>
         </div>
-
         <!-- PRICE -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <div>
