@@ -2843,27 +2843,40 @@ else if (finalPaid) {
     doc.setFont("helvetica", "normal");
 
     // Base Fare
-    doc.text(`Ticket Base Fare:`, 15, startY);
-    doc.text(`INR ${baseFare}`, 110, startY);
-    startY += 7;
+doc.text(`Ticket Base Fare:`, 15, startY);
+doc.text(`INR ${baseFare}`, 110, startY);
+startY += 7;
 
-    // GST
-    doc.text(`GST (5%):`, 15, startY);
-    doc.text(`INR ${gstAmount}`, 110, startY);
-    startY += 7;
+// GST
+doc.text(`GST (5%):`, 15, startY);
+doc.text(`INR ${gstAmount}`, 110, startY);
+startY += 7;
 
-    // Discount
-    doc.setTextColor(0, 150, 0);
-    doc.text(`Discount Applied${appliedCoupon ? ` (${appliedCoupon})` : ""}:`, 15, startY);
+// 🔥 SUBTOTAL (VERY IMPORTANT)
+const subTotal = baseFare + gstAmount;
+
+doc.setDrawColor(200, 200, 200);
+doc.line(15, startY, 195, startY);
+startY += 6;
+
+doc.text(`Subtotal:`, 15, startY);
+doc.text(`INR ${subTotal}`, 110, startY);
+startY += 7;
+
+// Discount
+doc.setTextColor(0, 150, 0);
+doc.text(`Discount Applied${appliedCoupon ? ` (${appliedCoupon})` : ""}:`, 15, startY);
 doc.text(`- INR ${Math.ceil(discountAmount)}`, 110, startY);
-    startY += 8;
+startY += 8;
 
-    doc.setTextColor(0, 0, 0);
+doc.setTextColor(0, 0, 0);
 
-    // TOTAL
-    const totalFare = finalPaid;
+// 🔥 FINAL TOTAL (AFTER DISCOUNT)
+const totalFare = subTotal - discountAmount;
 
-    doc.setFontSize(13);
+  
+
+doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 122, 0);
 
