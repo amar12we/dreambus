@@ -120,7 +120,7 @@ iframe#authFrame { width:100%; height:100%; border:none; }
         display: flex; 
         flex-direction: column;
         /* Pushed down further to 65px to clear the seat selection buttons */
-        transform: translateY(calc(85vh - 65px));
+        transform: translateY(calc(85vh - 55px));
     }
 
     .bottom-sheet.active { 
@@ -246,7 +246,7 @@ iframe#authFrame { width:100%; height:100%; border:none; }
 --primary-gradient:linear-gradient(135deg,#ff7a00,#ff9c40);
 }
 
-body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:5px 0; text-align:center; }
+body { font-family:'Segoe UI',sans-serif; background:#f4f6f8; margin:0; padding:0px 0; text-align:center; }
 
 /* ================= REST STOP SECTION FIX ================= */
 
@@ -891,8 +891,6 @@ transform:translateX(24px);
 #payBtn:active {
     transform: scale(0.98);
 }
-
-
 
 
 </style>
@@ -1990,7 +1988,6 @@ if (appliedCoupon && discountAmount > 0) {
     breakdownDiscount.style.color = "#000";
 }
 }
-
 const step2Fare = document.getElementById("step2Fare");
 if(step2Fare) step2Fare.innerText = "₹" + Math.ceil(finalFare);
 
@@ -2013,11 +2010,6 @@ window.currentFareData = {
 };
 
 }
-   
-
-
-
-
 
 document.getElementById("gstToggle").onclick = () => {
         const b = document.getElementById("gstBreakdown");
@@ -2214,24 +2206,55 @@ updateFareInfo();
 reapplyCouponAuto();
 }
    
-    document.getElementById("bookBtn").onclick = () => {
-        if (selectedSeats.length === 0) { 
-            showToast("Select a seat first!", "info"); 
-            return; 
-        }
-    
-        if (!currentUser) { 
-            document.getElementById('authOverlay').style.display = 'flex'; 
-            return; 
-        }
-    
-        renderLocationPicker();
-        document.getElementById('detailsOverlay').style.display = 'flex';
-    
-        // 🔥 FORCE HIDE PAY BUTTON IN STEP 1
-        document.getElementById('payBtn').style.display = 'none';
-    };
-    
+document.getElementById("bookBtn").onclick = () => {
+
+if (selectedSeats.length === 0) { 
+    showToast("Select a seat first!", "info"); 
+    return; 
+}
+
+if (!currentUser) { 
+    document.getElementById('authOverlay').style.display = 'flex'; 
+    return; 
+}
+
+// 🔥 ONLY RESET UI (NOT DATA)
+const container = document.querySelector('.details-container');
+const s1 = document.getElementById('step1');
+const s2 = document.getElementById('step2');
+
+// reset view to step 1 clean state
+if (s2) {
+    s2.style.display = "none";
+    s2.style.transform = "translateX(100%)";
+}
+
+if (s1) {
+    s1.style.display = "block";
+    s1.style.opacity = "1";
+    s1.style.transform = "translateX(0)";
+}
+
+container.classList.remove('full-screen');
+
+// 🔥 UI RESET ONLY
+appliedCoupon = null;
+discountedFare = null;
+
+renderLocationPicker();
+
+document.getElementById('detailsOverlay').style.display = 'flex';
+
+// 🔥 FORCE STEP 1 BUTTON ALWAYS VISIBLE
+const nextBtn = document.getElementById('nextStepBtn');
+if (nextBtn) {
+    nextBtn.style.display = "block";
+    nextBtn.style.opacity = "1";
+    nextBtn.style.pointerEvents = "auto";
+}
+
+document.getElementById('payBtn').style.display = 'none';
+};
     
     
     
@@ -2682,48 +2705,61 @@ document.getElementById("payAmount").textContent = totalAmount;
                 timestamp: new Date().toISOString()
             });
     
-            // ✅ STOP PROCESSING
             processingOverlay.style.display = "none";
-    
-            // ✅ SUCCESS POPUP
-            showToast("Booking saved successfully!", "success");
-    
-            // ✅ CONFETTI START
-            launchConfetti();
-    
-            // ✅ CONFETTI STOP AFTER 2 SEC (FIXED)
-            setTimeout(() => {
-                stopConfetti();
-            }, 2000);
-    
-            // ✅ CONTINUE AFTER ANIMATION
-            setTimeout(async () => {
-    
-                closeBookingModal();
-                selectedSeats = [];
-    
-                await downloadTicketPDF(
+
+// ✅ SUCCESS POPUP
+showToast("Booking saved successfully!", "success");
+
+// ✅ CONFETTI START
+launchConfetti();
+
+// stop confetti
+setTimeout(() => {
+    stopConfetti();
+}, 2000);
+
+// 🔥 TAKE SAFE SNAPSHOT BEFORE ANY RESET
+const pdfFareSnapshot = JSON.parse(JSON.stringify(window.currentFareData || {}));
+
+// safety fallback (VERY IMPORTANT)
+pdfFareSnapshot.baseFare =
+    pdfFareSnapshot.baseFare ||
+    (passengerData.length * farePerSeat);
+
+pdfFareSnapshot.gstAmount =
+    pdfFareSnapshot.gstAmount ||
+    Math.ceil(pdfFareSnapshot.baseFare * 0.05);
+
+pdfFareSnapshot.finalFare =
+    pdfFareSnapshot.finalFare ||
+    (pdfFareSnapshot.baseFare + pdfFareSnapshot.gstAmount);
+
+// ✅ FIRST GENERATE PDF (IMPORTANT FIX)
+await downloadTicketPDF(
     passengerData,
     selectedPickup,
     selectedDrop,
     "N/A",
     bookingId,
     paymentId,
-    window.currentFareData // 👈 pass this
+    pdfFareSnapshot
 );
-    
-                window.location.href = `info.html?bookingId=${bookingId}`;
-    
-            }, 2200);
-    
-        } catch (error) {
-            console.error(error);
-    
-            document.getElementById("processingOverlay").style.display = "none";
-            showToast("Booking failed!", "error");
-        }
-    } 
-    async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId, fareData) {
+
+// ✅ THEN RESET UI
+selectedSeats = [];
+appliedCoupon = null;
+discountedFare = null;
+
+resetModal();
+document.getElementById('detailsOverlay').style.display = 'none';
+} catch (error) {
+    console.error(error);
+
+    document.getElementById("processingOverlay").style.display = "none";
+    showToast("Booking failed!", "error");
+}
+}
+   async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId, fareData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -2956,7 +2992,18 @@ doc.setFontSize(13);
     doc.setFontSize(8);
     doc.text("This is a computer-generated e-ticket. Physical signature not required.", 105, 285, { align: "center" });
 
-    doc.save(`Dreamliner_Ticket_${bookingId}.pdf`);
+    const pdfBlob = doc.output("blob");
+const url = URL.createObjectURL(pdfBlob);
+
+const a = document.createElement("a");
+a.href = url;
+a.download = `Dreamliner_Ticket_${bookingId}.pdf`;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+
+// cleanup
+setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
 const journeyData = {
