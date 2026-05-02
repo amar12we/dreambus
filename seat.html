@@ -1729,32 +1729,39 @@ try {
 
     if (data.success) {
 
-        showDiscountAnimation(data.discount);
+showDiscountAnimation(data.discount);
 
-        appliedCoupon = couponCode;
-        discountedFare = data.finalPrice;
+appliedCoupon = couponCode;
+discountedFare = data.finalPrice;
 
-        // ✅ UI SUCCESS
-        msgBox.innerHTML = `
-            <div class="coupon-success">
-                <span class="discount-amount">₹${Math.round(data.discount)} OFF</span>
-                <span class="applied-text">Coupon applied successfully</span>
-            </div>
-        `;
-        msgBox.style.color = "#2e7d32";
+// ✅ UI SUCCESS
+msgBox.innerHTML = `
+    <div class="coupon-success">
+        <span class="discount-amount">₹${Math.round(data.discount)} OFF</span>
+        <span class="applied-text">Coupon applied successfully</span>
+    </div>
+`;
+msgBox.style.color = "#2e7d32";
 
-        // ✅ UPDATE FINAL PRICE
-        document.getElementById("payAmount").innerText = data.finalPrice;
-        document.getElementById("modalTotalFare").innerText = "₹" + data.finalPrice;
+// ✅ UPDATE FINAL PRICE
+document.getElementById("payAmount").innerText = data.finalPrice;
+document.getElementById("modalTotalFare").innerText = "₹" + data.finalPrice;
 
-        // ✅ UPDATE BREAKDOWN (🔥 MAIN FIX)
-        document.getElementById("breakdownDiscount").innerText = "₹" + Math.round(data.discount);
+// ✅ UPDATE BREAKDOWN
+document.getElementById("breakdownDiscount").innerText = "₹" + Math.round(data.discount);
 
-        // OPTIONAL STRIKETHROUGH
-        const oldFareEl = document.getElementById("oldFare");
-        if (oldFareEl) oldFareEl.innerText = "₹" + totalFare;
+const oldFareEl = document.getElementById("oldFare");
+if (oldFareEl) oldFareEl.innerText = "₹" + totalFare;
 
-    } else {
+// 🔥🔥 ADD THIS BLOCK RIGHT HERE 🔥🔥
+window.currentFareData = {
+    baseFare: Number(document.getElementById("breakdownBase")?.innerText.replace(/[^\d]/g,'')) || 0,
+    gstAmount: Number(document.getElementById("breakdownGST")?.innerText.replace(/[^\d]/g,'')) || 0,
+    discountAmount: Math.round(data.discount),
+    finalFare: Math.round(data.finalPrice)
+};
+}
+    else {
         msgBox.innerText = "❌ " + data.message;
         msgBox.style.color = "red";
     }
@@ -1971,12 +1978,17 @@ if (breakdownBase) breakdownBase.innerText = `₹${baseFare}`;
 
 const breakdownGST = document.getElementById("breakdownGST");
 if (breakdownGST) breakdownGST.innerText = `₹${gstAmount}`;
-
 const breakdownDiscount = document.getElementById("breakdownDiscount");
+
 if (breakdownDiscount) {
-    breakdownDiscount.innerText = (appliedCoupon && discountedFare)
-        ? `-₹${Math.ceil(discountAmount)}`
-        : `₹0`;
+
+    if (appliedCoupon && discountedFare && discountAmount > 0) {
+        breakdownDiscount.innerText = `-₹${Math.ceil(discountAmount)}`;
+        breakdownDiscount.style.color = "#2e7d32"; // green (optional)
+    } else {
+        breakdownDiscount.innerText = `₹0`;
+        breakdownDiscount.style.color = "#000"; // reset color
+    }
 }
 
 const step2Fare = document.getElementById("step2Fare");
@@ -1991,13 +2003,15 @@ if(fareInfo){
     fareInfo.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${Math.ceil(finalFare)}`;
 }
 
-// ✅ 🔥 IMPORTANT: STORE FOR PDF USE
 window.currentFareData = {
     baseFare,
     gstAmount,
-    discountAmount: Math.ceil(discountAmount),
+    discountAmount: appliedCoupon 
+        ? Math.ceil(discountAmount) 
+        : (window.currentFareData?.discountAmount || 0),
     finalFare: Math.ceil(finalFare)
 };
+
 }
    
 
@@ -2689,13 +2703,14 @@ document.getElementById("payAmount").textContent = totalAmount;
                 selectedSeats = [];
     
                 await downloadTicketPDF(
-                    passengerData,
-                    selectedPickup,
-                    selectedDrop,
-                    "N/A",
-                    bookingId,
-                    paymentId
-                );
+    passengerData,
+    selectedPickup,
+    selectedDrop,
+    "N/A",
+    bookingId,
+    paymentId,
+    window.currentFareData // 👈 pass this
+);
     
                 window.location.href = `info.html?bookingId=${bookingId}`;
     
@@ -2708,18 +2723,38 @@ document.getElementById("payAmount").textContent = totalAmount;
             showToast("Booking failed!", "error");
         }
     } 
-    async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId) {
+    async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId, fareData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const baseFare = passengers.length * farePerSeat;
-    const gstAmount = Math.round(baseFare * 0.05);
+    // 🔥 USE TRUSTED PASSED DATA FIRST
+const baseFare = fareData?.baseFare ?? (passengers.length * farePerSeat);
+const gstAmount = fareData?.gstAmount ?? Math.round(baseFare * 0.05);
 
-    // 🔥 DISCOUNT FROM GLOBAL STATE
-    const discountAmount = window.currentFareData?.discountAmount || 0;
+// 🔥 FINAL PAID (MOST TRUSTED SOURCE)
+const finalPaid =
+    fareData?.finalFare ??
+    window.currentFareData?.finalFare ??
+    discountedFare ??
+    (baseFare + gstAmount);
 
-    const totalFare = (baseFare + gstAmount) - discountAmount;
+// 🔥 SAFE DISCOUNT CALCULATION
+let discountAmount = 0;
 
+// Priority 1 → passed data (MOST IMPORTANT)
+if (fareData && fareData.discountAmount !== undefined) {
+    discountAmount = fareData.discountAmount;
+}
+
+// Priority 2 → fallback UI/global
+else if (window.currentFareData && window.currentFareData.discountAmount !== undefined) {
+    discountAmount = window.currentFareData.discountAmount;
+}
+
+// Priority 3 → calculate safely
+else if (finalPaid) {
+    discountAmount = Math.max(0, (baseFare + gstAmount) - finalPaid);
+}
     const pLoc = pickup.split('(')[0].trim();
     const pTime = pickup.includes('(') ? pickup.match(/\(([^)]+)\)/)[1] : "N/A";
     const dLoc = drop.split('(')[0].trim();
@@ -2817,15 +2852,17 @@ document.getElementById("payAmount").textContent = totalAmount;
     doc.text(`INR ${gstAmount}`, 110, startY);
     startY += 7;
 
-    // 🔥 DISCOUNT LINE (NEW)
+    // Discount
     doc.setTextColor(0, 150, 0);
-    doc.text(`Discount Applied:`, 15, startY);
-    doc.text(`- INR ${discountAmount}`, 110, startY);
+    doc.text(`Discount Applied${appliedCoupon ? ` (${appliedCoupon})` : ""}:`, 15, startY);
+doc.text(`- INR ${Math.ceil(discountAmount)}`, 110, startY);
     startY += 8;
 
     doc.setTextColor(0, 0, 0);
 
     // TOTAL
+    const totalFare = finalPaid;
+
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 122, 0);
