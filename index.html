@@ -7,63 +7,26 @@
 <title>Dreamliner Bus Booking</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: #e0e0e0;
-}
-
-/* HEADER */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: linear-gradient(to right, #ff7a00, #ff512f);
-    color: white;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-}
-
+body { margin: 0; font-family: 'Segoe UI', sans-serif;background: #e0e0e0;}
+.header { position: fixed; top: 0; left: 0;
+    width: 100%; z-index: 1000; display: flex; justify-content: space-between; align-items: center;padding: 8px 12px;
+    background: linear-gradient(to right, #ff7a00, #ff512f);color: white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);box-sizing: border-box; /* IMPORTANT */}
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    font-size: 18px;
-}
+    display: flex;  align-items: center; gap: 10px;font-weight: bold; font-size: 18px;}
 
 .logo-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
-}
+    width: 40px;height: 40px; border-radius: 50%;object-fit: cover; border: 2px solid white;}
 
 .login-btn {
-    background: white;
-    color: #ff512f;
-    border: none;
-    padding: 7px 14px;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
+    background: white; color: #ff512f; border: none; padding: 7px 14px;
+    border-radius: 25px;font-weight: 600; cursor: pointer;
     transition: 0.3s;
 }
 
-.login-btn:hover {
-    background: #ffeed9;
-}
+.login-btn:hover { background: #ffeed9;}
 
-/* HERO SLIDER */
-.hero {
-    position: relative;
-    width: 100%;
-    height: 280px;
-    overflow: hidden;
-    border-bottom-left-radius: 25px;
-    border-bottom-right-radius: 25px;
-}
+.hero {position: relative; width: 100%; height: 280px; overflow: hidden; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;}
 
 .slides {
     position: relative;
@@ -115,18 +78,20 @@ body {
 
 .booking-card {
     position: relative;
-    margin: -40px auto 20px;
-    width: 92%;
+    margin: -90px auto 20px;
+    width: 90%;
     max-width: 380px;
 
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(14px);
 
-    border-radius: 20px;
-    padding: 15px;
+    border-radius: 22px;
+    padding: 16px;
 
-    box-shadow: 0 12px 25px rgba(0,0,0,0.18);
-    z-index: 20;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.20);
+    transition: 0.3s ease;
+
+    z-index: 30;
 }
 .booking-card:hover {
     box-shadow: 0 15px 35px rgba(0,0,0,0.25);
@@ -272,18 +237,6 @@ body {
     background: #ff512f;
 }
 
-/* MODAL */
-.modal {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background: white;
-    top: 0;
-    left: 0;
-    display: none;
-    flex-direction: column;
-    z-index: 20;
-}
 
 .modal input {
     padding: 15px;
@@ -433,51 +386,7 @@ body {
 .search-btn {
     box-shadow: 0 4px 15px rgba(255,122,0,0.4);
 }
-/* PREMIUM ABOUT */
-.about-premium {
-    background: linear-gradient(135deg, #fff, #fff5ee);
-    border: 1px solid #ffe0cc;
-}
 
-/* TEXT */
-.about-text {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 15px;
-}
-
-/* FEATURES GRID */
-.about-features {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.about-box {
-    flex: 1;
-    background: white;
-    padding: 12px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    transition: 0.3s;
-}
-
-.about-box i {
-    font-size: 18px;
-    color: #ff7a00;
-    margin-bottom: 5px;
-}
-
-.about-box h4 {
-    font-size: 13px;
-    margin: 5px 0;
-}
-
-.about-box p {
-    font-size: 11px;
-    color: #777;
-}
 
 /* HOVER EFFECT */
 .about-box:hover {
@@ -528,13 +437,13 @@ body {
 
 .bottom-nav div {
     text-align: center;
-    font-size: 12px;
+    font-size: 9px;
     color: #555;
 }
 
 .bottom-nav i {
-    font-size: 18px;
-    margin-bottom: 3px;
+    font-size: 16px;
+    margin-bottom: 2px;
 }
 .floating-offer {
     position: fixed;
@@ -680,59 +589,87 @@ body {
     color: #777;
 }
 
-/* FOOTER TEXT */
-.about-footer {
-    margin-top: 12px;
-    font-size: 13px;
-    text-align: center;
-    color: #555;
-}
-.review-slider {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding: 5px;
-    scroll-snap-type: x mandatory;
-}
-
-.review-slider::-webkit-scrollbar {
-    display: none;
-}
-
+/* ===== REVIEW CARD (FLIPKART STYLE) ===== */
 .review-card {
-    min-width: 260px;
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
+    min-width: 280px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 14px 14px 12px;
     scroll-snap-align: start;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    border: 1px solid #f1f1f1;
+
+    transition: 0.25s ease;
 }
 
+.review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.10);
+}
+
+/* HEADER */
 .review-top {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 8px;
 }
 
+/* AVATAR */
 .review-img {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #ff7a00;
 }
 
+/* NAME */
+.review-top h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+}
+
+/* STARS */
 .stars {
+    font-size: 12px;
     color: #ffb400;
-    font-size: 13px;
+    letter-spacing: 1px;
+    margin-top: 2px;
 }
 
+/* COMMENT TEXT */
+.review-card p {
+    margin: 8px 0;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.4;
+}
+
+/* OFFICIAL REPLY (like Flipkart "Seller Response") */
 .reply {
     margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+
     font-size: 12px;
-    background: #f1f2f6;
-    padding: 8px;
-    border-radius: 10px;
     color: #555;
+
+    background: #f6f8ff;
+    border-left: 3px solid #4f46e5;
+}
+
+/* TAG STYLE (optional future use) */
+.review-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: #eaf7ee;
+    color: #16a34a;
+    margin-left: auto;
 }
 /* SLIDER */
 .tutorial-slider{
@@ -824,28 +761,41 @@ body {
     font-size:22px;
     cursor:pointer;
 }
-/* HERO BACKGROUND SECTION */
+
+
+/* ===== CONTACT HERO (KEEP IMAGE BUT MAKE PREMIUM) ===== */
 .contact-hero {
     position: relative;
     overflow: hidden;
     border-radius: 18px;
     margin: 15px;
-    padding: 25px 18px;
+    padding: 20px;
+
+    /* KEEP IMAGE */
     background: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
-    color: white;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
-/* DARK OVERLAY */
+/* SOFT BRAND OVERLAY (IMPORTANT) */
 .contact-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(0,0,0,0.75), rgba(255,81,47,0.65));
+
+    background: linear-gradient(
+        135deg,
+        rgba(255,122,0,0.85),
+        rgba(255,81,47,0.75),
+        rgba(0,0,0,0.55)
+    );
+
+    backdrop-filter: blur(2px);
 }
 
-/* CONTENT ABOVE OVERLAY */
+/* CONTENT */
 .contact-content {
     position: relative;
     z-index: 2;
@@ -854,14 +804,16 @@ body {
 /* TITLE */
 .contact-content h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
 }
 
 /* TAGLINE */
 .contact-tagline {
     font-size: 13px;
     margin: 6px 0 15px;
-    opacity: 0.9;
+    color: rgba(255,255,255,0.9);
 }
 
 /* GRID */
@@ -871,24 +823,31 @@ body {
     gap: 12px;
 }
 
-/* CARD */
+/* CARD (GLASS STYLE LIKE YOUR APP THEME) */
 .contact-card {
     display: flex;
     align-items: center;
     gap: 12px;
+
     padding: 14px;
     border-radius: 14px;
+
     text-decoration: none;
     color: white;
+
     background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+
     backdrop-filter: blur(10px);
+
     transition: 0.3s;
 }
 
 /* hover */
 .contact-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
     background: rgba(255,255,255,0.18);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 
 /* ICON */
@@ -896,30 +855,40 @@ body {
     width: 42px;
     height: 42px;
     border-radius: 12px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.2);
+
+    background: linear-gradient(to right, #ff7a00, #ff512f);
+    color: white;
 }
 
 /* TEXT */
 .contact-card h4 {
     margin: 0;
     font-size: 14px;
+    color: #fff;
 }
 
 .contact-card p {
     margin: 2px 0 0;
     font-size: 12px;
-    opacity: 0.85;
+    color: rgba(255,255,255,0.85);
 }
 
-/* FOOTER TEXT */
+/* ARROW */
+.contact-card i.fa-chevron-right {
+    margin-left: auto;
+    color: rgba(255,255,255,0.9);
+}
+
+/* FOOTER */
 .contact-footer-text {
     margin-top: 12px;
     font-size: 12px;
     text-align: center;
-    opacity: 0.9;
+    color: rgba(255,255,255,0.9);
 }
 
 /* SOCIAL */
@@ -933,14 +902,15 @@ body {
 .social-bar a {
     color: white;
     font-size: 16px;
-    opacity: 0.8;
+    opacity: 0.9;
     transition: 0.3s;
 }
 
 .social-bar a:hover {
-    opacity: 1;
     transform: scale(1.2);
+    color: #fff;
 }
+
 /* APP DOWNLOAD SECTION */
 .app-download {
     text-align: center;
@@ -1007,6 +977,833 @@ body {
 .store-btn:hover {
     transform: translateY(-4px) scale(1.02);
 }
+.feature-section{
+    margin: 15px;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg,#fff,#fff6f0);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+.feature-header h3{
+    margin:0;
+    font-size:18px;
+    color:#ff512f;
+}
+
+.feature-header p{
+    margin:5px 0 12px;
+    font-size:12px;
+    color:#666;
+}
+
+
+/* CARD */
+.feature-card{
+    min-width:260px;
+    padding:16px;
+    border-radius:18px;
+    scroll-snap-align:start;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+    transition:0.3s;
+    color:#222;
+}
+
+/* SOFT BACKGROUNDS (LIKE REDBUS STYLE VARIANTS) */
+.feature-card.fast{
+    background: linear-gradient(135deg,#fff,#fff3e6);
+}
+
+.feature-card.secure{
+    background: linear-gradient(135deg,#fff,#eafff3);
+}
+
+.feature-card.support{
+    background: linear-gradient(135deg,#fff,#eef4ff);
+}
+
+.feature-card.comfort{
+    background: linear-gradient(135deg,#fff,#fef0ff);
+}
+
+/* HOVER */
+.feature-card:hover{
+    transform: translateY(-6px);
+    box-shadow:0 15px 30px rgba(255,81,47,0.15);
+}
+
+/* TOP ROW */
+.feature-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+/* ICON */
+.icon-circle{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    background: linear-gradient(to right,#ff7a00,#ff512f);
+    font-size:16px;
+}
+
+/* TAG */
+.tag{
+    font-size:10px;
+    font-weight:700;
+    padding:4px 8px;
+    border-radius:20px;
+    background:#fff;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    color:#ff512f;
+}
+
+/* TEXT */
+.feature-card h4{
+    margin:10px 0 5px;
+    font-size:15px;
+}
+
+.feature-card p{
+    font-size:12px;
+    color:#666;
+    line-height:1.4;
+}
+.feature-section{
+    margin: 15px;
+    padding: 18px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid #eee;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+
+/* HEADER */
+.feature-header h3{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+    color:#1a1a1a;
+}
+
+.feature-header p{
+    margin:5px 0 12px;
+    font-size:12px;
+    color:#777;
+}
+
+/* SLIDER */
+.feature-slider{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+}
+
+.feature-slider::-webkit-scrollbar{
+    display:none;
+}
+
+/* CARD (CLEAN SWIGGY STYLE) */
+.feature-card{
+    min-width:250px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+
+    padding:14px;
+    border-radius:16px;
+
+    background:#fff;
+    border:1px solid #f2f2f2;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+
+    scroll-snap-align:start;
+    transition:0.25s;
+}
+
+/* hover */
+.feature-card:hover{
+    transform: translateY(-4px);
+    box-shadow:0 10px 22px rgba(0,0,0,0.10);
+}
+
+/* ICON BOX */
+.icon-box{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+    font-size:16px;
+
+    flex-shrink:0;
+}
+
+/* COLORS LIKE SWIGGY/REDBUS STYLE */
+.icon-box.fast{ background:#ff7a00; }
+.icon-box.secure{ background:#16a34a; }
+.icon-box.support{ background:#2563eb; }
+.icon-box.comfort{ background:#a855f7; }
+
+/* TEXT */
+.feature-card h4{
+    margin:0;
+    font-size:14px;
+    font-weight:600;
+    color:#222;
+}
+
+.feature-card p{
+    margin-top:3px;
+    font-size:12px;
+    color:#666;
+    line-height:1.4;
+}
+/* ===== BUS STYLE ROUTE UI ===== */
+.bus-route{
+    position: relative;
+    background: #fff;
+    border-radius: 18px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+.bus-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:600;
+    font-size:14px;
+    color:#ff512f;
+    margin-bottom:10px;
+}
+
+.bus-header i{
+    font-size:16px;
+}
+
+/* ROUTE POINT */
+.route-point{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 12px;
+    border-radius:12px;
+    background:#f9f9f9;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.route-point:hover{
+    background:#fff3e6;
+}
+
+/* TEXT */
+.route-text{
+    flex:1;
+    margin-left:10px;
+}
+
+.route-text small{
+    display:block;
+    font-size:11px;
+    color:#888;
+}
+
+.route-text span{
+    font-size:13px;
+    font-weight:600;
+    color:#222;
+}
+
+/* DOTS (BUS ROUTE FEEL) */
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+}
+
+.dot.start{
+    background:#16a34a;
+}
+
+.dot.end{
+    background:#ff512f;
+}
+
+/* CONNECTING LINE */
+.route-line{
+    width:2px;
+    height:18px;
+    background: linear-gradient(to bottom,#16a34a,#ff512f);
+    margin:4px 0 4px 14px;
+}
+
+/* ICON RIGHT */
+.route-point i{
+    color:#ff7a00;
+    font-size:14px;
+}
+
+/* SWAP BUTTON FIX */
+.swap-btn{
+    position:absolute;
+    top:50%;
+    right:12px;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    font-size:14px;
+    border-radius:50%;
+    background:linear-gradient(to right,#ff7a00,#ff512f);
+    color:white;
+    border:none;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+.quick-date {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+/* PREMIUM PILL BUTTON */
+.quick-btn {
+    flex: 1;
+    min-width: 90px;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+
+    text-align: center;
+    cursor: pointer;
+
+    font-weight: 600;
+    font-size: 13px;
+
+    background: #f5f6fa;
+    color: #444;
+
+    border: 1px solid #eee;
+
+    transition: all 0.25s ease;
+
+    position: relative;
+    overflow: hidden;
+}
+
+/* ICON DOT STYLE */
+.quick-btn::before {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ff7a00;
+    opacity: 0.6;
+}
+
+/* HOVER EFFECT */
+.quick-btn:hover {
+    background: #fff3e6;
+    border-color: #ffcc99;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255,122,0,0.15);
+}
+
+/* ACTIVE LOOK (optional if you want highlight) */
+.quick-btn.active {
+    background: linear-gradient(135deg, #ff7a00, #ff512f);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 18px rgba(255,81,47,0.25);
+}
+
+.quick-btn.active::before {
+    background: white;
+    opacity: 1;
+}
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100vh;
+
+    background: #fff;
+
+    display: none;
+    flex-direction: column;
+
+    z-index: 2000;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+
+    position: sticky;
+    top: 0;
+    background: white;
+}
+
+.modal-header i {
+    font-size: 18px;
+    cursor: pointer;
+    color: #ff512f;
+}
+
+.modal-header input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+.modal-header {
+    width: 90%;
+    max-width: 420px;
+    background: white;
+    border-radius: 14px 14px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+}
+
+.list {
+    width: 90%;
+    max-width: 420px;
+    background: white;
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 0 0 14px 14px;
+}
+/* APP BUTTON WRAPPER FIX */
+.app-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: nowrap;   /* IMPORTANT: force side-by-side */
+}
+
+/* STORE BUTTON */
+.store-btn {
+    flex: 1;             /* equal width */
+    max-width: 180px;    /* keeps them clean */
+    min-width: 140px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 12px 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: white;
+
+    transition: 0.3s;
+}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 480px) {
+    .app-buttons {
+        gap: 10px;
+    }
+
+    .store-btn {
+        padding: 10px 12px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .store-btn i {
+        font-size: 20px;
+    }
+
+    .store-btn strong {
+        font-size: 13px;
+    }
+
+    .store-btn span {
+        font-size: 9px;
+    }
+}
+.tutorial-card video{
+    width:100%;
+    height:140px;
+    object-fit:cover;
+    border-radius:0;
+}
+.copyright-footer {
+    text-align: center;
+    padding: 14px 10px;
+    font-size: 12px;
+    color: #080101;
+    background: linear-gradient(to right, #f4f2f0, #e9e4e3);
+    margin-top: 20px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+}
+
+/* HEADER */
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.review-header h2 {
+    font-size: 16px;
+    color: #ff512f;
+}
+
+.review-header button {
+    background: none;
+    border: none;
+    color: #ff512f;
+    font-weight: 600;
+    cursor: pointer;
+}
+.review-track {
+    display: flex;
+    gap: 1px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 0px 10px;   /* 👈 IMPORTANT: adds side space for peek */
+}
+
+.review-track::-webkit-scrollbar {
+    display: none;
+}
+
+.review-box {
+    min-width: 260px;   /* was 280px → slightly reduced */
+    background: #fff;
+    border-radius: 16px;
+    padding: 8px;
+    scroll-snap-align: start;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+}
+.review-track {
+    scroll-padding-left: 16px;
+}
+
+/* TOP ROW */
+.review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* USER INFO */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ff7a00;
+}
+
+.user-info h4 {
+    font-size: 13px;
+    margin: 0;
+}
+
+/* STARS */
+.rating {
+    color: #ffb400;
+    font-size: 13px;
+}
+
+.review-text {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+
+    word-wrap: break-word;      /* breaks long words */
+    overflow-wrap: break-word;  /* modern support */
+    word-break: break-word;     /* force wrap if needed */
+
+    white-space: normal;        /* allow multi-line */
+}
+
+/* STAR INPUT */
+.star-input {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+.star-input i {
+    font-size: 18px;
+    color: #ddd;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.star-input i.active {
+    color: #ffb400;
+}
+/* ===== COMPACT REVIEW CARD ===== */
+#userPreview {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;   /* center everything */
+    gap: 8px;
+
+    background: #fff;
+    padding: 12px;         /* reduced */
+    border-radius: 16px;
+
+    box-shadow: 0 6px 15px rgba(0,0,0,0.07);
+    border: 1px solid #eee;
+    margin-bottom: 12px;
+
+    max-width: 320px;      /* smaller width */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* TITLE */
+
+/* PROFILE IMAGE */
+#previewPhoto img,
+#previewPhoto div {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50%;
+    border: 2px solid #ff7a00;
+    box-shadow: 0 4px 10px rgba(255,122,0,0.25);
+}
+
+/* STACK NAME BELOW IMAGE */
+#userPreview > div:nth-child(2) {
+    text-align: center;
+    margin-top: -2px;
+}
+
+#previewName {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 4px;
+    color: #222;
+}
+
+/* SMALL SUBTEXT */
+#userPreview p {
+    font-size: 11px;
+    color: #888;
+    margin: 2px 0 0;
+}
+
+/* ⭐ STARS — GLOW EFFECT */
+.star-input {
+    justify-content: center;
+    margin-top: 3px;
+}
+
+.star-input i {
+    font-size: 17px;
+    color: #ddd;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.star-input i.active {
+    color: #ffb400;
+    text-shadow: 0 2px 6px rgba(255,180,0,0.4);
+}
+
+/* HOVER FEEL */
+.star-input i:hover {
+    transform: scale(1.15);
+}
+
+/* TEXTAREA — PREMIUM INPUT */
+#comment {
+    width: 100%;
+    min-height: 75px;
+    padding: 10px 12px;
+
+    border-radius: 12px;
+    border: 1px solid #eee;
+
+    font-size: 12px;
+    resize: none;
+    outline: none;
+
+    background: #fafafa;
+    transition: 0.25s;
+}
+
+#comment:focus {
+    background: #fff;
+    border-color: #ff7a00;
+    box-shadow: 0 0 0 2px rgba(255,122,0,0.12);
+}
+
+/* BUTTON — MATCH BRAND */
+#reviewForm button {
+    padding: 11px;
+    font-size: 13px;
+    border-radius: 12px;
+
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+
+    background: linear-gradient(to right, #ff7a00, #ff512f);
+
+    box-shadow: 0 5px 12px rgba(255,81,47,0.25);
+    transition: 0.3s;
+}
+
+/* HOVER */
+#reviewForm button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(255,81,47,0.35);
+}
+
+/* CLICK EFFECT */
+#reviewForm button:active {
+    transform: scale(0.97);
+}
+/* ===== ALL REVIEWS MODAL FIX ===== */
+#allReviewsModal > div {
+    background: #fff;
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 15px;
+    border-radius: 12px;
+
+    max-height: 80vh;
+    overflow-y: auto;   /* IMPORTANT */
+}
+
+/* LIST STACKING */
+#allReviewsList {
+    display: flex;
+    flex-direction: column; /* IMPORTANT */
+    gap: 12px;              /* spacing between reviews */
+    margin-top: 10px;
+}
+
+/* EACH REVIEW CARD */
+#allReviewsList > div {
+    display: block;
+    background: #fafafa;
+    padding: 12px;
+    border-radius: 12px;
+}
+/* FULL SCREEN MODAL */
+.reviews-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    z-index: 9999;
+}
+
+/* MAIN WHITE CONTAINER */
+.reviews-box {
+    position: relative;
+    width: 90%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+/* FIXED HEADER */
+.reviews-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 15px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+/* CLOSE BUTTON STYLE */
+.reviews-header button {
+    background: #ff512f;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* SCROLL AREA */
+.reviews-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 15px;
+}
+.dreamliner-reply {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+
+    background: #f8f9fb;
+    border: 1px solid #eef0f3;
+
+    font-size: 12px;
+    color: #444;
+    line-height: 1.4;
+
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.dreamliner-reply i {
+    color: #1d9bf0;
+    margin-top: 2px;
+    font-size: 12px;
+}
 </style>
 </head>
 <body>
@@ -1049,19 +1846,47 @@ body {
 </div>
 
 <div class="booking-card">
-    <div class="route-box">
-        <div class="input-box" onclick="openModal('from')">
-            <i class="fas fa-location-dot"></i> 
-            <span id="fromText">From</span>
-        </div>
+    <div class="route-box bus-route">
 
-        <button class="swap-btn" onclick="swapCities()">⇄</button>
-
-        <div class="input-box" onclick="openModal('to')">
-            <i class="fas fa-map-marker-alt"></i>
-            <span id="toText">To</span>
+        <!-- TOP: BUS ICON -->
+        <div class="bus-header">
+            <i class="fas fa-bus"></i>
+            <span>Plan Your Journey</span>
         </div>
+    
+        <!-- FROM -->
+        <div class="route-point from" onclick="openModal('from')">
+            <div class="dot start"></div>
+            <div class="route-text">
+                <small>From</small>
+                <span id="fromText">Select Boarding Point</span>
+            </div>
+            <i class="fas fa-location-arrow"></i>
+        </div>
+    
+        <!-- LINE -->
+        <div class="route-line"></div>
+    
+        <!-- TO -->
+        <div class="route-point to" onclick="openModal('to')">
+            <div class="dot end"></div>
+            <div class="route-text">
+                <small>To</small>
+                <span id="toText">Select Destination</span>
+            </div>
+            <i class="fas fa-flag-checkered"></i>
+        </div>
+    
+        <!-- SWAP -->
+        <button class="swap-btn" onclick="swapCities()">
+            <i class="fas fa-exchange-alt"></i>
+        </button>
+    
     </div>
+
+
+
+
 
     <div class="date-box" onclick="document.getElementById('date').showPicker();">
         <i class="fas fa-calendar-alt"></i>
@@ -1078,8 +1903,14 @@ body {
 </div>
 
 <div class="modal" id="modal">
-    <input type="text" placeholder="Search city..." onkeyup="filterList(this.value)">
+
+    <div class="modal-header">
+        <i class="fas fa-arrow-left" onclick="closeModal()"></i>
+        <input type="text" placeholder="Search city..." onkeyup="filterList(this.value)">
+    </div>
+
     <div class="list" id="cityList"></div>
+
 </div>
 <div class="main-content">
     <div class="drag-handle"></div>
@@ -1101,182 +1932,146 @@ body {
         </div>
     </div>
 
+    <div class="feature-section">
 
-
-
-
-    <section class="section about-premium">
-        <h2>Why Travel With Dreamliner</h2>
-    
-        <p class="about-text">
-            Experience seamless bus booking with speed, safety, and comfort.
-            Thousands of travelers trust Dreamliner for hassle-free journeys.
-        </p>
-    
-        <div class="about-features">
-            <div class="about-box">
-                <i class="fas fa-bolt"></i>
-                <h4>Fast Booking</h4>
-                <p>Book tickets in seconds</p>
-            </div>
-    
-            <div class="about-box">
-                <i class="fas fa-shield-alt"></i>
-                <h4>Secure</h4>
-                <p>Safe payments & data</p>
-            </div>
-    
-            <div class="about-box">
-                <i class="fas fa-headset"></i>
-                <h4>24/7 Support</h4>
-                <p>Always here to help</p>
-            </div>
+        <div class="feature-header">
+            <h3>Why Travel With Dreamliner?</h3>
+            <p>Trusted by thousands for safe, fast & comfortable journeys</p>
         </div>
     
-        <div class="about-stats">
-            <div>
-                <h3>10K+</h3>
-                <span>Happy Users</span>
-            </div>
-            <div>
-                <h3>500+</h3>
-                <span>Routes</span>
-            </div>
-            <div>
-                <h3>99%</h3>
-                <span>Success Rate</span>
-            </div>
-        </div>
-    </section>
+        <div class="feature-slider">
     
-    <section class="section about-premium">
-        <h2>About Dreamliner</h2>
-        <p class="about-sub">
-            Smooth Journeys, Superior Comfort
-        </p>
-    
-        <p class="about-desc">
-            At Dreamliner, we believe that a journey is just as important as the destination.
-            We are redefining road travel between Biswanath Charali and Guwahati,
-            ensuring every mile is defined by luxury, safety, and punctuality.
-        </p>
-    
-        <!-- FLEET -->
-        <div class="about-card">
-            <div class="about-icon"><i class="fas fa-bus"></i></div>
-            <div>
-                <h3>Our Fleet – Bharat Benz Experience</h3>
-                <p>
-                    Travel in premium Bharat Benz 2x2 Semi-Sleeper buses, engineered for stability,
-                    comfort, and smooth long-distance journeys. Spacious seating and climate control
-                    ensure a relaxing experience every time.
-                </p>
-            </div>
-        </div>
-    
-        <!-- SAFETY -->
-        <div class="about-card">
-            <div class="about-icon"><i class="fas fa-shield-alt"></i></div>
-            <div>
-                <h3>Your Comfort & Safety</h3>
-                <ul>
-                    <li>Dedicated female passenger safety protocol</li>
-                    <li>Strict hygiene and safety standards</li>
-                    <li>Well-trained staff and verified drivers</li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- FEATURES -->
-        <div class="about-card">
-            <div class="about-icon"><i class="fas fa-star"></i></div>
-            <div>
-                <h3>Onboard Experience</h3>
-                <ul>
-                    <li>Individual charging points at every seat</li>
-                    <li>High-efficiency air conditioning</li>
-                    <li>Comfortable reclining seats</li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- SCHEDULE -->
-        <div class="schedule-box">
-            <h3>Daily Schedule</h3>
-    
-            <div class="schedule-row">
-                <div>
-                    <strong>Morning Departure</strong>
-                    <p>6:15 AM – Biswanath Charali</p>
-                    <p>11:45 AM – Guwahati</p>
-                    <small>Via Tezpur & Nagaon</small>
+            <div class="feature-card">
+                <div class="icon-box fast">
+                    <i class="fas fa-bolt"></i>
                 </div>
-    
                 <div>
-                    <strong>Return Journey</strong>
-                    <p>3:50 PM – Guwahati</p>
-                    <p>Return to Biswanath Charali</p>
+                    <h4>Instant Booking</h4>
+                    <p>Book tickets in seconds with a smooth checkout experience.</p>
                 </div>
             </div>
+    
+            <div class="feature-card">
+                <div class="icon-box secure">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div>
+                    <h4>Secure Payments</h4>
+                    <p>Safe and encrypted transactions every time you book.</p>
+                </div>
+            </div>
+    
+            <div class="feature-card">
+                <div class="icon-box support">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div>
+                    <h4>24/7 Support</h4>
+                    <p>We are always available to help you anytime.</p>
+                </div>
+            </div>
+    
+            <div class="feature-card">
+                <div class="icon-box comfort">
+                    <i class="fas fa-couch"></i>
+                </div>
+                <div>
+                    <h4>Comfort Travel</h4>
+                    <p>Spacious seats and smooth long-distance journeys.</p>
+                </div>
+            </div>
+    
+        </div>
+    </div>
+      
+    
+    <section class="section review-carousel">
+
+        <div class="review-header">
+            <h1>Share Your Experience</h1>
+            
+            
+        </div>
+    <!-- USER PREVIEW (NEW) -->
+    <div id="userPreview" style="display:none; align-items:center; gap:10px; margin-bottom:10px;">
+            
+        <div id="previewPhoto"></div>
+    
+        <div>
+            <strong id="previewName">User</strong>
+            
+        </div>
+        <!-- STAR INPUT -->
+        <div class="star-input" id="starInput">
+            <i class="fa fa-star" onclick="setStar(1)"></i>
+            <i class="fa fa-star" onclick="setStar(2)"></i>
+            <i class="fa fa-star" onclick="setStar(3)"></i>
+            <i class="fa fa-star" onclick="setStar(4)"></i>
+            <i class="fa fa-star" onclick="setStar(5)"></i>
         </div>
     
-        <p class="about-footer">
-            Dreamliner is more than just a bus service — it’s your trusted travel partner in Assam.
-        </p>
-    </section>
-    
-    <section class="section review-premium">
-        <h2>Customer Reviews</h2>
-    
-        <div id="reviewList" class="review-slider"></div>
+        <input type="hidden" id="rating" value="0">
     
         <div class="review-form" id="reviewForm" style="display:none;">
-            <select id="rating">
-                <option value="5">5 Star</option>
-                <option value="4">4 Star</option>
-            </select>
-    
             <textarea id="comment" placeholder="Share your experience..."></textarea>
             <button onclick="addReview()">Submit Review</button>
         </div>
     
         <p id="loginMsg">Login to write a review</p>
-    </section>
-    <!-- TUTORIAL SECTION -->
-<div class="section">
-    <h2>Travel Guide</h2>
-    <p style="font-size:13px;color:#666;margin-bottom:12px;">
-        Swipe to learn how Dreamliner works
-    </p>
 
-    <!-- DOTS -->
-    <div class="dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+        
+        
+        </div>
+        <div class="review-header">
+            <h2>What Travelers Say</h2>
+            <button onclick="openAllReviews()">View All</button>
+        </div>
+        <!-- SLIDER -->
+        <div class="review-track" id="reviewTrack"></div>
+    
+    </section>
+    <div id="allReviewsModal" class="reviews-modal">
+
+        <div class="reviews-box">
+    
+            <!-- FIXED HEADER -->
+            <div class="reviews-header">
+                <h3>All Reviews</h3>
+                <button onclick="closeAllReviews()">Close</button>
+            </div>
+    
+            <!-- SCROLLABLE CONTENT -->
+            <div id="allReviewsList" class="reviews-list"></div>
+    
+        </div>
+    
     </div>
 
-    <!-- SLIDER -->
+
     <div class="tutorial-slider" id="tutorialSlider">
 
-        <div class="tutorial-card" onclick="openVideo('use.mp4')">
-            <img src="t1.jpg">
+        <div class="tutorial-card" onclick="openVideo('t1.mp4')">
+            <video muted autoplay loop playsinline>
+                <source src="t1.mp4" type="video/mp4">
+            </video>
             <h3>How to Use</h3>
         </div>
-
-        <div class="tutorial-card" onclick="openVideo('reschedule.mp4')">
-            <img src="t2.jpg">
+    
+        <div class="tutorial-card" onclick="openVideo('t1.mp4')">
+            <video muted autoplay loop playsinline>
+                <source src="t1.mp4" type="video/mp4">
+            </video>
             <h3>How to Reschedule</h3>
         </div>
-
-        <div class="tutorial-card" onclick="openVideo('refund.mp4')">
-            <img src="t3.jpg">
+    
+        <div class="tutorial-card" onclick="openVideo('t1.mp4')">
+            <video muted autoplay loop playsinline>
+                <source src="t1.mp4" type="video/mp4">
+            </video>
             <h3>Cancel / Refund</h3>
         </div>
-
+    
     </div>
-</div>
-
 <!-- VIDEO POPUP -->
 <div class="video-popup" id="videoPopup">
     <div class="video-box">
@@ -1359,7 +2154,7 @@ body {
         <a href="#" class="store-btn playstore" target="_blank">
             <i class="fab fa-google-play"></i>
             <div>
-                <span>Get it on</span>
+                <span>Get it on the </span>
                 <strong>Google Play</strong>
             </div>
         </a>
@@ -1378,6 +2173,10 @@ body {
 </section>
     
     <footer class="footer">
+        <!-- FOOTER COPYRIGHT -->
+<div class="copyright-footer">
+    © 2026 Dreamliner. All Rights Reserved. | Designed  for travelers
+</div>
    
     </footer>
     
@@ -1392,14 +2191,12 @@ body {
         <i class="fas fa-ticket-alt"></i>
         <p>My Trips</p>
     </div>
-    <div onclick="alert('Help Page')">
+    <div onclick="alert('support Page')">
         <i class="fas fa-headset"></i>
-        <p>Help</p>
+        <p>Support</p>
     </div>
 </div>
-<button class="floating-offer" onclick="alert('Coupons Open')">
-    🎁
-    </button>
+
    
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1421,17 +2218,75 @@ const db = getFirestore(app);
 
 let currentUser = null;
 
-onAuthStateChanged(auth, (user) => {
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+onAuthStateChanged(auth, async (user) => {
     currentUser = user;
 
     if (user) {
         document.getElementById("reviewForm").style.display = "block";
         document.getElementById("loginMsg").style.display = "none";
+        document.getElementById("userPreview").style.display = "flex";
+
+        // 🔥 FETCH PROFILE
+        const profileRef = doc(db, "profiles", user.uid);
+        const profileSnap = await getDoc(profileRef);
+
+        if (profileSnap.exists()) {
+            const data = profileSnap.data();
+
+            currentUser.profileName = data.name;
+            currentUser.profilePhoto = data.photoURL;
+        } else {
+            currentUser.profileName = user.displayName || "User";
+            currentUser.profilePhoto = user.photoURL || "";
+        }
+
+        // ✅ UPDATE UI PREVIEW
+        updateUserPreview();
+
     } else {
         document.getElementById("reviewForm").style.display = "none";
         document.getElementById("loginMsg").style.display = "block";
+        document.getElementById("userPreview").style.display = "none";
     }
 });
+function updateUserPreview() {
+    const nameEl = document.getElementById("previewName");
+    const photoEl = document.getElementById("previewPhoto");
+
+    if (!currentUser) return;
+
+    nameEl.innerText = currentUser.profileName || "User";
+
+    if (currentUser.profilePhoto) {
+        photoEl.innerHTML = `<img src="${currentUser.profilePhoto}" 
+            style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #ff7a00;">`;
+    } else {
+        photoEl.innerHTML = `
+            <div style="
+                width:40px;
+                height:40px;
+                border-radius:50%;
+                background:#ff7a00;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                color:white;
+                font-weight:bold;">
+                <i class="fas fa-user"></i>
+            </div>
+        `;
+    }
+}
+function setStar(val) {
+    document.getElementById("rating").value = val;
+
+    document.querySelectorAll(".star-input i").forEach((star, index) => {
+        star.classList.toggle("active", index < val);
+    });
+}
+setStar(0);
 async function addReview() {
     if (!currentUser) {
         alert("Please login first");
@@ -1439,6 +2294,10 @@ async function addReview() {
     }
 
     let rating = document.getElementById("rating").value;
+    if (rating == 0) {
+    alert("Please select a rating");
+    return;
+}
     let comment = document.getElementById("comment").value;
 
     if (!comment) {
@@ -1447,9 +2306,10 @@ async function addReview() {
     }
 
     await addDoc(collection(db, "reviews"), {
-        name: currentUser.displayName,
-        photo: currentUser.photoURL,
-        rating: rating,
+        uid: currentUser.uid,
+        name: currentUser.profileName,   // ✅ SAME ALWAYS
+        photo: currentUser.profilePhoto, // ✅ SAME ALWAYS
+        rating: Number(rating),
         comment: comment,
         createdAt: serverTimestamp()
     });
@@ -1457,38 +2317,160 @@ async function addReview() {
     document.getElementById("comment").value = "";
 }
 const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+const reviewTrack = document.getElementById("reviewTrack");
 
 onSnapshot(q, (snapshot) => {
-    let container = document.getElementById("reviewList");
-    container.innerHTML = "";
+    reviewTrack.innerHTML = "";
+
+    // ✅ ALSO RENDER MODAL LIST
+    renderAllReviews(snapshot);
 
     snapshot.forEach(doc => {
         let data = doc.data();
 
-        let stars = "★".repeat(data.rating);
+        let stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
 
         let div = document.createElement("div");
-        div.className = "review-card";
+        div.className = "review-box";
+
+        const name = data.name ? data.name : "User";
+        const photo = data.photo;
+        const date = data.createdAt?.toDate?.()
+    ? data.createdAt.toDate().toLocaleDateString()
+    : "Just now";
+
+div.innerHTML = `
+    <div class="review-top">
+
+        <div class="user-info">
+            ${
+                photo
+                ? `<img src="${photo}">`
+                : `<div style="
+                        width:38px;
+                        height:38px;
+                        border-radius:50%;
+                        background:#ff7a00;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        color:white;
+                        font-weight:bold;
+                    ">
+                    <i class="fas fa-user"></i>
+                   </div>`
+            }
+
+            <div>
+                <h4>${name}</h4>
+
+                <!-- ⭐ STARS MOVED BELOW NAME -->
+                <div style="color:#ffb400; font-size:13px; margin-top:3px;">
+                    ${stars}
+                </div>
+            </div>
+        </div>
+
+        <!-- DATE REPLACES RIGHT SIDE STARS -->
+        <div style="font-size:11px; color:#888;">
+            ${date}
+        </div>
+
+    </div>
+
+   <div class="review-text">
+    ${data.comment}
+</div>
+
+<div class="dreamliner-reply">
+    <i class="fas fa-headset"></i>
+
+    <div>
+        <strong style="display:flex; align-items:center; gap:6px;">
+            Dreamliner
+            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
+        </strong>
+
+        <div style="margin-top:2px;">
+            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
+        </div>
+    </div>
+</div>
+`;    reviewTrack.appendChild(div);
+    });
+});
+function renderAllReviews(snapshot) {
+    const list = document.getElementById("allReviewsList");
+    list.innerHTML = "";
+
+    snapshot.forEach(doc => {
+        let data = doc.data();
+
+        let stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
+
+        const name = data.name || "User";
+        const photo = data.photo;
+        const date = data.createdAt?.toDate?.()
+            ? data.createdAt.toDate().toLocaleDateString()
+            : "Just now";
+
+        let div = document.createElement("div");
+
+        div.style = `
+            border-bottom:1px solid #eee;
+            padding:12px 0;
+        `;
 
         div.innerHTML = `
-            <div class="review-top">
-                <img src="${data.photo || 'https://i.pravatar.cc/40'}" class="review-img"/>
+            <div style="display:flex; gap:10px; align-items:center;">
+                ${
+                    photo
+                    ? `<img src="${photo}" style="width:40px;height:40px;border-radius:50%;">`
+                    : `<div style="
+                        width:40px;height:40px;border-radius:50%;
+                        background:#ff7a00;display:flex;align-items:center;
+                        justify-content:center;color:white;">
+                        <i class="fas fa-user"></i>
+                    </div>`
+                }
+
                 <div>
-                    <h4>${data.name}</h4>
-                    <div class="stars">${stars}</div>
+                    <strong style="font-size:13px;">${name}</strong><br>
+                    <span style="color:#ffb400; font-size:12px;">${stars}</span><br>
+                    <small style="color:#888;">${date}</small>
                 </div>
             </div>
 
-            <p>${data.comment}</p>
+           <p style="font-size:13px; margin:8px 0 0;">
+    ${data.comment}
+</p>
 
-            <div class="reply">
-                Thank you for your review. We will try every day to make your travel even better.
-            </div>
+<div class="dreamliner-reply">
+<div class="dreamliner-reply">
+    <i class="fas fa-headset"></i>
+
+    <div>
+        <strong style="display:flex; align-items:center; gap:6px;">
+            Dreamliner
+            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
+        </strong>
+
+        <div style="margin-top:2px;">
+            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
+        </div>
+    </div>
+</div>
         `;
 
-        container.appendChild(div);
+        list.appendChild(div);
     });
-});
+}
+function openAllReviews() {
+    document.getElementById("allReviewsModal").style.display = "block";
+}
+function closeAllReviews() {
+    document.getElementById("allReviewsModal").style.display = "none";
+}
 let current = 0;
 const images = document.querySelectorAll("#slides img");
 
@@ -1634,17 +2616,22 @@ window.addEventListener('storage', (event) => {
 });
 
 
-
-// OPEN VIDEO POPUP
 function openVideo(src){
-    document.getElementById("videoPopup").style.display = "flex";
-    document.getElementById("popupVideo").src = src;
-}
+    const popup = document.getElementById("videoPopup");
+    const video = document.getElementById("popupVideo");
 
-// CLOSE VIDEO POPUP
+    video.src = src;
+    popup.style.display = "flex";
+
+    video.requestFullscreen?.(); // auto fullscreen if supported
+}
 function closeVideo(){
-    document.getElementById("videoPopup").style.display = "none";
-    document.getElementById("popupVideo").pause();
+    const popup = document.getElementById("videoPopup");
+    const video = document.getElementById("popupVideo");
+
+    popup.style.display = "none";
+    video.pause();
+    video.src = "";
 }
 
 // DOT INDICATOR (basic scroll tracking)
@@ -1657,7 +2644,27 @@ slider.addEventListener("scroll", () => {
     dots.forEach(d => d.classList.remove("active"));
     if(dots[index]) dots[index].classList.add("active");
 });
-// Add these lines at the end of your script
+const featureSlider = document.querySelector(".feature-slider");
+
+let scrollAmount = 0;
+let cardWidth = 270; // approx card width + gap
+
+function autoScrollFeatures() {
+    if (!featureSlider) return;
+
+    scrollAmount += cardWidth;
+
+    // if reached end → reset
+    if (scrollAmount >= featureSlider.scrollWidth - featureSlider.clientWidth) {
+        scrollAmount = 0;
+    }
+
+    featureSlider.scrollTo({
+        left: scrollAmount,
+        behavior: "smooth"
+    });
+}
+setInterval(autoScrollFeatures, 1000); 
 window.openModal = openModal;
 window.swapCities = swapCities;
 window.filterList = filterList;
@@ -1669,7 +2676,10 @@ window.closeLoginPopup = closeLoginPopup;
 window.openVideo = openVideo;
 window.closeVideo = closeVideo;
 window.addReview = addReview;
+window.openAllReviews = openAllReviews;
+window.closeAllReviews = closeAllReviews;
+window.setStar = setStar;
 </script>
 
 </body>
-</html>
+</html> 
