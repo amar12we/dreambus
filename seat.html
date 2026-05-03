@@ -1677,6 +1677,10 @@ document.addEventListener("click", (e) => {
 console.log("Coupon clicked");
 
 async function applyCoupon() {
+    if (isReschedule) {
+        showToast("Coupons not applicable on reschedule", "info");
+        return;
+    }
 
 const list = document.getElementById("couponList");
 if (list) list.classList.remove("show");
@@ -1927,6 +1931,59 @@ document.getElementById("couponInput").addEventListener("focus", () => {
     
     function updateFareInfo(){
 
+// 🔥 RESCHEDULE MODE → FORCE ₹0
+if (isReschedule) {
+
+    const zero = "₹0";
+
+    // STEP 1
+    const step1Ticket = document.getElementById("step1TicketFare");
+    if (step1Ticket) step1Ticket.innerText = zero;
+
+    const step1GST = document.getElementById("step1GST");
+    if (step1GST) step1GST.innerText = zero;
+
+    const step1Round = document.getElementById("step1RoundOff");
+    if (step1Round) step1Round.innerText = zero;
+
+    const step1Discount = document.getElementById("step1Discount");
+    if (step1Discount) step1Discount.innerText = zero;
+
+    const step1Total = document.getElementById("step1Total");
+    if (step1Total) step1Total.innerText = zero;
+
+    // STEP 2
+    document.getElementById("modalTotalFare").innerText = zero;
+
+    const breakdownBase = document.getElementById("breakdownBase");
+    if (breakdownBase) breakdownBase.innerText = zero;
+
+    const breakdownGST = document.getElementById("breakdownGST");
+    if (breakdownGST) breakdownGST.innerText = zero;
+
+    const breakdownDiscount = document.getElementById("breakdownDiscount");
+    if (breakdownDiscount) breakdownDiscount.innerText = zero;
+
+    const step2Fare = document.getElementById("step2Fare");
+    if(step2Fare) step2Fare.innerText = zero;
+
+    const payAmount = document.getElementById("payAmount");
+    if(payAmount) payAmount.innerText = "0";
+
+    // SAFE DATA
+    window.currentFareData = {
+        baseFare: 0,
+        gstAmount: 0,
+        discountAmount: 0,
+        finalFare: 0
+    };
+
+    return; // 🚀 STOP normal calculation
+}
+
+
+// ================= NORMAL FLOW (UNCHANGED) =================
+
 const baseFare = selectedSeats.length * farePerSeat;
 const gstAmount = Math.ceil(baseFare * 0.05);
 
@@ -1943,12 +2000,10 @@ let discountAmount = 0;
 
 if (appliedCoupon && discountedFare) {
     finalFare = discountedFare;
-
-    // ✅ Correct & safe discount calculation
     discountAmount = Math.max(0, (baseFare + gstAmount) - discountedFare);
 }
 
-// ================= STEP 1 UPDATE =================
+// STEP 1
 const step1Ticket = document.getElementById("step1TicketFare");
 if (step1Ticket) step1Ticket.innerText = `₹${baseFare}`;
 
@@ -1968,7 +2023,7 @@ if (step1Discount) {
 const step1Total = document.getElementById("step1Total");
 if (step1Total) step1Total.innerText = `₹${Math.ceil(finalFare)}`;
 
-// ================= STEP 2 UPDATE =================
+// STEP 2
 document.getElementById("modalTotalFare").innerText = "₹" + Math.ceil(finalFare);
 
 const breakdownBase = document.getElementById("breakdownBase");
@@ -1976,25 +2031,25 @@ if (breakdownBase) breakdownBase.innerText = `₹${baseFare}`;
 
 const breakdownGST = document.getElementById("breakdownGST");
 if (breakdownGST) breakdownGST.innerText = `₹${gstAmount}`;
+
 const breakdownDiscount = document.getElementById("breakdownDiscount");
-
 if (breakdownDiscount) {
+    if (appliedCoupon && discountAmount > 0) {
+        breakdownDiscount.innerText = `-₹${Math.ceil(discountAmount)}`;
+        breakdownDiscount.style.color = "#2e7d32";
+    } else {
+        breakdownDiscount.innerText = `-₹0`;
+        breakdownDiscount.style.color = "#000";
+    }
+}
 
-if (appliedCoupon && discountAmount > 0) {
-    breakdownDiscount.innerText = `-₹${Math.ceil(discountAmount)}`;
-    breakdownDiscount.style.color = "#2e7d32"; // green
-} else {
-    breakdownDiscount.innerText = `-₹0`;
-    breakdownDiscount.style.color = "#000";
-}
-}
 const step2Fare = document.getElementById("step2Fare");
 if(step2Fare) step2Fare.innerText = "₹" + Math.ceil(finalFare);
 
 const payAmount = document.getElementById("payAmount");
 if(payAmount) payAmount.innerText = Math.ceil(finalFare);
 
-// Hidden summary (optional safety)
+// Hidden summary
 const fareInfo = document.getElementById("fareInfo");
 if(fareInfo){
     fareInfo.innerText = `Selected Seats: ${selectedSeats.length} | Total Fare: ₹${Math.ceil(finalFare)}`;
@@ -2010,6 +2065,8 @@ window.currentFareData = {
 };
 
 }
+
+
 
 document.getElementById("gstToggle").onclick = () => {
         const b = document.getElementById("gstBreakdown");
@@ -2533,16 +2590,17 @@ document.getElementById("backStepBtn").onclick = function() {
         document.getElementById("processingText").innerText = "Creating Order...";
     
         const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-    seats: selectedSeats.length,
-    from,
-    to,
-    trip,
-    finalAmount: discountedFare || Number(document.getElementById("payAmount").innerText)
-})
-        });
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        seats: selectedSeats.length,
+        from,
+        to,
+        trip,
+        couponCode: appliedCoupon,
+        userUid: currentUser?.uid || null
+    })
+});
     
         const orderData = await orderRes.json();
     
