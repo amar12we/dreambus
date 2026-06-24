@@ -239,7 +239,7 @@ cursor:pointer;
 <body>
 
 <div class="header">
-<button class="back-btn" onclick="window.history.back()">
+<button class="back-btn" onclick="stopVoice(); window.history.back();">
 <i class="fas fa-chevron-left"></i>
 </button>
 
@@ -279,7 +279,8 @@ input:"Type your message...",
 whatNext:"What next?",
 chatAgain:"Chat Again",
 employee:"Chat with Employee",
-serverError:"Server connection failed."
+serverError:"Server connection failed.",
+invalid:"Sorry, I can help only with the options below. Please select one from here:"
 },
 
 hi:{
@@ -295,11 +296,65 @@ input:"अपना संदेश लिखें...",
 whatNext:"आगे क्या?",
 chatAgain:"फिर से चैट करें",
 employee:"कर्मचारी से चैट करें",
-serverError:"सर्वर कनेक्शन फेल हो गया।"
+serverError:"सर्वर कनेक्शन फेल हो गया।",
+invalid:"माफ़ करें, मैं केवल नीचे दिए गए विकल्पों में मदद कर सकता हूँ। कृपया यहाँ से एक विकल्प चुनें:"
 }
 };
 
 let currentLang = "en";
+
+function getUserQuestion(type){
+const questions = {
+en:{
+book:"How can I book a ticket?",
+cancel:"How can I cancel my ticket?",
+refund:"What is the refund policy?",
+boarding:"What is the boarding information?",
+reschedule:"How can I reschedule my journey?",
+support:"How can I contact support?"
+},
+hi:{
+book:"मैं टिकट कैसे बुक कर सकता हूँ?",
+cancel:"मैं अपना टिकट कैसे रद्द कर सकता हूँ?",
+refund:"रिफंड नीति क्या है?",
+boarding:"बोर्डिंग जानकारी क्या है?",
+reschedule:"मैं अपनी यात्रा पुनः कैसे निर्धारित कर सकता हूँ?",
+support:"मैं सहायता से कैसे संपर्क कर सकता हूँ?"
+}
+};
+
+return questions[currentLang][type];
+}
+
+function detectOption(text){
+text = text.toLowerCase();
+
+if(text.includes("book") || text.includes("ticket book") || text.includes("टिकट बुक")){
+return "book";
+}
+
+if(text.includes("cancel") || text.includes("टिकट रद्द") || text.includes("रद्द")){
+return "cancel";
+}
+
+if(text.includes("refund") || text.includes("रिफंड")){
+return "refund";
+}
+
+if(text.includes("boarding") || text.includes("board") || text.includes("बोर्डिंग")){
+return "boarding";
+}
+
+if(text.includes("reschedule") || text.includes("change journey") || text.includes("यात्रा पुनः")){
+return "reschedule";
+}
+
+if(text.includes("support") || text.includes("help") || text.includes("सहायता")){
+return "support";
+}
+
+return null;
+}
 
 function loadUI(){
 
@@ -371,23 +426,38 @@ if(!type && !typedText){
 return;
 }
 
-if(type){
-chat.innerHTML += `
-<div class="message user">${LANG[currentLang][type]}</div>
-`;
-}else{
+if(!type){
+const matchedType = detectOption(typedText);
+
 chat.innerHTML += `
 <div class="message user">${typedText}</div>
 `;
-}
 
-showTyping();
 input.value = "";
 chat.scrollTop = chat.scrollHeight;
 
-setTimeout(async ()=>{
+if(matchedType){
+type = matchedType;
+}else{
+chat.innerHTML += `
+<div class="message bot">${LANG[currentLang].invalid}</div>
+`;
+showOptionsAgain();
+chat.scrollTop = chat.scrollHeight;
+return;
+}
 
-removeTyping();
+}else{
+chat.innerHTML += `
+<div class="message user">${getUserQuestion(type)}</div>
+`;
+input.value = "";
+chat.scrollTop = chat.scrollHeight;
+}
+
+showTyping();
+
+setTimeout(async ()=>{
 
 try{
 
@@ -404,6 +474,8 @@ lang:currentLang
 });
 
 const data = await res.json();
+
+removeTyping();
 
 if(!data.success){
 chat.innerHTML += `
@@ -436,6 +508,8 @@ speak(data.answer);
 }
 catch(err){
 
+removeTyping();
+
 chat.innerHTML += `
 <div class="message bot">${LANG[currentLang].serverError}</div>
 `;
@@ -446,6 +520,12 @@ chat.scrollTop = chat.scrollHeight;
 
 },900);
 }
+
+document.getElementById("question").addEventListener("keydown", function(e){
+if(e.key === "Enter"){
+sendMessage();
+}
+});
 
 function openWhatsApp(){
 window.open("https://wa.me/919435818872","_blank");
@@ -470,7 +550,8 @@ const t = document.getElementById("typing");
 if(t) t.remove();
 }
 
-function speak(text){ const cleanText = text.replace(/<[^>]*>/g," "); 
+function speak(text){ 
+const cleanText = text.replace(/<[^>]*>/g," "); 
 const finalText = cleanText.replace(/\s+/g," ").trim();
 
 window.speechSynthesis.cancel();
@@ -482,6 +563,19 @@ msg.pitch = 1;
 
 window.speechSynthesis.speak(msg);
 }
+
+function stopVoice(){
+window.speechSynthesis.cancel();
+}
+
+window.addEventListener("beforeunload", stopVoice);
+window.addEventListener("pagehide", stopVoice);
+window.addEventListener("blur", stopVoice);
+document.addEventListener("visibilitychange", function(){
+if(document.hidden){
+stopVoice();
+}
+});
 
 </script>
 
