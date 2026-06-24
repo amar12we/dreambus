@@ -2198,488 +2198,553 @@ body {
         </div>
     </div>
    
-<script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import {  getAuth,  onAuthStateChanged  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-         import {  getFirestore,   collection, addDoc,   onSnapshot,  query,  orderBy,  serverTimestamp  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            onSnapshot,
+            query,
+            orderBy,
+            serverTimestamp,
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+            authDomain:"dreamliner-421b0.firebaseapp.com",
+            projectId:"dreamliner-421b0",
+            storageBucket:"dreamliner-421b0.appspot.com",
+            messagingSenderId:"454472970770",
+            appId:"1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+        let currentProfileName = "User";
+        let currentProfilePhoto = "";
+        let latestReviews = [];
+        let profilesMap = {};
+        
+        const reviewTrack = document.getElementById("reviewTrack");
+        
+        onSnapshot(collection(db, "profiles"), () => {
+    renderReviews();
+});
+        
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+        
+            if (user) {
+                document.getElementById("reviewForm").style.display = "block";
+                document.getElementById("loginMsg").style.display = "none";
+                document.getElementById("userPreview").style.display = "flex";
+        
+                await loadCurrentUserProfile();
+                updateUserPreview();
+        
+            } else {
+                document.getElementById("reviewForm").style.display = "none";
+                document.getElementById("loginMsg").style.display = "block";
+                document.getElementById("userPreview").style.display = "none";
+            }
+        });
+        
+        async function loadCurrentUserProfile() {
+            if (!currentUser) return;
+        
+            try {
+                const profileRef = doc(db, "profiles", currentUser.uid);
+                const profileSnap = await getDoc(profileRef);
+        
+                if (profileSnap.exists()) {
+                    const data = profileSnap.data();
+        
+                    currentProfileName = data.name || currentUser.displayName || "User";
+                    currentProfilePhoto = data.photoURL || currentUser.photoURL || "";
+                } else {
+                    currentProfileName = currentUser.displayName || "User";
+                    currentProfilePhoto = currentUser.photoURL || "";
+                }
+        
+            } catch (error) {
+                console.log("Profile error:", error);
+                currentProfileName = currentUser.displayName || "User";
+                currentProfilePhoto = currentUser.photoURL || "";
+            }
+        }
+        
+        function updateUserPreview() {
+            const nameEl = document.getElementById("previewName");
+            const photoEl = document.getElementById("previewPhoto");
+        
+            if (!currentUser) return;
+        
+            nameEl.innerText = currentProfileName || "User";
+        
+            if (currentProfilePhoto) {
+                photoEl.innerHTML = `<img src="${currentProfilePhoto}" 
+                style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #ff7a00;">`;
+            } else {
+                photoEl.innerHTML = `
+                <div style="
+                    width:40px;
+                    height:40px;
+                    border-radius:50%;
+                    background:#ff7a00;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:white;
+                    font-weight:bold;">
+                    <i class="fas fa-user"></i>
+                </div>`;
+            }
+        }
+        
+        function setStar(val) {
+            document.getElementById("rating").value = val;
+        
+            document.querySelectorAll(".star-input i").forEach((star, index) => {
+                star.classList.toggle("active", index < val);
+            });
+        }
+        
+        window.setStar = setStar;
+        setStar(0);
+        
+        async function addReview() {
+            if (!currentUser) {
+                alert("Please login first");
+                return;
+            }
+        
+            await loadCurrentUserProfile();
+        
+            let rating = document.getElementById("rating").value;
+        
+            if (rating == 0) {
+                alert("Please select a rating");
+                return;
+            }
+        
+            let comment = document.getElementById("comment").value.trim();
+        
+            if (!comment) {
+                alert("Write something");
+                return;
+            }
+        
+            await addDoc(collection(db, "reviews"), {
+                uid: currentUser.uid,
+                name: currentProfileName || "User",
+                photo: currentProfilePhoto || "",
+                rating: Number(rating),
+                comment: comment,
+                createdAt: serverTimestamp()
+            });
+        
+            document.getElementById("comment").value = "";
+            document.getElementById("rating").value = "0";
+            setStar(0);
+        }
+        
+        window.addReview = addReview;
+        
+        async function getLatestProfile(data) {
+    if (!data.uid) {
+        return {
+            name: data.name || "User",
+            photo: data.photo || ""
+        };
+    }
 
-  const firebaseConfig = {
-    apiKey:"AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-    authDomain:"dreamliner-421b0.firebaseapp.com",
-    projectId:"dreamliner-421b0",
-    storageBucket:"dreamliner-421b0.appspot.com",
-    messagingSenderId:"454472970770",
-    appId:"1:454472970770:web:cbf95c8b7523f24f2b5ecb"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser = null;
-
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-onAuthStateChanged(auth, async (user) => {
-    currentUser = user;
-
-    if (user) {
-        document.getElementById("reviewForm").style.display = "block";
-        document.getElementById("loginMsg").style.display = "none";
-        document.getElementById("userPreview").style.display = "flex";
-
-        // 🔥 FETCH PROFILE
-        const profileRef = doc(db, "profiles", user.uid);
+    try {
+        const profileRef = doc(db, "profiles", data.uid);
         const profileSnap = await getDoc(profileRef);
 
         if (profileSnap.exists()) {
-            const data = profileSnap.data();
+            const profile = profileSnap.data();
 
-            currentUser.profileName = data.name;
-            currentUser.profilePhoto = data.photoURL;
-        } else {
-            currentUser.profileName = user.displayName || "User";
-            currentUser.profilePhoto = user.photoURL || "";
-        }
+            let photoURL = profile.photoURL || data.photo || "";
 
-        // ✅ UPDATE UI PREVIEW
-        updateUserPreview();
-
-    } else {
-        document.getElementById("reviewForm").style.display = "none";
-        document.getElementById("loginMsg").style.display = "block";
-        document.getElementById("userPreview").style.display = "none";
-    }
-});
-function updateUserPreview() {
-    const nameEl = document.getElementById("previewName");
-    const photoEl = document.getElementById("previewPhoto");
-
-    if (!currentUser) return;
-
-    nameEl.innerText = currentUser.profileName || "User";
-
-    if (currentUser.profilePhoto) {
-        photoEl.innerHTML = `<img src="${currentUser.profilePhoto}" 
-            style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #ff7a00;">`;
-    } else {
-        photoEl.innerHTML = `
-            <div style="
-                width:40px;
-                height:40px;
-                border-radius:50%;
-                background:#ff7a00;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                color:white;
-                font-weight:bold;">
-                <i class="fas fa-user"></i>
-            </div>
-        `;
-    }
-}
-function setStar(val) {
-    document.getElementById("rating").value = val;
-
-    document.querySelectorAll(".star-input i").forEach((star, index) => {
-        star.classList.toggle("active", index < val);
-    });
-}
-setStar(0);
-async function addReview() {
-    if (!currentUser) {
-        alert("Please login first");
-        return;
-    }
-
-    let rating = document.getElementById("rating").value;
-    if (rating == 0) {
-    alert("Please select a rating");
-    return;
-}
-    let comment = document.getElementById("comment").value;
-
-    if (!comment) {
-        alert("Write something");
-        return;
-    }
-
-    await addDoc(collection(db, "reviews"), {
-        uid: currentUser.uid,
-        name: currentUser.profileName,   // ✅ SAME ALWAYS
-        photo: currentUser.profilePhoto, // ✅ SAME ALWAYS
-        rating: Number(rating),
-        comment: comment,
-        createdAt: serverTimestamp()
-    });
-
-    document.getElementById("comment").value = "";
-}
-const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-const reviewTrack = document.getElementById("reviewTrack");
-
-onSnapshot(q, (snapshot) => {
-    reviewTrack.innerHTML = "";
-
-    // ✅ ALSO RENDER MODAL LIST
-    renderAllReviews(snapshot);
-
-    snapshot.forEach(doc => {
-        let data = doc.data();
-
-        let stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
-
-        let div = document.createElement("div");
-        div.className = "review-box";
-
-        const name = data.name ? data.name : "User";
-        const photo = data.photo;
-        const date = data.createdAt?.toDate?.()
-    ? data.createdAt.toDate().toLocaleDateString()
-    : "Just now";
-
-div.innerHTML = `
-    <div class="review-top">
-
-        <div class="user-info">
-            ${
-                photo
-                ? `<img src="${photo}">`
-                : `<div style="
-                        width:38px;
-                        height:38px;
-                        border-radius:50%;
-                        background:#ff7a00;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        color:white;
-                        font-weight:bold;
-                    ">
-                    <i class="fas fa-user"></i>
-                   </div>`
+            if (photoURL && profile.updatedAt?.toMillis) {
+                photoURL = photoURL + "?v=" + profile.updatedAt.toMillis();
             }
 
-            <div>
-                <h4>${name}</h4>
-
-                <!-- ⭐ STARS MOVED BELOW NAME -->
-                <div style="color:#ffb400; font-size:13px; margin-top:3px;">
-                    ${stars}
-                </div>
-            </div>
-        </div>
-
-        <!-- DATE REPLACES RIGHT SIDE STARS -->
-        <div style="font-size:11px; color:#888;">
-            ${date}
-        </div>
-
-    </div>
-
-   <div class="review-text">
-    ${data.comment}
-</div>
-
-<div class="dreamliner-reply">
-    <i class="fas fa-headset"></i>
-
-    <div>
-        <strong style="display:flex; align-items:center; gap:6px;">
-            Dreamliner
-            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
-        </strong>
-
-        <div style="margin-top:2px;">
-            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
-        </div>
-    </div>
-</div>
-`;    reviewTrack.appendChild(div);
-    });
-});
-function renderAllReviews(snapshot) {
-    const list = document.getElementById("allReviewsList");
-    list.innerHTML = "";
-
-    snapshot.forEach(doc => {
-        let data = doc.data();
-
-        let stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
-
-        const name = data.name || "User";
-        const photo = data.photo;
-        const date = data.createdAt?.toDate?.()
-            ? data.createdAt.toDate().toLocaleDateString()
-            : "Just now";
-
-        let div = document.createElement("div");
-
-        div.style = `
-            border-bottom:1px solid #eee;
-            padding:12px 0;
-        `;
-
-        div.innerHTML = `
-            <div style="display:flex; gap:10px; align-items:center;">
-                ${
-                    photo
-                    ? `<img src="${photo}" style="width:40px;height:40px;border-radius:50%;">`
-                    : `<div style="
-                        width:40px;height:40px;border-radius:50%;
-                        background:#ff7a00;display:flex;align-items:center;
-                        justify-content:center;color:white;">
-                        <i class="fas fa-user"></i>
-                    </div>`
-                }
-
-                <div>
-                    <strong style="font-size:13px;">${name}</strong><br>
-                    <span style="color:#ffb400; font-size:12px;">${stars}</span><br>
-                    <small style="color:#888;">${date}</small>
-                </div>
-            </div>
-
-           <p style="font-size:13px; margin:8px 0 0;">
-    ${data.comment}
-</p>
-
-<div class="dreamliner-reply">
-<div class="dreamliner-reply">
-    <i class="fas fa-headset"></i>
-
-    <div>
-        <strong style="display:flex; align-items:center; gap:6px;">
-            Dreamliner
-            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
-        </strong>
-
-        <div style="margin-top:2px;">
-            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
-        </div>
-    </div>
-</div>
-        `;
-
-        list.appendChild(div);
-    });
-}
-function openAllReviews() {
-    document.getElementById("allReviewsModal").style.display = "block";
-}
-function closeAllReviews() {
-    document.getElementById("allReviewsModal").style.display = "none";
-}
-let current = 0;
-const images = document.querySelectorAll("#slides img");
-
-function showSlide() {
-    images.forEach((img, i) => {
-        img.classList.toggle("active", i === current);
-    });
-    current = (current + 1) % images.length;
-}
-
-setInterval(showSlide, 3000);
-
-// CITY MODAL
-let currentField = "";
-let cities = [
-     "Biswanath Charali", "Sootea", "Jamagurihat", "Tezpur",  "Kaliabor","Nagaon", "Guwahati",
-    "Games Village"
-];
-
-function openModal(field) {
-    currentField = field;
-    document.getElementById("modal").style.display = "flex";
-    showList(cities);
-}
-
-function showList(data) {
-    let list = document.getElementById("cityList");
-    list.innerHTML = "";
-    data.forEach(city => {
-        let div = document.createElement("div");
-        div.innerText = city;
-        div.onclick = () => selectCity(city);
-        list.appendChild(div);
-    });
-}
-
-function swapCities() {
-    let from = document.getElementById("fromText").innerText;
-    let to = document.getElementById("toText").innerText;
-    document.getElementById("fromText").innerText = to;
-    document.getElementById("toText").innerText = from;
-}
-
-function filterList(value) {
-    let filtered = cities.filter(c =>
-        c.toLowerCase().includes(value.toLowerCase())
-    );
-    showList(filtered);
-}
-
-function selectCity(city) {
-    if (currentField === "from") {
-        document.getElementById("fromText").innerText = city;
-    } else {
-        document.getElementById("toText").innerText = city;
-    }
-    document.getElementById("modal").style.display = "none";
-}
-
-function setQuickDate(offset) {
-    const d = new Date();
-    d.setDate(d.getDate() + offset);
-    const formatted = d.toISOString().split("T")[0];
-    document.getElementById("date").value = formatted;
-    document.getElementById("dateText").innerText = formatted;
-}
-
-function searchBus() {
-    let from = document.getElementById("fromText").innerText;
-    let to = document.getElementById("toText").innerText;
-    let date = document.getElementById("date").value;
-
-    if (from === "From" || to === "To" || !date) {
-        alert("Please fill all details");
-        return;
-    }
-    window.location.href = `bus.html?from=${from}&to=${to}&date=${date}`;
-}
-
-// --- AUTH & POPUP LOGIC ---
-
-function openLoginPopup() {
-    document.getElementById("login-popup").style.display = "flex";
-}
-
-function closeLoginPopup() {
-    const popup = document.getElementById("login-popup");
-    if (popup) popup.style.display = "none";
-}
-
-function showProfileIcon() {
-    const loginBtn = document.getElementById("login-btn");
-    const userProfile = document.getElementById("user-profile");
-    
-    if (loginBtn) loginBtn.style.display = "none";
-    if (userProfile) userProfile.style.display = "block";
-}
-
-function hideProfileIcon() {
-    const loginBtn = document.getElementById("login-btn");
-    const userProfile = document.getElementById("user-profile");
-    
-    if (loginBtn) loginBtn.style.display = "block";
-    if (userProfile) userProfile.style.display = "none";
-}
-
-// Check status on load
-function checkLoginStatus(){
-    if (localStorage.getItem("isLoggedIn") === "true") {
-        showProfileIcon();
-    } else {
-        hideProfileIcon();
-    }
-}
-
-// Run when page loads
-window.onload = checkLoginStatus;
-
-// Auto check every 1 second
-setInterval(checkLoginStatus, 1000);
-
-// Listen for message from login.html (Inside Iframe) - UPDATED FEATURE
-window.addEventListener("message", function(event) {
-    if (event.data === "loginSuccess") {
-        localStorage.setItem("isLoggedIn", "true");
-        
-        // This force-triggers the UI update in the SAME tab immediately
-        showProfileIcon(); 
-        
-        closeLoginPopup();
-    }
-}, false);
-
-// SYNC ACROSS TABS: Automatically updates if login/logout happens in another window
-window.addEventListener('storage', (event) => {
-    if (event.key === 'isLoggedIn') {
-        if (event.newValue === 'true') {
-            showProfileIcon();
-        } else {
-            hideProfileIcon();
+            return {
+                name: profile.name || data.name || "User",
+                photo: photoURL
+            };
         }
-    }
-});
 
-
-function openVideo(src){
-    const popup = document.getElementById("videoPopup");
-    const video = document.getElementById("popupVideo");
-
-    video.src = src;
-    popup.style.display = "flex";
-
-    video.requestFullscreen?.(); // auto fullscreen if supported
-}
-function closeVideo(){
-    const popup = document.getElementById("videoPopup");
-    const video = document.getElementById("popupVideo");
-
-    popup.style.display = "none";
-    video.pause();
-    video.src = "";
-}
-
-// DOT INDICATOR (basic scroll tracking)
-const slider = document.getElementById("tutorialSlider");
-const dots = document.querySelectorAll(".dot");
-
-slider.addEventListener("scroll", () => {
-    let index = Math.round(slider.scrollLeft / 250);
-
-    dots.forEach(d => d.classList.remove("active"));
-    if(dots[index]) dots[index].classList.add("active");
-});
-const featureSlider = document.querySelector(".feature-slider");
-
-let scrollAmount = 0;
-let cardWidth = 270; // approx card width + gap
-
-function autoScrollFeatures() {
-    if (!featureSlider) return;
-
-    scrollAmount += cardWidth;
-
-    // if reached end → reset
-    if (scrollAmount >= featureSlider.scrollWidth - featureSlider.clientWidth) {
-        scrollAmount = 0;
+    } catch (error) {
+        console.log("Profile load error:", error);
     }
 
-    featureSlider.scrollTo({
-        left: scrollAmount,
-        behavior: "smooth"
-    });
+    return {
+        name: data.name || "User",
+        photo: data.photo || ""
+    };
 }
-setInterval(autoScrollFeatures, 1000); 
-window.openModal = openModal;
-window.swapCities = swapCities;
-window.filterList = filterList;
-window.selectCity = selectCity;
-window.setQuickDate = setQuickDate;
-window.searchBus = searchBus;
-window.openLoginPopup = openLoginPopup;
-window.closeLoginPopup = closeLoginPopup;
-window.openVideo = openVideo;
-window.closeVideo = closeVideo;
-window.addReview = addReview;
-window.openAllReviews = openAllReviews;
-window.closeAllReviews = closeAllReviews;
-window.setStar = setStar;
-</script>
-
+        
+        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+        
+        onSnapshot(q, async (snapshot) => {
+            latestReviews = [];
+        
+            snapshot.forEach(reviewDoc => {
+                latestReviews.push({
+                    id: reviewDoc.id,
+                    ...reviewDoc.data()
+                });
+            });
+        
+            await renderReviews();
+        
+        }, (error) => {
+            console.log("Review loading error:", error);
+        });
+        
+        async function renderReviews() {
+            if (!reviewTrack) return;
+        
+            reviewTrack.innerHTML = "";
+            await renderAllReviewsFromArray(latestReviews);
+        
+            for (const data of latestReviews) {
+                const profile = await getLatestProfile(data);
+        
+                let stars = "★".repeat(data.rating || 0) + "☆".repeat(5 - (data.rating || 0));
+        
+                let div = document.createElement("div");
+                div.className = "review-box";
+        
+                const name = profile.name || "User";
+                const photo = profile.photo;
+                const date = data.createdAt?.toDate?.()
+                    ? data.createdAt.toDate().toLocaleDateString()
+                    : "Just now";
+        
+                div.innerHTML = `
+                <div class="review-top">
+                    <div class="user-info">
+                        ${
+                            photo
+                            ? `<img src="${photo}">`
+                            : `<div style="
+                                width:38px;
+                                height:38px;
+                                border-radius:50%;
+                                background:#ff7a00;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                color:white;
+                                font-weight:bold;">
+                                <i class="fas fa-user"></i>
+                            </div>`
+                        }
+        
+                        <div>
+                            <h4>${name}</h4>
+                            <div style="color:#ffb400; font-size:13px; margin-top:3px;">
+                                ${stars}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div style="font-size:11px; color:#888;">
+                        ${date}
+                    </div>
+                </div>
+        
+                <div class="review-text">
+                    ${data.comment || ""}
+                </div>
+        
+                <div class="dreamliner-reply">
+                    <i class="fas fa-headset"></i>
+                    <div>
+                        <strong style="display:flex; align-items:center; gap:6px;">
+                            Dreamliner
+                            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
+                        </strong>
+                        <div style="margin-top:2px;">
+                            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
+                        </div>
+                    </div>
+                </div>`;
+        
+                reviewTrack.appendChild(div);
+            }
+        }
+        
+        async function renderAllReviewsFromArray(reviews) {
+            const list = document.getElementById("allReviewsList");
+            if (!list) return;
+        
+            list.innerHTML = "";
+        
+            for (const data of reviews) {
+                const profile = await getLatestProfile(data);
+        
+                let stars = "★".repeat(data.rating || 0) + "☆".repeat(5 - (data.rating || 0));
+        
+                const name = profile.name || "User";
+                const photo = profile.photo;
+                const date = data.createdAt?.toDate?.()
+                    ? data.createdAt.toDate().toLocaleDateString()
+                    : "Just now";
+        
+                let div = document.createElement("div");
+        
+                div.style = `
+                    border-bottom:1px solid #eee;
+                    padding:12px 0;
+                `;
+        
+                div.innerHTML = `
+                <div style="display:flex; gap:10px; align-items:center;">
+                    ${
+                        photo
+                        ? `<img src="${photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+                        : `<div style="
+                            width:40px;
+                            height:40px;
+                            border-radius:50%;
+                            background:#ff7a00;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            color:white;">
+                            <i class="fas fa-user"></i>
+                        </div>`
+                    }
+        
+                    <div>
+                        <strong style="font-size:13px;">${name}</strong><br>
+                        <span style="color:#ffb400; font-size:12px;">${stars}</span><br>
+                        <small style="color:#888;">${date}</small>
+                    </div>
+                </div>
+        
+                <p style="font-size:13px; margin:8px 0 0;">
+                    ${data.comment || ""}
+                </p>
+        
+                <div class="dreamliner-reply">
+                    <i class="fas fa-headset"></i>
+                    <div>
+                        <strong style="display:flex; align-items:center; gap:6px;">
+                            Dreamliner
+                            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
+                        </strong>
+                        <div style="margin-top:2px;">
+                            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
+                        </div>
+                    </div>
+                </div>`;
+        
+                list.appendChild(div);
+            }
+        }
+        
+        function openAllReviews() {
+            document.getElementById("allReviewsModal").style.display = "block";
+        }
+        
+        function closeAllReviews() {
+            document.getElementById("allReviewsModal").style.display = "none";
+        }
+        
+        window.openAllReviews = openAllReviews;
+        window.closeAllReviews = closeAllReviews;
+        
+        let current = 0;
+        const images = document.querySelectorAll("#slides img");
+        
+        function showSlide() {
+            images.forEach((img, i) => {
+                img.classList.toggle("active", i === current);
+            });
+            current = (current + 1) % images.length;
+        }
+        
+        setInterval(showSlide, 3000);
+        
+        let currentField = "";
+        
+        let cities = [
+            "Biswanath Charali",
+            "Sootea",
+            "Jamagurihat",
+            "Tezpur",
+            "Kaliabor",
+            "Nagaon",
+            "Guwahati",
+            "Games Village"
+        ];
+        
+        function openModal(field) {
+            currentField = field;
+            document.getElementById("modal").style.display = "flex";
+            showList(cities);
+        }
+        
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+        
+        function showList(data) {
+            let list = document.getElementById("cityList");
+            list.innerHTML = "";
+        
+            data.forEach(city => {
+                let div = document.createElement("div");
+                div.innerText = city;
+                div.onclick = () => selectCity(city);
+                list.appendChild(div);
+            });
+        }
+        
+        function swapCities() {
+            let from = document.getElementById("fromText").innerText;
+            let to = document.getElementById("toText").innerText;
+        
+            document.getElementById("fromText").innerText = to;
+            document.getElementById("toText").innerText = from;
+        }
+        
+        function filterList(value) {
+            let filtered = cities.filter(c =>
+                c.toLowerCase().includes(value.toLowerCase())
+            );
+        
+            showList(filtered);
+        }
+        
+        function selectCity(city) {
+            if (currentField === "from") {
+                document.getElementById("fromText").innerText = city;
+            } else {
+                document.getElementById("toText").innerText = city;
+            }
+        
+            document.getElementById("modal").style.display = "none";
+        }
+        
+        function setQuickDate(offset) {
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+        
+            const formatted = d.toISOString().split("T")[0];
+        
+            document.getElementById("date").value = formatted;
+            document.getElementById("dateText").innerText = formatted;
+        }
+        
+        function searchBus() {
+            let from = document.getElementById("fromText").innerText;
+            let to = document.getElementById("toText").innerText;
+            let date = document.getElementById("date").value;
+        
+            if (from === "Select Boarding Point" || to === "Select Destination" || !date) {
+                alert("Please fill all details");
+                return;
+            }
+        
+            window.location.href = `bus.html?from=${from}&to=${to}&date=${date}`;
+        }
+        
+        function openLoginPopup() {
+            document.getElementById("login-popup").style.display = "flex";
+        }
+        
+        function closeLoginPopup() {
+            const popup = document.getElementById("login-popup");
+            if (popup) popup.style.display = "none";
+        }
+        
+        function showProfileIcon() {
+            const loginBtn = document.getElementById("login-btn");
+            const userProfile = document.getElementById("user-profile");
+        
+            if (loginBtn) loginBtn.style.display = "none";
+            if (userProfile) userProfile.style.display = "block";
+        }
+        
+        function hideProfileIcon() {
+            const loginBtn = document.getElementById("login-btn");
+            const userProfile = document.getElementById("user-profile");
+        
+            if (loginBtn) loginBtn.style.display = "block";
+            if (userProfile) userProfile.style.display = "none";
+        }
+        
+        function checkLoginStatus() {
+            if (localStorage.getItem("isLoggedIn") === "true") {
+                showProfileIcon();
+            } else {
+                hideProfileIcon();
+            }
+        }
+        
+        window.onload = checkLoginStatus;
+        setInterval(checkLoginStatus, 1000);
+        
+        window.addEventListener("message", function(event) {
+            if (event.data === "loginSuccess") {
+                localStorage.setItem("isLoggedIn", "true");
+                showProfileIcon();
+                closeLoginPopup();
+            }
+        }, false);
+        
+        window.addEventListener("storage", (event) => {
+            if (event.key === "isLoggedIn") {
+                if (event.newValue === "true") {
+                    showProfileIcon();
+                } else {
+                    hideProfileIcon();
+                }
+            }
+        });
+        
+        function openVideo(src) {
+            const popup = document.getElementById("videoPopup");
+            const video = document.getElementById("popupVideo");
+        
+            video.src = src;
+            popup.style.display = "flex";
+            video.play();
+        }
+        
+        function closeVideo() {
+            const popup = document.getElementById("videoPopup");
+            const video = document.getElementById("popupVideo");
+        
+            video.pause();
+            video.src = "";
+            popup.style.display = "none";
+        }
+        
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.swapCities = swapCities;
+        window.filterList = filterList;
+        window.setQuickDate = setQuickDate;
+        window.searchBus = searchBus;
+        window.openLoginPopup = openLoginPopup;
+        window.closeLoginPopup = closeLoginPopup;
+        window.openVideo = openVideo;
+        window.closeVideo = closeVideo;
+        </script>
 </body>
 </html> 
