@@ -330,7 +330,18 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } 
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -373,14 +384,36 @@
 
     try {
         const storageRef = ref(storage, `profilePhotos/${user.uid}.jpg`);
+
         await uploadBytes(storageRef, file);
+
         const downloadURL = await getDownloadURL(storageRef);
-        document.getElementById('profileImg').src = downloadURL;
+
+        document.getElementById('profileImg').src = downloadURL + "?v=" + Date.now();
+
         await setDoc(doc(db, "profiles", user.uid), {
-            photoURL: downloadURL
+            photoURL: downloadURL,
+            updatedAt: serverTimestamp()
         }, { merge: true });
-     } catch (err) {
+
+        const reviewsQuery = query(
+            collection(db, "reviews"),
+            where("uid", "==", user.uid)
+        );
+
+        const reviewsSnap = await getDocs(reviewsQuery);
+
+        for (const reviewDoc of reviewsSnap.docs) {
+            await updateDoc(doc(db, "reviews", reviewDoc.id), {
+                photo: downloadURL
+            });
+        }
+
+        alert("Profile photo updated!");
+
+    } catch (err) {
         console.error("Upload failed:", err);
+        alert("Photo update failed");
     }
 });
 
@@ -554,20 +587,53 @@ function renderBookings(bookings, uid) {
         document.getElementById("totalRoutes").innerText = routes.size;
     }
 }
-    document.getElementById("saveProfile").onclick = async () => {
-        const user = auth.currentUser;
-        if(!user) return;
-        try {
-            await setDoc(doc(db, "profiles", user.uid), {
-                name: document.getElementById("name").value,
-                age: document.getElementById("age").value,
-                address: document.getElementById("address").value,
-                altphone: document.getElementById("altphone").value,
-            }, { merge: true });
-            alert("Updated!");
-            location.reload();
-        } catch (e) { alert("Error."); }
-    };
+document.getElementById("saveProfile").onclick = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const newName = document.getElementById("name").value.trim();
+
+        if (!newName) {
+            alert("Please enter your name");
+            return;
+        }
+
+        const profileSnap = await getDoc(doc(db, "profiles", user.uid));
+        const oldProfile = profileSnap.exists() ? profileSnap.data() : {};
+
+        await setDoc(doc(db, "profiles", user.uid), {
+            name: newName,
+            age: document.getElementById("age").value,
+            address: document.getElementById("address").value,
+            altphone: document.getElementById("altphone").value,
+            photoURL: oldProfile.photoURL || "",
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        const reviewsQuery = query(
+            collection(db, "reviews"),
+            where("uid", "==", user.uid)
+        );
+
+        const reviewsSnap = await getDocs(reviewsQuery);
+
+        for (const reviewDoc of reviewsSnap.docs) {
+            await updateDoc(doc(db, "reviews", reviewDoc.id), {
+                name: newName,
+                photo: oldProfile.photoURL || ""
+            });
+        }
+
+        document.getElementById("usernameDisplay").innerText = newName;
+
+        alert("Profile updated successfully!");
+
+    } catch (e) {
+        console.error("Profile update error:", e);
+        alert("Update failed");
+    }
+};
 
     window.openReschedule = (bookingId) => {
 
