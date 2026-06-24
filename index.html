@@ -1798,6 +1798,17 @@ body {
     gap: 8px;
     align-items: flex-start;
 }
+.coupon-scroll,
+.feature-slider,
+.tutorial-slider{
+    scroll-behavior:smooth;
+}
+
+.coupon-scroll::-webkit-scrollbar,
+.feature-slider::-webkit-scrollbar,
+.tutorial-slider::-webkit-scrollbar{
+    display:none;
+}
 
 .dreamliner-reply i {
     color: #1d9bf0;
@@ -1917,7 +1928,7 @@ body {
     <div class="coupon-section">
         <h3>Best Offers for You</h3>
     
-        <div class="coupon-scroll">
+        <div class="coupon-scroll" id="offerSlider">
             <div class="coupon-img-card">
                 <img src="coupon1.jpg">
             </div>
@@ -1939,7 +1950,7 @@ body {
             <p>Trusted by thousands for safe, fast & comfortable journeys</p>
         </div>
     
-        <div class="feature-slider">
+        <div class="feature-slider" id="featureSlider">
     
             <div class="feature-card">
                 <div class="icon-box fast">
@@ -2210,7 +2221,8 @@ body {
             orderBy,
             serverTimestamp,
             doc,
-            getDoc
+            getDoc,
+limit
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const firebaseConfig = {
@@ -2230,11 +2242,13 @@ body {
         let currentProfileName = "User";
         let currentProfilePhoto = "";
         let latestReviews = [];
-        let profilesMap = {};
-        
-        const reviewTrack = document.getElementById("reviewTrack");
-        
-        onSnapshot(collection(db, "profiles"), () => {
+        let profilesMap = new Map();
+
+onSnapshot(collection(db, "profiles"), (snapshot) => {
+    snapshot.forEach(docSnap => {
+        profilesMap.set(docSnap.id, docSnap.data());
+    });
+
     renderReviews();
 });
         
@@ -2281,32 +2295,43 @@ body {
         }
         
         function updateUserPreview() {
-            const nameEl = document.getElementById("previewName");
-            const photoEl = document.getElementById("previewPhoto");
-        
-            if (!currentUser) return;
-        
-            nameEl.innerText = currentProfileName || "User";
-        
-            if (currentProfilePhoto) {
-                photoEl.innerHTML = `<img src="${currentProfilePhoto}" 
-                style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #ff7a00;">`;
-            } else {
-                photoEl.innerHTML = `
-                <div style="
-                    width:40px;
-                    height:40px;
-                    border-radius:50%;
-                    background:#ff7a00;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    color:white;
-                    font-weight:bold;">
-                    <i class="fas fa-user"></i>
-                </div>`;
-            }
-        }
+    const nameEl = document.getElementById("previewName");
+    const photoEl = document.getElementById("previewPhoto");
+
+    if (!currentUser) return;
+
+    nameEl.innerText = currentProfileName || "User";
+
+    const cleanPhoto = safeImageUrl(currentProfilePhoto);
+
+    photoEl.innerHTML = "";
+
+    if (cleanPhoto) {
+        const img = document.createElement("img");
+        img.src = cleanPhoto;
+        img.style.width = "40px";
+        img.style.height = "40px";
+        img.style.borderRadius = "50%";
+        img.style.objectFit = "cover";
+        img.style.border = "2px solid #ff7a00";
+
+        photoEl.appendChild(img);
+    } else {
+        photoEl.innerHTML = `
+        <div style="
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            background:#ff7a00;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-weight:bold;">
+            <i class="fas fa-user"></i>
+        </div>`;
+    }
+}
         
         function setStar(val) {
             document.getElementById("rating").value = val;
@@ -2356,45 +2381,49 @@ body {
         }
         
         window.addReview = addReview;
-        
-        async function getLatestProfile(data) {
-    if (!data.uid) {
-        return {
-            name: data.name || "User",
-            photo: data.photo || ""
-        };
+        function safeText(value) {
+    return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function safeImageUrl(url) {
+    url = String(url || "");
+
+    if (
+        url.startsWith("https://") ||
+        url.startsWith("http://") ||
+        url.startsWith("data:image/")
+    ) {
+        return url;
     }
 
-    try {
-        const profileRef = doc(db, "profiles", data.uid);
-        const profileSnap = await getDoc(profileRef);
+    return "";
+}
+        
+function getLatestProfile(data) {
+    const profile = data.uid ? profilesMap.get(data.uid) : null;
 
-        if (profileSnap.exists()) {
-            const profile = profileSnap.data();
+    let photoURL = profile?.photoURL || data.photo || "";
 
-            let photoURL = profile.photoURL || data.photo || "";
-
-            if (photoURL && profile.updatedAt?.toMillis) {
-                photoURL = photoURL + "?v=" + profile.updatedAt.toMillis();
-            }
-
-            return {
-                name: profile.name || data.name || "User",
-                photo: photoURL
-            };
-        }
-
-    } catch (error) {
-        console.log("Profile load error:", error);
+    if (photoURL && profile?.updatedAt?.toMillis) {
+        photoURL = photoURL + "?v=" + profile.updatedAt.toMillis();
     }
 
     return {
-        name: data.name || "User",
-        photo: data.photo || ""
+        name: profile?.name || data.name || "User",
+        photo: photoURL
     };
 }
         
-        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+const q = query(
+    collection(db, "reviews"),
+    orderBy("createdAt", "desc"),
+    limit(30)
+);
         
         onSnapshot(q, async (snapshot) => {
             latestReviews = [];
@@ -2412,170 +2441,186 @@ body {
             console.log("Review loading error:", error);
         });
         
-        async function renderReviews() {
-            if (!reviewTrack) return;
-        
-            reviewTrack.innerHTML = "";
-            await renderAllReviewsFromArray(latestReviews);
-        
-            for (const data of latestReviews) {
-                const profile = await getLatestProfile(data);
-        
-                let stars = "★".repeat(data.rating || 0) + "☆".repeat(5 - (data.rating || 0));
-        
-                let div = document.createElement("div");
-                div.className = "review-box";
-        
-                const name = profile.name || "User";
-                const photo = profile.photo;
-                const date = data.createdAt?.toDate?.()
-                    ? data.createdAt.toDate().toLocaleDateString()
-                    : "Just now";
-        
-                div.innerHTML = `
-                <div class="review-top">
-                    <div class="user-info">
-                        ${
-                            photo
-                            ? `<img src="${photo}">`
-                            : `<div style="
-                                width:38px;
-                                height:38px;
-                                border-radius:50%;
-                                background:#ff7a00;
-                                display:flex;
-                                align-items:center;
-                                justify-content:center;
-                                color:white;
-                                font-weight:bold;">
-                                <i class="fas fa-user"></i>
-                            </div>`
-                        }
-        
-                        <div>
-                            <h4>${name}</h4>
-                            <div style="color:#ffb400; font-size:13px; margin-top:3px;">
-                                ${stars}
-                            </div>
-                        </div>
-                    </div>
-        
-                    <div style="font-size:11px; color:#888;">
-                        ${date}
+        function renderReviews() {
+    if (!reviewTrack) return;
+
+    reviewTrack.innerHTML = "";
+
+    renderAllReviewsFromArray(latestReviews);
+
+    const fragment = document.createDocumentFragment();
+
+    latestReviews.forEach(data => {
+        const profile = getLatestProfile(data);
+
+        const rating = Number(data.rating || 0);
+        const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+
+        const div = document.createElement("div");
+        div.className = "review-box";
+
+        const name = safeText(profile.name || "User");
+        const photo = safeImageUrl(profile.photo);
+
+        const date = data.createdAt?.toDate?.()
+            ? data.createdAt.toDate().toLocaleDateString()
+            : "Just now";
+
+        div.innerHTML = `
+        <div class="review-top">
+            <div class="user-info">
+                ${
+                    photo
+                    ? `<img src="${photo}" loading="lazy">`
+                    : `<div style="
+                        width:38px;
+                        height:38px;
+                        border-radius:50%;
+                        background:#ff7a00;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        color:white;
+                        font-weight:bold;">
+                        <i class="fas fa-user"></i>
+                    </div>`
+                }
+
+                <div>
+                    <h4>${name}</h4>
+                    <div style="color:#ffb400; font-size:13px; margin-top:3px;">
+                        ${stars}
                     </div>
                 </div>
-        
-                <div class="review-text">
-                    ${data.comment || ""}
+            </div>
+
+            <div style="font-size:11px; color:#888;">
+                ${date}
+            </div>
+        </div>
+
+        <div class="review-text">
+            ${safeText(data.comment)}
+        </div>
+
+        <div class="dreamliner-reply">
+            <i class="fas fa-headset"></i>
+            <div>
+                <strong style="display:flex; align-items:center; gap:6px;">
+                    Dreamliner
+                    <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
+                </strong>
+                <div style="margin-top:2px;">
+                    Thanks for your feedback ❤️ We’re always working to improve your travel experience.
                 </div>
-        
-                <div class="dreamliner-reply">
-                    <i class="fas fa-headset"></i>
-                    <div>
-                        <strong style="display:flex; align-items:center; gap:6px;">
-                            Dreamliner
-                            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
-                        </strong>
-                        <div style="margin-top:2px;">
-                            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
-                        </div>
-                    </div>
-                </div>`;
-        
-                reviewTrack.appendChild(div);
+            </div>
+        </div>`;
+
+        fragment.appendChild(div);
+    });
+
+    reviewTrack.appendChild(fragment);
+}
+
+function renderAllReviewsFromArray(reviews) {
+    const list = document.getElementById("allReviewsList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    const fragment = document.createDocumentFragment();
+
+    reviews.forEach(data => {
+        const profile = getLatestProfile(data);
+
+        const rating = Number(data.rating || 0);
+        const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+
+        const name = safeText(profile.name || "User");
+        const photo = safeImageUrl(profile.photo);
+
+        const date = data.createdAt?.toDate?.()
+            ? data.createdAt.toDate().toLocaleDateString()
+            : "Just now";
+
+        const div = document.createElement("div");
+
+        div.style = `
+            border-bottom:1px solid #eee;
+            padding:12px 0;
+        `;
+
+        div.innerHTML = `
+        <div style="display:flex; gap:10px; align-items:center;">
+            ${
+                photo
+                ? `<img src="${photo}" loading="lazy" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+                : `<div style="
+                    width:40px;
+                    height:40px;
+                    border-radius:50%;
+                    background:#ff7a00;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:white;">
+                    <i class="fas fa-user"></i>
+                </div>`
             }
-        }
-        
-        async function renderAllReviewsFromArray(reviews) {
-            const list = document.getElementById("allReviewsList");
-            if (!list) return;
-        
-            list.innerHTML = "";
-        
-            for (const data of reviews) {
-                const profile = await getLatestProfile(data);
-        
-                let stars = "★".repeat(data.rating || 0) + "☆".repeat(5 - (data.rating || 0));
-        
-                const name = profile.name || "User";
-                const photo = profile.photo;
-                const date = data.createdAt?.toDate?.()
-                    ? data.createdAt.toDate().toLocaleDateString()
-                    : "Just now";
-        
-                let div = document.createElement("div");
-        
-                div.style = `
-                    border-bottom:1px solid #eee;
-                    padding:12px 0;
-                `;
-        
-                div.innerHTML = `
-                <div style="display:flex; gap:10px; align-items:center;">
-                    ${
-                        photo
-                        ? `<img src="${photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
-                        : `<div style="
-                            width:40px;
-                            height:40px;
-                            border-radius:50%;
-                            background:#ff7a00;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            color:white;">
-                            <i class="fas fa-user"></i>
-                        </div>`
-                    }
-        
-                    <div>
-                        <strong style="font-size:13px;">${name}</strong><br>
-                        <span style="color:#ffb400; font-size:12px;">${stars}</span><br>
-                        <small style="color:#888;">${date}</small>
-                    </div>
+
+            <div>
+                <strong style="font-size:13px;">${name}</strong><br>
+                <span style="color:#ffb400; font-size:12px;">${stars}</span><br>
+                <small style="color:#888;">${date}</small>
+            </div>
+        </div>
+
+        <p style="font-size:13px; margin:8px 0 0;">
+            ${safeText(data.comment)}
+        </p>
+
+        <div class="dreamliner-reply">
+            <i class="fas fa-headset"></i>
+            <div>
+                <strong style="display:flex; align-items:center; gap:6px;">
+                    Dreamliner
+                    <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
+                </strong>
+                <div style="margin-top:2px;">
+                    Thanks for your feedback ❤️ We’re always working to improve your travel experience.
                 </div>
-        
-                <p style="font-size:13px; margin:8px 0 0;">
-                    ${data.comment || ""}
-                </p>
-        
-                <div class="dreamliner-reply">
-                    <i class="fas fa-headset"></i>
-                    <div>
-                        <strong style="display:flex; align-items:center; gap:6px;">
-                            Dreamliner
-                            <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
-                        </strong>
-                        <div style="margin-top:2px;">
-                            Thanks for your feedback ❤️ We’re always working to improve your travel experience.
-                        </div>
-                    </div>
-                </div>`;
-        
-                list.appendChild(div);
-            }
-        }
-        
-        function openAllReviews() {
-            document.getElementById("allReviewsModal").style.display = "block";
-        }
-        
-        function closeAllReviews() {
-            document.getElementById("allReviewsModal").style.display = "none";
-        }
-        
-        window.openAllReviews = openAllReviews;
-        window.closeAllReviews = closeAllReviews;
-        
-        let current = 0;
-        const images = document.querySelectorAll("#slides img");
-        
-        function showSlide() {
-            images.forEach((img, i) => {
-                img.classList.toggle("active", i === current);
-            });
-            current = (current + 1) % images.length;
-        }
+            </div>
+        </div>`;
+
+        fragment.appendChild(div);
+    });
+
+    list.appendChild(fragment);
+}
+
+function openAllReviews() {
+    document.getElementById("allReviewsModal").style.display = "block";
+}
+
+function closeAllReviews() {
+    document.getElementById("allReviewsModal").style.display = "none";
+}
+
+window.openAllReviews = openAllReviews;
+window.closeAllReviews = closeAllReviews;
+
+let current = 0;
+const images = document.querySelectorAll("#slides img");
+
+function showSlide() {
+    if (!images.length) return;
+
+    images.forEach((img, i) => {
+        img.classList.toggle("active", i === current);
+    });
+
+    current = (current + 1) % images.length;
+}
         
         setInterval(showSlide, 3000);
         
@@ -2735,6 +2780,7 @@ body {
             popup.style.display = "none";
         }
         
+        
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.swapCities = swapCities;
@@ -2745,6 +2791,37 @@ body {
         window.closeLoginPopup = closeLoginPopup;
         window.openVideo = openVideo;
         window.closeVideo = closeVideo;
+        function autoSlide(sliderId, cardClass, time) {
+    const slider = document.getElementById(sliderId);
+    if (!slider) return;
+
+    let cards = slider.querySelectorAll(cardClass);
+    if (cards.length <= 1) return;
+
+    cards.forEach(card => {
+        slider.appendChild(card.cloneNode(true));
+    });
+
+    let step = cards[0].offsetWidth + 12;
+
+    setInterval(() => {
+        slider.scrollBy({
+            left: step,
+            behavior: "smooth"
+        });
+
+        if (slider.scrollLeft >= slider.scrollWidth / 2) {
+            setTimeout(() => {
+                slider.scrollLeft = 0;
+            }, 400);
+        }
+    }, time);
+}
+
+
+autoSlide("offerSlider", ".coupon-img-card", 1000);
+autoSlide("featureSlider", ".feature-card", 1500);
+autoSlide("tutorialSlider", ".tutorial-card", 3000);
         </script>
 </body>
 </html> 
