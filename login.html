@@ -154,6 +154,7 @@ inputs.forEach(input => {
         alert("Invalid OTP");
     }
 }
+
 </script>
 
 <style>
@@ -216,19 +217,27 @@ body {
     outline: none;
 }
 
-/* OTP */
+/* OTP SECTION */
+#otp-section{
+    margin-top: 15px;
+    width: 100%;
+}
+
 .otp-box {
     display: flex;
-    justify-content: space-between;
-    gap: 8px;
+    justify-content: center;
+    gap: 6px;
     margin-top: 12px;
+    width: 100%;
 }
 
 .otp-box input {
-    width: 45px;
+    flex: 1;
+    max-width: 50px;
+    min-width: 35px;
     height: 55px;
     text-align: center;
-    font-size: 18px;
+    font-size: 20px;
     border-radius: 10px;
     border: 1px solid #e5e5e5;
     outline: none;
@@ -285,6 +294,38 @@ button#edit-btn {
     background: #555;
 }
 
+.container {
+    width: 100%;
+    max-width: 350px;
+    margin: 15px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    text-align: center;
+}
+@media (max-width: 480px) {
+
+body{
+    padding: 0px;
+}
+
+.container{
+    width: 100%;
+    max-width: none;
+    padding: 1px;
+}
+
+.otp-box{
+    gap: 5px;
+}
+
+.otp-box input{
+    height: 50px;
+    font-size: 18px;
+    min-width: 32px;
+}
+}
 </style>
 </head>
 
