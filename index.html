@@ -308,11 +308,29 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif;background: #e0e0e0;}
     transform: scale(1.1);
     transition: 0.2s;
 }
-/* PREMIUM HERO */
 .hero {
-    height: 320px;
+    position: relative;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+
+    opacity: 0;
+    transform: translateY(-35px);
+
+    transition:
+        height 0.65s cubic-bezier(.22,1,.36,1),
+        opacity 0.45s ease,
+        transform 0.65s cubic-bezier(.22,1,.36,1);
 }
 
+.hero.ready {
+    height: 320px;
+    opacity: 1;
+    transform: translateY(0);
+}
 .hero-overlay {
     position:absolute;
     width:100%;
@@ -1890,7 +1908,7 @@ body {
 
 <div class="header">
     <div class="logo">
-        <img src="logo.png" class="logo-img">
+        <img id="siteLogo" src="logo.png" class="logo-img" alt="Dreamliner Logo">
         Dreamliner
     </div>
     <div id="auth-section">
@@ -1910,9 +1928,7 @@ body {
 
 <div class="hero">
     <div class="slides" id="slides">
-        <img src="demo1.webp" class="active">
-        <img src="demo2.jpeg">
-        <img src="demo3.jpeg">
+        <!-- Hero images will load from Firebase Firestore -->
     </div>
 
     <!-- GLASS OVERLAY -->
@@ -2331,6 +2347,137 @@ limit
         let currentProfilePhoto = "";
         let latestReviews = [];
         let profilesMap = new Map();
+        async function loadHomepageAssets() {
+    const fallbackAssets = {
+        logoUrl: "logo.png",
+        heroImages: ["demo1.webp", "demo2.jpeg", "demo3.jpeg"],
+        offerImages: ["coupon1.jpg", "coupon2.jpg", "coupon3.jpg"],
+        tutorialVideos: [
+            { title: "How to Use", videoUrl: "t1.mp4" },
+            { title: "How to Reschedule", videoUrl: "t2.mp4" },
+            { title: "Cancel / Refund", videoUrl: "t3.mp4" }
+        ]
+    };
+
+    // ✅ SHOW IMAGES IMMEDIATELY
+    renderHomepageAssets(fallbackAssets);
+
+    try {
+        const assetRef = doc(db, "siteSettings", "homepage");
+        const assetSnap = await getDoc(assetRef);
+
+        if (assetSnap.exists()) {
+            const data = { ...fallbackAssets, ...assetSnap.data() };
+
+            // ✅ replace with Firebase images after they are ready
+            renderHomepageAssets(data);
+        }
+
+    } catch (error) {
+        console.log("Homepage assets loading error:", error);
+    }
+}
+
+function renderHomepageAssets(data) {
+    const siteLogo = document.getElementById("siteLogo");
+
+    if (siteLogo && data.logoUrl) {
+        siteLogo.src = data.logoUrl;
+    }
+
+    const slides = document.getElementById("slides");
+
+    if (slides) {
+        slides.innerHTML = "";
+
+        const heroImages = Array.isArray(data.heroImages)
+            ? data.heroImages.filter(Boolean)
+            : [];
+            let firstHeroShown = false;
+
+heroImages.forEach((url, index) => {
+    const img = document.createElement("img");
+
+    img.alt = "Dreamliner Bus";
+    img.loading = index === 0 ? "eager" : "lazy";
+    img.className = index === 0 ? "active" : "";
+
+    img.onload = function () {
+        if (!firstHeroShown) {
+            firstHeroShown = true;
+            document.querySelector(".hero").classList.add("ready");
+        }
+    };
+
+    img.onerror = function () {
+        console.log("Hero image failed:", url);
+
+        // if first image fails, still show section after next images try
+        if (!firstHeroShown && index === heroImages.length - 1) {
+            document.querySelector(".hero").classList.add("ready");
+        }
+    };
+
+    img.src = url; // ✅ src must be after onload/onerror
+
+    slides.appendChild(img);
+});
+    }
+
+    const offerSlider = document.getElementById("offerSlider");
+
+    if (offerSlider) {
+        offerSlider.innerHTML = "";
+
+        const offerImages = Array.isArray(data.offerImages)
+            ? data.offerImages.filter(Boolean)
+            : [];
+
+        offerImages.forEach((url, index) => {
+            const card = document.createElement("div");
+            card.className = "coupon-img-card";
+
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Dreamliner Offer " + (index + 1);
+            img.loading = "lazy";
+
+            card.appendChild(img);
+            offerSlider.appendChild(card);
+        });
+
+        autoSlide("offerSlider", ".coupon-img-card", 1000);
+    }
+
+    const tutorialSlider = document.getElementById("tutorialSlider");
+
+    if (tutorialSlider) {
+        tutorialSlider.innerHTML = "";
+
+        const tutorialVideos = Array.isArray(data.tutorialVideos)
+            ? data.tutorialVideos.filter(video => video && video.videoUrl)
+            : [];
+
+        tutorialVideos.forEach(video => {
+            const card = document.createElement("div");
+            card.className = "tutorial-card";
+            card.onclick = () => openVideo(video.videoUrl);
+
+            card.innerHTML = `
+                <video muted autoplay loop playsinline preload="metadata">
+                    <source src="${safeImageUrl(video.videoUrl)}" type="video/mp4">
+                </video>
+                <h3>${safeText(video.title || "Tutorial")}</h3>
+            `;
+
+            tutorialSlider.appendChild(card);
+        });
+
+        autoSlide("tutorialSlider", ".tutorial-card", 3000);
+    }
+}
+
+loadHomepageAssets();
 
 onSnapshot(collection(db, "profiles"), (snapshot) => {
     snapshot.forEach(docSnap => {
@@ -2766,9 +2913,10 @@ window.openAllReviews = openAllReviews;
 window.closeAllReviews = closeAllReviews;
 
 let current = 0;
-const images = document.querySelectorAll("#slides img");
 
 function showSlide() {
+    const images = document.querySelectorAll("#slides img");
+
     if (!images.length) return;
 
     images.forEach((img, i) => {
@@ -2790,6 +2938,7 @@ function showSlide() {
             "Kaliabor",
             "Nagaon",
             "Guwahati",
+            "Jagun",
             "Games Village"
         ];
         
