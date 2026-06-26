@@ -1815,6 +1815,75 @@ body {
     margin-top: 2px;
     font-size: 12px;
 }
+.journey-popup-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+    padding:18px;
+}
+
+.journey-popup{
+    width:100%;
+    max-width:360px;
+    background:white;
+    border-radius:22px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 20px 45px rgba(0,0,0,.25);
+}
+
+.journey-popup-icon{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#fff3e6;
+    color:#ff7a00;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 12px;
+    font-size:25px;
+}
+
+.journey-popup h3{
+    margin:0;
+    font-size:19px;
+    color:#222;
+}
+
+.journey-popup p{
+    font-size:14px;
+    color:#666;
+    margin:10px 0 18px;
+}
+
+.popup-actions{
+    display:flex;
+    gap:10px;
+}
+
+.popup-actions button{
+    flex:1;
+    border:none;
+    padding:12px;
+    border-radius:14px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.close-popup-btn{
+    background:#f1f1f1;
+    color:#222;
+}
+
+.review-now-btn{
+    background:linear-gradient(to right,#ff7a00,#ff512f);
+    color:white;
+}
 </style>
 </head>
 <body>
@@ -2208,7 +2277,24 @@ body {
             <p>Support</p>
         </div>
     </div>
-   
+    <div class="journey-popup-overlay" id="journeyCompletePopup">
+        <div class="journey-popup">
+            <div class="journey-popup-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+    
+            <h3>Journey Completed</h3>
+    
+            <p>
+                Your journey is completed. Please rate your journey and share your review.
+            </p>
+    
+            <div class="popup-actions">
+                <button class="close-popup-btn" onclick="closeJourneyPopup()">Close</button>
+                <button class="review-now-btn" onclick="openReviewSection()">Rate Now</button>
+            </div>
+        </div>
+    </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -2222,6 +2308,8 @@ body {
             serverTimestamp,
             doc,
             getDoc,
+getDocs,
+where,
 limit
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
@@ -2251,7 +2339,74 @@ onSnapshot(collection(db, "profiles"), (snapshot) => {
 
     renderReviews();
 });
-        
+async function checkCompletedJourneyPopup(user) {
+    if (!user) return;
+
+    const q = query(
+        collection(db, "bookings"),
+        where("userUid", "==", user.uid)
+    );
+
+    const snap = await getDocs(q);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let completedBooking = null;
+
+    snap.forEach(docItem => {
+        const booking = {
+            id: docItem.id,
+            ...docItem.data()
+        };
+
+        const journeyDate = new Date(booking.date);
+        journeyDate.setHours(0, 0, 0, 0);
+
+        const bookingId = booking.bookingUid || booking.id;
+
+        const alreadyShown = localStorage.getItem("journeyPopup_" + bookingId);
+
+        if (
+            booking.status !== "CANCELLED" &&
+            journeyDate < today &&
+            !alreadyShown &&
+            !completedBooking
+        ) {
+            completedBooking = booking;
+        }
+    });
+
+    if (completedBooking) {
+        const bookingId = completedBooking.bookingUid || completedBooking.id;
+        localStorage.setItem("journeyPopup_" + bookingId, "shown");
+
+        document.getElementById("journeyCompletePopup").style.display = "flex";
+    }
+}
+
+window.closeJourneyPopup = function () {
+    document.getElementById("journeyCompletePopup").style.display = "none";
+};
+
+window.openReviewSection = function () {
+    document.getElementById("journeyCompletePopup").style.display = "none";
+
+    const reviewSection = document.querySelector(".review-carousel");
+
+    if (reviewSection) {
+        reviewSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+
+    setTimeout(() => {
+        const commentBox = document.getElementById("comment");
+        if (commentBox) commentBox.focus();
+    }, 700);
+};
+
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
         
@@ -2261,7 +2416,8 @@ onSnapshot(collection(db, "profiles"), (snapshot) => {
                 document.getElementById("userPreview").style.display = "flex";
         
                 await loadCurrentUserProfile();
-                updateUserPreview();
+updateUserPreview();
+checkCompletedJourneyPopup(user);
         
             } else {
                 document.getElementById("reviewForm").style.display = "none";
