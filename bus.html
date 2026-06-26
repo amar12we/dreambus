@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamliner - Available Buses</title>
-    <style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dreamliner - Available Buses</title>
+
+<style>
 :root {
     --primary: #ff7a00;
     --secondary: #ff512f;
@@ -16,7 +19,6 @@
     --success-bg: #f0fdf4;
 }
 
-/* BODY */
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-gray);
@@ -24,7 +26,6 @@ body {
     color: var(--text-dark);
 }
 
-/* HEADER */
 .header {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
@@ -48,9 +49,9 @@ body {
     align-items: center;
     justify-content: center;
     margin-right: 15px;
+    color: white;
 }
 
-/* ROUTE */
 .route-container {
     display: flex;
     flex-direction: column;
@@ -66,7 +67,6 @@ body {
     opacity: 0.9;
 }
 
-/* BUS CARD */
 .bus-card {
     background: #fff;
     margin: 18px 15px;
@@ -77,12 +77,10 @@ body {
         0 10px 30px rgba(0,0,0,0.06);
 }
 
-/* BRAND SECTION */
 .brand-section {
     margin-bottom: 22px;
 }
 
-/* DREAMLINER */
 .brand-name {
     font-size: 20px;
     font-weight: 900;
@@ -95,7 +93,6 @@ body {
     display: inline-block;
 }
 
-/* 🚀 BHARAT BENZ BELOW DREAMLINER */
 .bus-type {
     font-size: 12px;
     color: #6b7280;
@@ -105,7 +102,6 @@ body {
     padding-left: 2px;
 }
 
-/* JOURNEY */
 .journey-row {
     display: flex;
     justify-content: space-between;
@@ -113,7 +109,6 @@ body {
     margin: 32px 0;
 }
 
-/* TIME BOX */
 .time-box {
     text-align: center;
     min-width: 80px;
@@ -130,11 +125,9 @@ body {
     color: var(--text-light);
     margin-top: 6px;
     font-weight: 600;
+    display: block;
 }
 
-/* ❌ REMOVED ALL IN/OUT ICONS (CLEAN LOOK) */
-
-/* CENTER LINE */
 .duration-container {
     flex: 1;
     display: flex;
@@ -142,7 +135,6 @@ body {
     align-items: center;
 }
 
-/* ROAD + BUS ANIMATION */
 .line-visual {
     height: 3px;
     width: 85%;
@@ -181,7 +173,6 @@ body {
     100% { left: 100%; }
 }
 
-/* DURATION */
 .duration-text {
     font-size: 11px;
     color: var(--text-light);
@@ -189,7 +180,6 @@ body {
     margin-bottom: 6px;
 }
 
-/* SEAT TAG */
 .seat-tag {
     font-size: 11px;
     font-weight: 800;
@@ -200,7 +190,6 @@ body {
     border: 1px solid #e2e8f0;
 }
 
-/* FOOTER */
 .footer-row {
     display: flex;
     justify-content: space-between;
@@ -246,7 +235,11 @@ body {
     font-weight: 700;
 }
 
-/* NO BUS UI (UNCHANGED) */
+.book-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .no-bus-wrapper {
     margin: 60px 20px;
     display: flex;
@@ -300,12 +293,88 @@ body {
     color: white;
     font-weight: 700;
 }
-    </style>
+/* SMALLER BUS CARD */
+.bus-card {
+    margin: 12px 12px;
+    padding: 16px 15px;
+    border-radius: 16px;
+}
+
+.brand-section {
+    margin-bottom: 14px;
+}
+
+.brand-name {
+    font-size: 16px;
+    padding: 4px 10px;
+}
+
+.bus-type {
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.journey-row {
+    margin: 20px 0;
+}
+
+.time {
+    font-size: 17px;
+}
+
+.time-box {
+    min-width: 68px;
+}
+
+.footer-row {
+    padding-top: 12px;
+}
+
+.fare-amount {
+    font-size: 17px;
+}
+
+.book-btn {
+    padding: 10px 15px;
+    font-size: 12px;
+}
+
+/* LOADING SPINNER */
+.loading-wrapper {
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ff7a00;
+    font-weight: 800;
+}
+
+.loading-spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid #ffe0c2;
+    border-top: 4px solid #ff7a00;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>
 </head>
+
 <body>
 
 <div class="header">
-    <button class="back-btn" onclick="window.history.back()"><i class="fas fa-chevron-left"></i></button>
+    <button class="back-btn" onclick="window.history.back()">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+
     <div class="route-container">
         <div id="routeHeader">...</div>
         <div id="routeDate">...</div>
@@ -314,310 +383,307 @@ body {
 
 <div id="busList"></div>
 
-<!-- SAME HTML ABOVE (UNCHANGED) -->
-
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-        authDomain: "dreamliner-421b0.firebaseapp.com",
-        projectId: "dreamliner-421b0",
-        storageBucket: "dreamliner-421b0.appspot.com",
-        messagingSenderId: "454472970770",
-        appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    collectionGroup,
+    getDocs,
+    query,
+    where
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+    authDomain: "dreamliner-421b0.firebaseapp.com",
+    projectId: "dreamliner-421b0",
+    storageBucket: "dreamliner-421b0.appspot.com",
+    messagingSenderId: "454472970770",
+    appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+
+const from = params.get("from") || "";
+const to = params.get("to") || "";
+const date = params.get("date") || "";
+const womenSafety = params.get("womenSafety") || "false";
+
+const busList = document.getElementById("busList");
+
+document.getElementById("routeHeader").innerText = `${from} → ${to}`;
+document.getElementById("routeDate").innerText = date;
+
+const blockedDate = "2026-06-02";
+
+if (date === blockedDate) {
+    showNoBus(
+        "fas fa-calendar-times",
+        "Service Not Available",
+        "Sorry, we are not operating on this date.<br>Please book for another day.",
+        "Choose Another Date"
+    );
+
+    throw new Error("Blocked date - stop execution");
+}
+
+function showNoBus(icon, title, text, buttonText) {
+    busList.innerHTML = `
+    <div class="no-bus-wrapper">
+        <div class="no-bus-card">
+            <div class="no-bus-icon">
+                <i class="${icon}"></i>
+            </div>
+
+            <div class="no-bus-title">${title}</div>
+
+            <div class="no-bus-text">
+                ${text}
+            </div>
+
+            <button class="no-bus-btn" onclick="window.history.back()">
+                ${buttonText}
+            </button>
+        </div>
+    </div>
+    `;
+}
+function showLoading() {
+    busList.innerHTML = `
+        <div class="loading-wrapper">
+            <div class="loading-spinner"></div>
+            <div>Searching buses...</div>
+        </div>
+    `;
+}
+
+function calculateDuration(start, end) {
+    const parse = (t) => {
+        let [time, mod] = t.split(" ");
+        let [h, m] = time.split(":").map(Number);
+
+        if (h === 12) h = 0;
+        if (mod === "PM") h += 12;
+
+        return h * 60 + m;
     };
-    
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    
-    const params = new URLSearchParams(window.location.search);
-    const from = params.get("from") || "";
-    const to = params.get("to") || "";
-    const date = params.get("date") || "";
-    const womenSafety = params.get("womenSafety") || "false";
-    
-    document.getElementById("routeHeader").innerText = `${from} → ${to}`;
-    document.getElementById("routeDate").innerText = date;
-    
-    
-    /* 🔥 DATE BLOCK CHECK (ADDED ONLY THIS PART) */
-    const blockedDate = "2026-06-02";
-    
-    
-    if (date === blockedDate) {
-        document.getElementById("busList").innerHTML = `
-        <div class="no-bus-wrapper">
-            <div class="no-bus-card">
-                
-                <div class="no-bus-icon">
-                    <i class="fas fa-calendar-times"></i>
-                </div>
-    
-                <div class="no-bus-title">Service Not Available</div>
-    
-                <div class="no-bus-text">
-                    Sorry, we are not operating on this date.<br>
-                    Please book for another day.
-                </div>
-    
-                <button class="no-bus-btn" onclick="window.history.back()">
-                    Choose Another Date
-                </button>
-    
-            </div>
-        </div>
-        `;
-    
-        throw new Error("Blocked date - stop execution");
-    }
-    
-    
-    const routes = [
-    {
-        from: "Biswanath Charali",
-        to: "Guwahati",
-        fare: 465,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "6:15 AM",
-        arr: "11:45 AM"
-    },
-    {
-        from: "Sootea",
-        to: "Guwahati",
-        fare: 465,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "06:35 AM",
-        arr: "11:45 AM"
-    },
-    {
-        from: "Jamagurihat",
-        to: "Guwahati",
-        fare: 465,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "07:00 AM",
-        arr: "11:45 AM"
-    },
-    {
-        from: "Tezpur",
-        to: "Guwahati",
-        fare: 415,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "07:20 AM",
-        arr: "11:45 AM"
-    },
-    {
-        from: "Kaliabor",
-        to: "Guwahati",
-        fare: 375,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "07:45 AM",
-        arr: "11:45 AM"
-    },
-    
-    {
-        from: "Guwahati",
-        to: "Biswanath Charali",
-        fare: 465,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "04:40 PM",
-        arr: "09:45 PM"
-    },
-    {
-        from: "Guwahati",
-        to: "Sootea",
-        fare: 465,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "04:40 PM",
-        arr: "09:25 PM"
-    },
-    {
-        from: "Guwahati",
-        to: "Jamagurihat",
-        fare: 465,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "04:40 PM",
-        arr: "09:00 PM"
-    },
-    {
-        from: "Guwahati",
-        to: "Tezpur",
-        fare: 415,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "04:40 PM",
-        arr: "08:40 PM"
-    },
-    {
-        from: "Guwahati",
-        to: "Kaliabor",
-        fare: 395,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "04:40 PM",
-        arr: "08:15 PM"
-    },
-    {
-        from: "Nagaon",
-        to: "Biswanath Charali",
-        fare: 295,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "06:55 PM",
-        arr: "09:45 PM"
-    },
-    {
-        from: "Biswanath Charali",
-        to: "Nagaon",
-        fare: 295,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "06:15 AM",
-        arr: "08:35 AM"
-    },
-    {
-        from: "Nagaon",
-        to: "Guwahati",
-        fare: 295,
-        capacity: 45,
-        busName: "DREAMLINER",
-        busType: "Bhart-Benz 2X2 Semi Sleeper",
-        dept: "08:35 AM",
-        arr: "11:45 AM"
-    },
-];
-    
-    /* DURATION */
-    function calculateDuration(start, end) {
-        const parse = (t) => {
-            let [time, mod] = t.split(' ');
-            let [h, m] = time.split(':').map(Number);
-            if (h === 12) h = 0;
-            if (mod === 'PM') h += 12;
-            return h * 60 + m;
-        };
-        let d = parse(end) - parse(start);
-        if (d < 0) d += 1440;
-        return `${Math.floor(d/60)}h ${d%60}m`;
-    }
-    
-    /* FILTER */
-    const matchedRoutes = routes.filter(r => r.from === from && r.to === to);
-    
-    /* NO MATCH */
-    if (matchedRoutes.length === 0) {
-    
-        document.getElementById("busList").innerHTML = `
-        <div class="no-bus-wrapper">
-            <div class="no-bus-card">
-                <div class="no-bus-icon">
-                    <i class="fas fa-route"></i>
-                </div>
-    
-                <div class="no-bus-title">No Buses Found</div>
-    
-                <div class="no-bus-text">
-                    We couldn’t find any buses for this route.<br>
-                    Try changing your source or destination.
-                </div>
-    
-                <button class="no-bus-btn" onclick="window.history.back()">
-                    Search Again
-                </button>
-            </div>
-        </div>
-        `;
-    
-    } else {
-    
-        matchedRoutes.forEach((matched, index) => {
-    
-            const trip = matched.dept.includes("PM") ? "PM" : "AM";
-            const dbPath = `${date}_${trip}`;
-    
-            const card = document.createElement("div");
-            card.className = "bus-card";
-    
-            card.innerHTML = `
-                <div class="brand-section">
-                    <span class="brand-name">${matched.busName}</span>
-                    <span class="bus-type">${matched.busType}</span>
-                </div>
-    
-                <div class="journey-row">
-                    <div class="time-box">
-                        <span class="time">${matched.dept}</span>
-                        <span class="location">${matched.from}</span>
-                    </div>
-    
-                    <div class="duration-container">
-                        <span class="duration-text">${calculateDuration(matched.dept, matched.arr)}</span>
-                        <div class="line-visual"></div>
-                        <span class="seat-tag" id="avail-${index}">Checking...</span>
-                    </div>
-    
-                    <div class="time-box">
-                        <span class="time">${matched.arr}</span>
-                        <span class="location">${matched.to}</span>
-                    </div>
-                </div>
-    
-                <div class="footer-row">
-                    <div class="status-box">
-                        <div class="status-dot"></div>
-                        <span class="status-text">On Time</span>
-                    </div>
-    
-                    <div>
-                        <div class="fare-amount">₹${matched.fare}</div>
-                        <button class="book-btn" id="btn-${index}">View Seats</button>
-                    </div>
-                </div>
-            `;
-    
-            document.getElementById("busList").appendChild(card);
-    
-            onSnapshot(doc(db, "buses", dbPath), (snap) => {
-                let booked = 0;
-                if (snap.exists()) {
-                    const data = snap.data();
-                    const seatSource = data.seats ? data.seats : data;
-                    booked = Object.keys(seatSource).length;
-                }
-    
-                const avail = matched.capacity - booked;
-                const txt = document.getElementById(`avail-${index}`);
-    
-                txt.innerText = avail <= 0 ? "Sold Out" : `${avail} Seats`;
-                txt.style.color = avail <= 0 || avail < 10 ? "#dc3545" : "#16a34a";
+
+    let d = parse(end) - parse(start);
+
+    if (d < 0) d += 1440;
+
+    return `${Math.floor(d / 60)}h ${d % 60}m`;
+}
+
+function getTripFromServiceId(serviceId) {
+    if (!serviceId) return "";
+
+    if (serviceId.endsWith("_PM")) return "PM";
+    if (serviceId.endsWith("_AM")) return "AM";
+
+    if (serviceId.includes("_PM")) return "PM";
+    if (serviceId.includes("_AM")) return "AM";
+
+    return "";
+}
+
+async function loadRoutesFromFirestore() {
+    const snap = await getDocs(collectionGroup(db, "routes"));
+
+    let routes = [];
+
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+
+        if (
+            data.active === true &&
+            data.from === from &&
+            data.to === to
+        ) {
+            routes.push({
+                id: docSnap.id,
+                ...data
             });
-    
-            document.getElementById(`btn-${index}`).onclick = () => {
-                window.location.href = `seat.html?from=${from}&to=${to}&date=${date}&trip=${trip}&fare=${matched.fare}&womenSafety=${womenSafety}`;
-            };
-        });
+        }
+    });
+
+    return routes;
+}
+
+async function loadLayout(busId) {
+    const layoutRef = doc(db, "busLayouts", busId);
+    const layoutSnap = await getDoc(layoutRef);
+
+    if (!layoutSnap.exists()) {
+        console.error("No layout found for busId:", busId);
+        return null;
     }
-    </script>
+
+    return layoutSnap.data();
+}
+
+async function getSeatAvailability(date, serviceId, capacity) {
+    const dbPath = `${date}_${serviceId}`;
+    const busRef = doc(db, "buses", dbPath);
+    const snap = await getDoc(busRef);
+
+    let booked = 0;
+
+    if (snap.exists()) {
+        const data = snap.data();
+        const seatSource = data.seats ? data.seats : data;
+
+        booked = Object.values(seatSource).filter(seat => {
+            return seat && seat.status === "booked";
+        }).length;
+    }
+
+    return capacity - booked;
+}
+
+function createBusCard(matched, layout, index) {
+    const busId = matched.busId;
+    const serviceId = matched.serviceId || busId;
+    const trip = getTripFromServiceId(serviceId);
+
+    const card = document.createElement("div");
+    card.className = "bus-card";
+
+    card.innerHTML = `
+        <div class="brand-section">
+            <span class="brand-name">${matched.busName || "DREAMLINER"}</span>
+            <span class="bus-type">${matched.busType || "Bus Service"}</span>
+        </div>
+
+        <div class="journey-row">
+            <div class="time-box">
+                <span class="time">${matched.dept}</span>
+                <span class="location">${matched.from}</span>
+            </div>
+
+            <div class="duration-container">
+                <span class="duration-text">${calculateDuration(matched.dept, matched.arr)}</span>
+                <div class="line-visual"></div>
+                <span class="seat-tag" id="avail-${index}">Checking...</span>
+            </div>
+
+            <div class="time-box">
+                <span class="time">${matched.arr}</span>
+                <span class="location">${matched.to}</span>
+            </div>
+        </div>
+
+        <div class="footer-row">
+            <div class="status-box">
+                <div class="status-dot"></div>
+                <span class="status-text">On Time</span>
+            </div>
+
+            <div>
+                <div class="fare-amount">₹${matched.fare}</div>
+                <button class="book-btn" id="btn-${index}">View Seats</button>
+            </div>
+        </div>
+    `;
+
+    busList.appendChild(card);
+
+    document.getElementById(`btn-${index}`).onclick = () => {
+        window.location.href =
+        `seat.html?from=${encodeURIComponent(from)}` +
+        `&to=${encodeURIComponent(to)}` +
+        `&date=${encodeURIComponent(date)}` +
+        `&trip=${encodeURIComponent(trip)}` +
+        `&busId=${encodeURIComponent(busId)}` +
+        `&serviceId=${encodeURIComponent(serviceId)}` +
+        `&fare=${encodeURIComponent(matched.fare)}` +
+        `&capacity=${encodeURIComponent(layout.capacity)}` +
+        `&layoutId=${encodeURIComponent(layout.layoutId)}` +
+        `&normalRows=${encodeURIComponent(layout.normalRows)}` +
+        `&lastRowSeats=${encodeURIComponent(layout.lastRowSeats)}` +
+        `&leftSeats=${encodeURIComponent(layout.leftSeats)}` +
+        `&rightSeats=${encodeURIComponent(layout.rightSeats)}` +
+        `&womenSafety=${encodeURIComponent(womenSafety)}`;
+    };
+}
+
+async function updateAvailability(matched, layout, index) {
+    const serviceId = matched.serviceId || matched.busId;
+    const txt = document.getElementById(`avail-${index}`);
+    const btn = document.getElementById(`btn-${index}`);
+
+    try {
+        const avail = await getSeatAvailability(date, serviceId, layout.capacity);
+
+        if (txt) {
+            txt.innerText = avail <= 0 ? "Sold Out" : `${avail} Seats`;
+            txt.style.color = avail <= 0 || avail < 10 ? "#dc3545" : "#16a34a";
+        }
+
+        if (btn && avail <= 0) {
+            btn.disabled = true;
+            btn.innerText = "Sold Out";
+        }
+
+    } catch (error) {
+        console.error("Seat availability error:", error);
+
+        if (txt) {
+            txt.innerText = "Check failed";
+            txt.style.color = "#dc3545";
+        }
+    }
+}
+
+async function loadBuses() {
+    try {
+        showLoading();
+
+        const matchedRoutes = await loadRoutesFromFirestore();
+        busList.innerHTML = "";
+
+        if (matchedRoutes.length === 0) {
+            showNoBus(
+                "fas fa-route",
+                "No Buses Found",
+                "We couldn’t find any buses for this route.<br>Try changing your source or destination.",
+                "Search Again"
+            );
+            return;
+        }
+
+        for (let i = 0; i < matchedRoutes.length; i++) {
+            const matched = matchedRoutes[i];
+
+            const layout = await loadLayout(matched.busId);
+
+            if (!layout) continue;
+
+            createBusCard(matched, layout, i);
+
+            await updateAvailability(matched, layout, i);
+        }
+
+    } catch (error) {
+        console.error("Bus loading error:", error);
+
+        showNoBus(
+            "fas fa-triangle-exclamation",
+            "Something Went Wrong",
+            "Unable to load buses right now.<br>Please try again.",
+            "Go Back"
+        );
+    }
+}
+
+loadBuses();
+</script>
+
 </body>
 </html>
