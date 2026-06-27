@@ -1,71 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Policy - Dreamliner</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; margin: 0; color: #333; line-height: 1.6; }
-        .header { background: #ff7a00; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .container { max-width: 800px; margin: 30px auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        
-        h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
-        h2 { color: #ff7a00; border-bottom: 2px solid #fff4eb; padding-bottom: 10px; margin-top: 30px; font-size: 20px; }
-        
-        .highlight-box { background: #fff5f5; border-left: 5px solid #ff3b30; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .highlight-box strong { color: #d81b60; }
-        
-        .policy-list { list-style: none; padding: 0; }
-        .policy-list li { margin-bottom: 15px; padding-left: 30px; position: relative; }
-        .policy-list li::before { content: '✓'; position: absolute; left: 0; color: #28a745; font-weight: bold; }
-        
-        .footer { text-align: center; margin-top: 40px; padding-bottom: 40px; font-size: 14px; color: #999; }
-        .back-link { display: inline-block; margin-top: 20px; color: #ff7a00; text-decoration: none; font-weight: bold; }
-        .back-link:hover { text-decoration: underline; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Policy - Dreamliner</title>
 
-        @media (max-width: 600px) {
-            .container { margin: 15px; padding: 20px; }
-            h1 { font-size: 20px; }
-        }
-    </style>
+<style>
+:root{
+    --orange:#ff7a00;
+    --orange-dark:#e86600;
+    --green:#18a957;
+    --red:#ff3b30;
+    --text:#222;
+    --muted:#6f6f6f;
+    --bg:#f4f6f8;
+    --card:#ffffff;
+    --border:#eeeeee;
+    --soft-orange:#fff4eb;
+    --soft-red:#fff5f5;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.65;
+}
+
+.header{
+    position:relative;
+    background:linear-gradient(135deg,#ff7a00,#ff9a35);
+    color:white;
+    padding:34px 18px 42px;
+    text-align:center;
+    box-shadow:0 6px 22px rgba(255,122,0,0.28);
+}
+
+.header h1{
+    margin:0;
+    font-size:27px;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+}
+
+.header p{
+    margin:8px 0 0;
+    font-size:15px;
+    opacity:.95;
+}
+
+.container{
+    max-width:900px;
+    margin:-22px auto 30px;
+    background:var(--card);
+    padding:34px;
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.08);
+}
+
+.policy-intro{
+    background:var(--soft-orange);
+    border:1px solid #ffe0c2;
+    padding:18px 20px;
+    border-radius:14px;
+    color:#5a2b00;
+    margin-bottom:26px;
+}
+
+h2{
+    color:var(--orange);
+    font-size:20px;
+    margin:34px 0 14px;
+    padding-bottom:9px;
+    border-bottom:2px solid var(--soft-orange);
+}
+
+h3{
+    font-size:16px;
+    margin:18px 0 8px;
+    color:#333;
+}
+
+.highlight-box{
+    background:var(--soft-red);
+    border-left:5px solid var(--red);
+    padding:18px 20px;
+    border-radius:10px;
+    margin:18px 0;
+}
+
+.highlight-box strong{
+    color:#d81b60;
+}
+
+.policy-list{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+.policy-list li{
+    margin-bottom:13px;
+    padding-left:30px;
+    position:relative;
+}
+
+.policy-list li::before{
+    content:'✓';
+    position:absolute;
+    left:0;
+    top:0;
+    color:var(--green);
+    font-weight:800;
+}
+
+.warning-list li::before{
+    content:'!';
+    color:white;
+    background:var(--red);
+    width:18px;
+    height:18px;
+    line-height:18px;
+    text-align:center;
+    border-radius:50%;
+    font-size:12px;
+    top:4px;
+}
+
+.refund-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+    overflow:hidden;
+    border-radius:12px;
+    box-shadow:0 0 0 1px var(--border);
+}
+
+.refund-table th{
+    background:var(--orange);
+    color:white;
+    text-align:left;
+    padding:13px;
+    font-size:14px;
+}
+
+.refund-table td{
+    padding:13px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+.refund-table tr:last-child td{
+    border-bottom:none;
+}
+
+.note{
+    font-size:14px;
+    color:var(--muted);
+    background:#fafafa;
+    padding:14px 16px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    margin-top:16px;
+}
+
+.back-wrap{
+    text-align:center;
+    margin-top:35px;
+}
+
+.back-link{
+    display:inline-block;
+    background:var(--orange);
+    color:white;
+    text-decoration:none;
+    font-weight:700;
+    padding:13px 24px;
+    border-radius:30px;
+    box-shadow:0 6px 16px rgba(255,122,0,.28);
+    transition:.25s ease;
+}
+
+.back-link:hover{
+    background:var(--orange-dark);
+    transform:translateY(-1px);
+}
+
+.footer{
+    text-align:center;
+    padding:20px 15px 38px;
+    font-size:14px;
+    color:#999;
+}
+@media(max-width:600px){
+
+.header{
+    padding:60px 14px 32px;
+}
+
+.header h1{
+    font-size:20px;
+    line-height:1.3;
+    padding:0 40px;
+}
+
+.header p{
+    font-size:14px;
+    margin-top:6px;
+    padding:0 20px;
+}
+
+.back-btn{
+    top:14px;
+    left:14px;
+    width:38px;
+    height:38px;
+}
+
+.back-btn i{
+    font-size:15px;
+}
+
+.container{
+    margin:-18px 12px 24px;
+    padding:22px;
+    border-radius:16px;
+}
+
+h2{
+    font-size:18px;
+}
+
+.refund-table th,
+.refund-table td{
+    font-size:13px;
+    padding:10px;
+}
+}
+.back-btn{
+    position:absolute;
+    top:18px;
+    left:18px;
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:12px;
+    background:rgba(255,255,255,.18);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.25s ease;
+    box-shadow:0 4px 14px rgba(0,0,0,.12);
+}
+.back-btn:hover{
+    background:rgba(255,255,255,.28);
+    transform:translateY(-2px);
+}
+.back-btn i{font-size:17px;}
+@media(max-width:600px){
+.back-btn{top:14px;left:14px;width:38px;height:38px;}
+.back-btn i{font-size:15px;}
+}
+
+</style>
 </head>
+
 <body>
+    
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="header">
+    <button class="back-btn" onclick="window.history.back()">
+        <i class="fas fa-chevron-left"></i>
+    </button>
     <h1>Dreamliner Booking Policy</h1>
     <p>Smooth Journeys, Superior Comfort</p>
 </div>
 
+
 <div class="container">
+
+    <div class="policy-intro">
+        Please read the booking, cancellation, safety and travel policies carefully before confirming your Dreamliner ticket.
+    </div>
+
     <h2>1. Female Passenger Safety Policy</h2>
-    <p>To ensure the safety and comfort of our female travelers, Dreamliner enforces a strict "Adjacent Seat" protocol:</p>
-    
+    <p>Dreamliner follows a strict adjacent-seat safety rule to ensure a safer and more comfortable journey for female passengers.</p>
+
     <div class="highlight-box">
-        <strong>Mandatory Rule:</strong> A seat directly adjacent (horizontally) to a seat already booked by a female passenger cannot be booked by a male passenger from a separate booking transaction.
+        <strong>Mandatory Rule:</strong> A seat directly adjacent to a female passenger cannot be booked by a male passenger from a separate booking transaction.
     </div>
 
     <ul class="policy-list">
-        <li><strong>Automated Restriction:</strong> Our system automatically blocks male gender selection for seats neighboring a female passenger.</li>
-        <li><strong>Co-Traveler Exception:</strong> This restriction does not apply if both seats are being booked within the <strong>same transaction</strong> (e.g., a family or couple booking together).</li>
-        <li><strong>Operator Authority:</strong> The Bus Operator reserves the right to reassign seats if it is found that a male passenger has intentionally bypassed this safety feature by providing incorrect gender information.</li>
+        <li><strong>Automated Restriction:</strong> The system automatically restricts male passenger selection next to an already booked female passenger seat.</li>
+        <li><strong>Co-Traveller Exception:</strong> This rule does not apply when both seats are booked in the same transaction, such as family or couple bookings.</li>
+        <li><strong>Incorrect Information:</strong> If wrong gender details are provided to bypass the rule, the operator may reassign or cancel the seat as required.</li>
+        <li><strong>Operator Authority:</strong> Final seat adjustment rights remain with the bus operator for passenger safety and operational reasons.</li>
     </ul>
 
-    <h2>2. Booking & Cancellation</h2>
+    <h2>2. Booking Rules</h2>
     <ul class="policy-list">
-        <li>Reschedule available up to 12 hours before departure. One-time limit applies.</li>
-        <li>Digital or M-Ticket is valid for boarding.</li>
-        <li>Reporting time: 15 minutes prior.</li>
-        <li>Tickets are non-transferable and valid only for the trip date and time specified.</li>
-        <li>Passengers must carry a valid ID (Aadhaar, Voter ID, etc.) that matches the name on the e-ticket.</li>
-        <li>Cancellations made 24 hours before departure are eligible for a partial refund as per standard slab rates.</li>
+        <li>Tickets are valid only for the selected travel date, route, trip and time.</li>
+        <li>Tickets are non-transferable and cannot be used by another passenger.</li>
+        <li>Passenger name, age, gender and phone number must be entered correctly during booking.</li>
+        <li>Passengers must carry a valid Government ID such as Aadhaar Card, Voter ID, Driving Licence or Passport.</li>
+        <li>Dreamliner is not responsible for issues caused by incorrect passenger, pickup or drop details entered during booking.</li>
     </ul>
 
-    <h2>3. GST & Service Fees</h2>
-    <p>As per government regulations, a <strong>18% GST</strong> is applicable on all luxury bus transport services. This is calculated on the base fare and shown clearly during the checkout process.</p>
+    <h2>3. Boarding Policy</h2>
+    <ul class="policy-list">
+        <li>Digital ticket or M-Ticket is valid for boarding.</li>
+        <li>Passengers must report at the selected pickup point at least 15 minutes before departure.</li>
+        <li>The bus will not wait for late passengers.</li>
+        <li>Passengers must board only from the selected pickup point shown on the ticket.</li>
+        <li>Government ID may be checked before boarding.</li>
+    </ul>
 
-    <center>
-        <a href="javascript:window.close();" class="back-link">Return to Booking Screen</a>
-    </center>
+    <h2>4. Cancellation & Refund Policy</h2>
+    <p>Refund amount is calculated based on the time left before scheduled departure.</p>
+
+    <table class="refund-table">
+        <thead>
+            <tr>
+                <th>Cancellation Time</th>
+                <th>Deduction</th>
+                <th>Refund</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>More than 48 hours before departure</td>
+                <td>10%</td>
+                <td>90%</td>
+            </tr>
+            <tr>
+                <td>24 to 48 hours before departure</td>
+                <td>20%</td>
+                <td>80%</td>
+            </tr>
+            <tr>
+                <td>12 to 24 hours before departure</td>
+                <td>50%</td>
+                <td>50%</td>
+            </tr>
+            <tr>
+                <td>Less than 12 hours before departure</td>
+                <td>100%</td>
+                <td>No refund</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="note">
+        Refunds may take 5–6 working days to reflect in the original payment method, depending on the bank or payment provider.
+    </div>
+
+    <h2>5. Reschedule Policy</h2>
+    <ul class="policy-list">
+        <li>Reschedule is allowed only once per booking.</li>
+        <li>Reschedule is available up to 12 hours before departure.</li>
+        <li>Reschedule is not allowed within 12 hours of departure.</li>
+        <li>Passenger count must remain the same while rescheduling.</li>
+        <li>Coupons or discounts may not be applicable during reschedule.</li>
+        <li>Once rescheduled, the ticket cannot be rescheduled again.</li>
+    </ul>
+
+    <h2>6. Luggage Policy</h2>
+    <ul class="policy-list">
+        <li>Each passenger is allowed up to 2 pieces of luggage.</li>
+        <li>Extra luggage or luggage above 15 kg may be chargeable.</li>
+        <li>Passengers are responsible for their personal belongings.</li>
+        <li>Dreamliner is not responsible for loss of valuables kept in luggage.</li>
+    </ul>
+
+    <h2>7. Restricted Items</h2>
+    <ul class="policy-list warning-list">
+        <li>Pets are not allowed inside the bus.</li>
+        <li>Liquor and illegal substances are strictly prohibited.</li>
+        <li>Dangerous, inflammable or restricted goods are not allowed.</li>
+        <li>Passengers causing disturbance may be denied boarding or removed from the journey.</li>
+    </ul>
+
+    <h2>8. GST, Fare & Service Fees</h2>
+    <ul class="policy-list">
+        <li>GST and applicable charges are shown clearly during checkout.</li>
+        <li>The final payable amount is displayed before payment confirmation.</li>
+        <li>Convenience fees, payment gateway charges or service charges may be non-refundable.</li>
+        <li>Fare may vary based on route, date, trip, seat availability and offers.</li>
+    </ul>
+
+    <h2>9. Coupons & Offers</h2>
+    <ul class="policy-list">
+        <li>Coupons are valid only for eligible users and eligible bookings.</li>
+        <li>Some coupons may be limited to one-time use per user.</li>
+        <li>Coupon benefits may change, pause or expire without prior notice.</li>
+        <li>Coupons are not applicable after booking confirmation.</li>
+        <li>Coupons may not be available during reschedule bookings.</li>
+    </ul>
+
+    <h2>10. Operator Rights</h2>
+    <ul class="policy-list">
+        <li>Dreamliner may change bus, seat or schedule due to operational reasons.</li>
+        <li>Seat reassignment may be done for safety, technical or management reasons.</li>
+        <li>In case of unavoidable delay, passengers will be informed through available contact details.</li>
+        <li>Dreamliner reserves the right to refuse travel in case of misconduct, invalid ticket or incorrect passenger details.</li>
+    </ul>
+
+    <h2>11. Important Travel Notice</h2>
+    <ul class="policy-list">
+        <li>Passengers should check pickup point, departure time and journey date before travel.</li>
+        <li>Passengers should keep their phone reachable for trip-related communication.</li>
+        <li>Dreamliner is not responsible for missed buses due to passenger delay.</li>
+        <li>By booking a ticket, the passenger agrees to all Dreamliner booking policies.</li>
+    </ul>
+
+    <div class="back-wrap">
+        <a href="javascript:history.back();" class="back-link">Return to Booking Screen</a>
+    </div>
+
 </div>
 
 <div class="footer">
