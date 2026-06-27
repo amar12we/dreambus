@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>About Us | Dreamliner</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+    --orange:#ff7a00;
+    --orange-dark:#e86d00;
+    --soft-orange:#fff3e6;
+    --dark:#1f2937;
+    --muted:#6b7280;
+    --bg:#f5f7fa;
+    --white:#ffffff;
+    --border:#eeeeee;
+    --green:#16a34a;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+    line-height:1.7;
+}
+
+.hero{
+    position:relative;
+    background:
+        radial-gradient(circle at top left,rgba(255,255,255,.22),transparent 32%),
+        linear-gradient(135deg,#ff7a00,#ff9d3d);
+    color:white;
+    padding:58px 20px 82px;
+    text-align:center;
+}
+
+.hero-top{
+    position:absolute;
+    top:20px;
+    left:20px;
+}
+
+.back-btn{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    cursor:pointer;
+    transition:.25s ease;
+}
+
+.back-btn:hover{
+    background:rgba(255,255,255,0.25);
+    transform:translateX(-2px);
+}
+
+.hero-badge{
+    display:inline-block;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35);
+    padding:8px 16px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:34px;
+    margin-bottom:12px;
+    letter-spacing:.4px;
+}
+
+.hero p{
+    max-width:720px;
+    margin:auto;
+    font-size:16px;
+    opacity:.96;
+}
+
+.container{
+    max-width:1050px;
+    margin:-45px auto 35px;
+    padding:0 16px;
+}
+
+.card{
+    background:white;
+    border-radius:24px;
+    padding:32px;
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+    margin-bottom:22px;
+}
+
+.section-title{
+    font-size:23px;
+    color:var(--orange);
+    margin-bottom:14px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-top:24px;
+}
+
+.info-box{
+    background:#fafafa;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    transition:.25s ease;
+}
+
+.info-box:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,.06);
+}
+
+.info-box i{
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    background:var(--soft-orange);
+    color:var(--orange);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    margin-bottom:15px;
+}
+
+.info-box h3{
+    font-size:17px;
+    margin-bottom:8px;
+}
+
+.info-box p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.route-strip{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+    margin-top:20px;
+}
+
+.route{
+    background:linear-gradient(135deg,#fff,#fff7ef);
+    border:1px solid #ffe0c2;
+    border-radius:16px;
+    padding:18px;
+}
+
+.route h3{
+    color:#333;
+    font-size:16px;
+    margin-bottom:8px;
+}
+
+.route p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.policy-list{
+    list-style:none;
+    margin-top:12px;
+}
+
+.policy-list li{
+    position:relative;
+    padding-left:30px;
+    margin-bottom:12px;
+    color:#444;
+}
+
+.policy-list li::before{
+    content:"✓";
+    position:absolute;
+    left:0;
+    top:0;
+    color:var(--green);
+    font-weight:800;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-top:24px;
+}
+
+.stat{
+    background:var(--soft-orange);
+    border-radius:18px;
+    padding:20px 10px;
+    text-align:center;
+}
+
+.stat h3{
+    color:var(--orange);
+    font-size:24px;
+}
+
+.stat p{
+    font-size:13px;
+    color:#7a4a1f;
+}
+
+.cta{
+    text-align:center;
+    background:linear-gradient(135deg,#222,#333);
+    color:white;
+}
+
+.cta h2{
+    font-size:24px;
+    margin-bottom:10px;
+}
+
+.cta p{
+    color:#ddd;
+    max-width:650px;
+    margin:auto;
+}
+
+.actions{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin-top:25px;
+}
+
+.btn{
+    text-decoration:none;
+    padding:13px 24px;
+    border-radius:30px;
+    font-weight:700;
+    transition:.25s ease;
+}
+
+.btn-primary{
+    background:var(--orange);
+    color:white;
+    box-shadow:0 8px 20px rgba(255,122,0,.28);
+}
+
+.btn-primary:hover{
+    background:var(--orange-dark);
+    transform:translateY(-2px);
+}
+
+.btn-light{
+    background:white;
+    color:var(--orange);
+}
+
+.btn-light:hover{
+    background:#fff4eb;
+}
+
+.footer{
+    text-align:center;
+    color:#999;
+    font-size:13px;
+    padding:15px 12px 35px;
+}
+
+@media(max-width:850px){
+    .grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .route-strip{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:520px){
+    .hero{
+        padding:46px 16px 72px;
+    }
+
+    .hero-top{
+        top:16px;
+        left:16px;
+    }
+
+    .hero h1{
+        font-size:27px;
+    }
+
+    .card{
+        padding:24px 20px;
+        border-radius:20px;
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .actions{
+        flex-direction:column;
+    }
+
+    .btn{
+        width:100%;
+        text-align:center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<section class="hero">
+
+    <div class="hero-top">
+        <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+
+    <div class="hero-badge">Dreamliner Transport Services</div>
+
+    <h1>About Dreamliner</h1>
+
+    <p>
+        Dreamliner is built to make bus travel smoother, safer and more comfortable with simple online booking,
+        secure payments, digital tickets and passenger-friendly travel policies.
+    </p>
+
+</section>
+
+<div class="container">
+
+    <div class="card">
+        <h2 class="section-title">Who We Are</h2>
+
+        <p>
+            Dreamliner is a modern bus booking platform focused on providing a clean, reliable and convenient travel
+            experience for passengers. From selecting your route and seat to receiving your digital ticket, our goal is
+            to make every step simple and stress-free.
+        </p>
+
+        <p style="margin-top:12px;">
+            We are currently serving important routes such as Guwahati, Biswanath Charali, Tezpur, Jamugurihat, Sootea,
+            Kaliabor and Nagaon, with a focus on comfort, safety and timely communication.
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <h3>24/7</h3>
+                <p>Online Booking</p>
+            </div>
+
+            <div class="stat">
+                <h3>100%</h3>
+                <p>Digital Ticket</p>
+            </div>
+
+            <div class="stat">
+                <h3>5%</h3>
+                <p>GST Billing</p>
+            </div>
+
+            <div class="stat">
+                <h3>1x</h3>
+                <p>Reschedule Option</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">Why Choose Dreamliner?</h2>
+
+        <div class="grid">
+
+            <div class="info-box">
+                <i class="fas fa-ticket"></i>
+                <h3>Easy Booking</h3>
+                <p>Search routes, select seats, add passenger details and confirm your ticket in a few simple steps.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-shield-halved"></i>
+                <h3>Safe Travel</h3>
+                <p>Female passenger safety rules and adjacent seat protection are built into the booking system.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-credit-card"></i>
+                <h3>Secure Payments</h3>
+                <p>Payments are processed securely with verified order and payment confirmation flow.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-mobile-screen-button"></i>
+                <h3>M-Ticket Support</h3>
+                <p>No need for printed tickets. Show your digital ticket during boarding with valid ID proof.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-calendar-days"></i>
+                <h3>Reschedule Option</h3>
+                <p>Passengers can reschedule once up to 12 hours before departure, subject to policy conditions.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-headset"></i>
+                <h3>Passenger Support</h3>
+                <p>Support and travel guidance are available for booking, cancellation, refund and boarding help.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">Our Routes</h2>
+
+        <p>
+            Dreamliner is designed for regional travel with convenient pickup and drop points across major locations.
+        </p>
+
+        <div class="route-strip">
+
+            <div class="route">
+                <h3><i class="fas fa-route"></i> Guwahati ↔ Biswanath Charali</h3>
+                <p>Comfortable journey with selected boarding and dropping points.</p>
+            </div>
+
+            <div class="route">
+                <h3><i class="fas fa-location-dot"></i> Key Stops</h3>
+                <p>Tezpur, Sootea, Jamugurihat, Kaliabor, Nagaon and more route points.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">Passenger Policies</h2>
+
+        <ul class="policy-list">
+            <li>Passengers should report at the pickup point at least 15 minutes before departure.</li>
+            <li>Digital ticket or M-Ticket is valid for boarding.</li>
+            <li>Valid Government ID is required during boarding.</li>
+            <li>Cancellation refund is calculated based on time left before departure.</li>
+            <li>Refunds may take 5–6 working days to reflect in the original payment method.</li>
+            <li>Reschedule is allowed only once and only up to 12 hours before departure.</li>
+            <li>Two pieces of luggage are allowed. Extra luggage above 15 kg may be chargeable.</li>
+            <li>Pets, liquor and restricted items are not allowed inside the bus.</li>
+            <li>The bus will not wait for late passengers at pickup points.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">Our Commitment</h2>
+
+        <p>
+            Dreamliner is committed to improving the travel experience with better technology, transparent policies and
+            reliable passenger service. Features like live bus tracking are under development to make future journeys
+            even smoother and more convenient.
+        </p>
+
+        <ul class="policy-list">
+            <li>Clear fare and GST display before payment.</li>
+            <li>Simple booking, cancellation and reschedule process.</li>
+            <li>Passenger-first safety and comfort policies.</li>
+            <li>Continuous improvement of online travel services.</li>
+        </ul>
+    </div>
+
+    <div class="card cta">
+        <h2>Ready to Travel with Dreamliner?</h2>
+
+        <p>
+            Book your next journey with a smooth online experience, secure payment and digital ticket support.
+        </p>
+
+        <div class="actions">
+            <a href="index.html" class="btn btn-primary">
+                <i class="fas fa-bus"></i> Book Ticket
+            </a>
+
+            <a href="javascript:history.back();" class="btn btn-light">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    © 2026 Dreamliner Transport Services. All Rights Reserved.
+</div>
+
+</body>
+</html>

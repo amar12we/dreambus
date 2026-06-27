@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Track Bus | Dreamliner</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+
+:root{
+    --orange:#ff7a00;
+    --orange-dark:#eb6c00;
+    --orange-light:#fff4eb;
+    --text:#222;
+    --muted:#6f6f6f;
+    --bg:#f5f7fa;
+    --white:#ffffff;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+}
+
+body{
+    height:100dvh;
+    overflow:hidden;
+    font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    background:
+        radial-gradient(circle at top left,rgba(255,122,0,.15),transparent 35%),
+        radial-gradient(circle at bottom right,rgba(255,122,0,.08),transparent 35%),
+        linear-gradient(180deg,#ffffff,#f5f7fa);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+}
+
+.card{
+    width:100%;
+    max-width:470px;
+    max-height:calc(100dvh - 24px);
+    background:rgba(255,255,255,.95);
+    border-radius:24px;
+    padding:28px 24px;
+    text-align:center;
+    box-shadow:0 18px 45px rgba(0,0,0,.08);
+    backdrop-filter:blur(12px);
+    overflow:hidden;
+}
+
+.icon-wrap{
+    width:82px;
+    height:82px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    background:linear-gradient(145deg,#ffffff,#fafafa);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.08),
+        inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.icon-wrap::before{
+    content:"";
+    position:absolute;
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    border:2px dashed rgba(255,122,0,.25);
+    animation:spin 18s linear infinite;
+}
+
+.track-icon{
+    font-size:40px;
+    color:var(--orange);
+    animation:float 2.8s ease-in-out infinite;
+}
+
+.badge{
+    display:inline-block;
+    background:var(--orange-light);
+    color:var(--orange);
+    font-weight:700;
+    font-size:13px;
+    padding:8px 16px;
+    border-radius:30px;
+    margin-bottom:14px;
+}
+
+h1{
+    font-size:25px;
+    color:var(--text);
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.6;
+}
+
+.message{
+    margin-top:18px;
+    background:#fafafa;
+    border:1px solid #ededed;
+    border-radius:16px;
+    padding:14px;
+    color:#555;
+    line-height:1.6;
+    font-size:13px;
+}
+
+.progress-box{
+    margin-top:20px;
+}
+
+.progress-title{
+    display:flex;
+    justify-content:space-between;
+    font-size:14px;
+    color:#666;
+    margin-bottom:10px;
+}
+
+.progress{
+    width:100%;
+    height:8px;
+    background:#ececec;
+    border-radius:30px;
+    overflow:hidden;
+}
+
+.progress span{
+    display:block;
+    width:72%;
+    height:100%;
+    border-radius:30px;
+    background:linear-gradient(90deg,#ff7a00,#ffae52);
+    animation:loading 2.2s ease-in-out infinite alternate;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    margin-top:22px;
+}
+
+.btn{
+    flex:1;
+    text-decoration:none;
+    padding:12px;
+    border-radius:35px;
+    font-weight:700;
+    font-size:14px;
+    transition:.25s;
+    white-space:nowrap;
+}
+
+.home{
+    background:var(--orange);
+    color:white;
+    box-shadow:0 10px 22px rgba(255,122,0,.28);
+}
+
+.home:hover{
+    background:var(--orange-dark);
+    transform:translateY(-2px);
+}
+
+.back{
+    border:1px solid #ffd8b6;
+    color:var(--orange);
+    background:white;
+}
+
+.back:hover{
+    background:#fff7f0;
+}
+
+.footer{
+    margin-top:16px;
+    font-size:11px;
+    color:#aaa;
+}
+
+@keyframes float{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-7px);
+    }
+
+}
+
+@keyframes spin{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+@keyframes loading{
+
+    from{
+        width:58%;
+    }
+
+    to{
+        width:78%;
+    }
+
+}
+
+@media(max-width:480px){
+
+body{
+    padding:8px;
+}
+
+.card{
+    max-height:calc(100dvh - 16px);
+    padding:20px 16px;
+    border-radius:20px;
+}
+
+.icon-wrap{
+    width:70px;
+    height:70px;
+    margin-bottom:14px;
+}
+
+.icon-wrap::before{
+    width:86px;
+    height:86px;
+}
+
+.track-icon{
+    font-size:34px;
+}
+
+.badge{
+    font-size:12px;
+    padding:6px 14px;
+    margin-bottom:12px;
+}
+
+h1{
+    font-size:22px;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    font-size:13px;
+    line-height:1.5;
+}
+
+.message{
+    margin-top:14px;
+    padding:12px;
+    font-size:12px;
+    line-height:1.5;
+}
+
+.progress-box{
+    margin-top:16px;
+}
+
+.progress-title{
+    font-size:12px;
+}
+
+.actions{
+    flex-direction:row;
+    gap:8px;
+    margin-top:18px;
+}
+
+.btn{
+    padding:10px;
+    font-size:13px;
+}
+
+.footer{
+    margin-top:12px;
+    font-size:10px;
+}
+
+}
+
+@media(max-height:700px){
+
+.card{
+    padding-top:16px;
+    padding-bottom:16px;
+}
+
+.icon-wrap{
+    width:62px;
+    height:62px;
+    margin-bottom:10px;
+}
+
+.icon-wrap::before{
+    width:76px;
+    height:76px;
+}
+
+.track-icon{
+    font-size:30px;
+}
+
+.badge{
+    font-size:11px;
+    padding:5px 12px;
+    margin-bottom:9px;
+}
+
+h1{
+    font-size:20px;
+    margin-bottom:6px;
+}
+
+.subtitle{
+    font-size:12px;
+    line-height:1.4;
+}
+
+.message{
+    margin-top:10px;
+    padding:10px;
+    font-size:11.5px;
+    line-height:1.4;
+}
+
+.progress-box{
+    margin-top:12px;
+}
+
+.progress-title{
+    font-size:11px;
+    margin-bottom:7px;
+}
+
+.progress{
+    height:7px;
+}
+
+.actions{
+    margin-top:14px;
+}
+
+.btn{
+    padding:9px;
+    font-size:12px;
+}
+
+.footer{
+    margin-top:9px;
+    font-size:9.5px;
+}
+
+}
+
+@media(max-height:600px){
+
+.message{
+    display:none;
+}
+
+.card{
+    padding-top:14px;
+    padding-bottom:14px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="icon-wrap">
+        <i class="fas fa-location-dot track-icon"></i>
+    </div>
+
+    <div class="badge">
+        Coming Soon
+    </div>
+
+    <h1>Live Bus Tracking</h1>
+
+    <p class="subtitle">
+        We sincerely apologize for the inconvenience.
+        Our Live Bus Tracking feature is currently under development to provide you with a more accurate and seamless travel experience.
+    </p>
+
+    <div class="message">
+        Our team is actively working on this feature and it will be available soon. Once launched, you'll be able to view your bus's live location, estimated arrival time, and journey updates directly from the Dreamliner app.
+    </div>
+
+    <div class="progress-box">
+
+        <div class="progress-title">
+            <span>Development Progress</span>
+            <span>Coming Soon</span>
+        </div>
+
+        <div class="progress">
+            <span></span>
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <a href="javascript:history.back()" class="btn back">
+            <i class="fas fa-arrow-left"></i> Go Back
+        </a>
+
+        <a href="index.html" class="btn home">
+            <i class="fas fa-house"></i> Home
+        </a>
+
+    </div>
+
+    <div class="footer">
+        © 2026 Dreamliner Transport Services. All Rights Reserved.
+    </div>
+
+</div>
+
+</body>
+</html>
