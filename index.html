@@ -1879,6 +1879,44 @@ body {
     margin:10px 0 18px;
 }
 
+.journey-popup-route{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    border-radius:16px;
+    padding:12px;
+    margin:12px 0;
+    text-align:left;
+}
+
+.journey-popup-route strong{
+    display:block;
+    font-size:14px;
+    color:#222;
+}
+
+.journey-popup-route span{
+    display:block;
+    margin-top:4px;
+    font-size:12px;
+    color:#9a3412;
+    font-weight:700;
+}
+
+.active-journey-review-note{
+    display:none;
+    width:100%;
+    box-sizing:border-box;
+    margin:0 0 10px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:#fff7ed;
+    color:#9a3412;
+    border:1px solid #fed7aa;
+    font-size:12px;
+    font-weight:700;
+    text-align:center;
+}
+
 .popup-actions{
     display:flex;
     gap:10px;
@@ -2065,6 +2103,60 @@ body {
         width: 36px;
         height: 36px;
     }
+}
+
+
+
+/* ===== ANNOUNCEMENT NOTIFICATION BADGE ===== */
+.announcement-nav-item{
+    position:relative;
+}
+
+.announcement-icon-wrap{
+    position:relative;
+    width:max-content;
+    margin:0 auto 2px;
+}
+
+.announcement-count-badge{
+    position:absolute;
+    top:-10px;
+    right:-16px;
+    min-width:21px;
+    height:21px;
+    padding:0 6px;
+    border-radius:999px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#ff7a00,#ff512f);
+    color:white;
+    border:2px solid #fff;
+    font-size:10px;
+    font-weight:800;
+    line-height:1;
+    box-shadow:0 6px 14px rgba(255,81,47,.35);
+    animation:announceBadgePop .45s ease;
+}
+
+.announcement-count-badge.show{
+    display:flex;
+}
+
+.announcement-count-badge.pulse{
+    animation:announceBadgePulse 1.4s infinite;
+}
+
+@keyframes announceBadgePop{
+    0%{transform:scale(.3);opacity:.2;}
+    70%{transform:scale(1.18);opacity:1;}
+    100%{transform:scale(1);opacity:1;}
+}
+
+@keyframes announceBadgePulse{
+    0%{box-shadow:0 0 0 0 rgba(255,122,0,.45);}
+    70%{box-shadow:0 0 0 8px rgba(255,122,0,0);}
+    100%{box-shadow:0 0 0 0 rgba(255,122,0,0);}
 }
 
 </style>
@@ -2274,6 +2366,7 @@ body {
         <input type="hidden" id="rating" value="0">
     
         <div class="review-form" id="reviewForm" style="display:none;">
+            <div id="activeJourneyReviewNote" class="active-journey-review-note"></div>
             <textarea id="comment" placeholder="Share your experience..."></textarea>
             <button onclick="addReview()">Submit Review</button>
         </div>
@@ -2508,8 +2601,11 @@ body {
             <p>Home</p>
         </div>
     
-        <div onclick="window.location.href='announcements.html'">
-            <i class="fas fa-bullhorn"></i>
+        <div class="announcement-nav-item" onclick="openAnnouncementsPage()">
+            <div class="announcement-icon-wrap">
+                <i class="fas fa-bullhorn"></i>
+                <span id="announcementBadge" class="announcement-count-badge">0</span>
+            </div>
             <p>Announcements</p>
         </div>
     
@@ -2526,9 +2622,14 @@ body {
     
             <h3>Journey Completed</h3>
     
-            <p>
+            <p id="journeyPopupMessage">
                 Your journey is completed. Please rate your journey and share your review.
             </p>
+
+            <div class="journey-popup-route" id="journeyPopupRoute" style="display:none;">
+                <strong id="journeyPopupRouteText">Dreamliner journey</strong>
+                <span id="journeyPopupDateText">Travel date</span>
+            </div>
     
             <div class="popup-actions">
                 <button class="close-popup-btn" onclick="closeJourneyPopup()">Close</button>
@@ -2566,8 +2667,69 @@ limit
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+
+        /* ===== ANNOUNCEMENT NOTIFICATION COUNT ===== */
+        const announcementBadge = document.getElementById("announcementBadge");
+        let currentAnnouncementIds = [];
+
+        function getSeenAnnouncementIds(){
+            try{
+                return JSON.parse(localStorage.getItem("seenAnnouncements") || "[]");
+            }catch(error){
+                return [];
+            }
+        }
+
+        function updateAnnouncementBadge(unreadCount){
+            if(!announcementBadge) return;
+
+            if(unreadCount > 0){
+                announcementBadge.textContent = unreadCount > 99 ? "99+" : unreadCount;
+                announcementBadge.classList.add("show","pulse");
+            }else{
+                announcementBadge.classList.remove("show","pulse");
+                announcementBadge.textContent = "0";
+            }
+        }
+
+        window.openAnnouncementsPage = function(){
+            if(currentAnnouncementIds.length){
+                localStorage.setItem("seenAnnouncements", JSON.stringify(currentAnnouncementIds));
+                localStorage.setItem("lastSeenAnnouncementId", currentAnnouncementIds[0]);
+            }
+            window.location.href = "announcements.html";
+        };
+
+        function watchAnnouncementNotifications(){
+            const announcementQuery = query(
+                collection(db, "announcements"),
+                orderBy("createdAt", "desc"),
+                limit(50)
+            );
+
+            onSnapshot(announcementQuery, snapshot => {
+                currentAnnouncementIds = [];
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if(data.active === false) return;
+                    currentAnnouncementIds.push(docSnap.id);
+                });
+
+                const seenIds = getSeenAnnouncementIds();
+                const unreadCount = currentAnnouncementIds.filter(id => !seenIds.includes(id)).length;
+                updateAnnouncementBadge(unreadCount);
+            }, error => {
+                console.error("Announcement notification error:", error);
+                updateAnnouncementBadge(0);
+            });
+        }
+
+        watchAnnouncementNotifications();
         
         let currentUser = null;
+        let pendingCompletedBooking = null;
         let currentProfileName = "User";
         let currentProfilePhoto = "";
         let latestReviews = [];
@@ -2886,6 +3048,51 @@ onSnapshot(collection(db, "profiles"), (snapshot) => {
 
     renderReviews();
 });
+function getIndianJourneyTime(dateTime, dateOnly) {
+    if (dateTime) {
+        if (String(dateTime).includes("+05:30") || String(dateTime).endsWith("Z")) {
+            return new Date(dateTime);
+        }
+        return new Date(dateTime + "+05:30");
+    }
+
+    if (dateOnly) {
+        return new Date(dateOnly + "T23:59:59+05:30");
+    }
+
+    return null;
+}
+
+function formatJourneyDate(dateValue) {
+    if (!dateValue) return "date not available";
+
+    const dateObj = new Date(dateValue + "T00:00:00+05:30");
+
+    if (Number.isNaN(dateObj.getTime())) {
+        return dateValue;
+    }
+
+    return dateObj.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+function setActiveJourneyReviewNote(booking) {
+    const note = document.getElementById("activeJourneyReviewNote");
+    if (!note) return;
+
+    if (!booking) {
+        note.style.display = "none";
+        note.textContent = "";
+        return;
+    }
+
+    note.style.display = "block";
+    note.textContent = `Reviewing ${booking.from || "your pickup"} to ${booking.to || "your drop"} journey on ${formatJourneyDate(booking.date)}.`;
+}
+
 async function checkCompletedJourneyPopup(user) {
     if (!user) return;
 
@@ -2896,9 +3103,7 @@ async function checkCompletedJourneyPopup(user) {
 
     const snap = await getDocs(q);
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const now = new Date();
     let completedBooking = null;
 
     snap.forEach(docItem => {
@@ -2907,17 +3112,17 @@ async function checkCompletedJourneyPopup(user) {
             ...docItem.data()
         };
 
-        const journeyDate = new Date(booking.date);
-        journeyDate.setHours(0, 0, 0, 0);
-
         const bookingId = booking.bookingUid || booking.id;
-
+        const journeyTime = getIndianJourneyTime(booking.departureDateTime, booking.date);
         const alreadyShown = localStorage.getItem("journeyPopup_" + bookingId);
+        const alreadyReviewed = localStorage.getItem("journeyReviewed_" + bookingId) || booking.reviewed === true;
 
         if (
             booking.status !== "CANCELLED" &&
-            journeyDate < today &&
+            journeyTime &&
+            journeyTime < now &&
             !alreadyShown &&
+            !alreadyReviewed &&
             !completedBooking
         ) {
             completedBooking = booking;
@@ -2926,8 +3131,25 @@ async function checkCompletedJourneyPopup(user) {
 
     if (completedBooking) {
         const bookingId = completedBooking.bookingUid || completedBooking.id;
+        pendingCompletedBooking = completedBooking;
         localStorage.setItem("journeyPopup_" + bookingId, "shown");
 
+        const routeBox = document.getElementById("journeyPopupRoute");
+        const routeText = document.getElementById("journeyPopupRouteText");
+        const dateText = document.getElementById("journeyPopupDateText");
+        const message = document.getElementById("journeyPopupMessage");
+
+        if (message) {
+            message.textContent = "Your journey is completed. Please review your journey.";
+        }
+
+        if (routeBox && routeText && dateText) {
+            routeBox.style.display = "block";
+            routeText.textContent = `${completedBooking.from || "From"} → ${completedBooking.to || "To"}`;
+            dateText.textContent = `Travel date: ${formatJourneyDate(completedBooking.date)}`;
+        }
+
+        setActiveJourneyReviewNote(completedBooking);
         document.getElementById("journeyCompletePopup").style.display = "flex";
     }
 }
@@ -2947,6 +3169,8 @@ window.openReviewSection = function () {
             block: "start"
         });
     }
+
+    setActiveJourneyReviewNote(pendingCompletedBooking);
 
     setTimeout(() => {
         const commentBox = document.getElementById("comment");
@@ -3069,18 +3293,37 @@ checkCompletedJourneyPopup(user);
                 return;
             }
         
-            await addDoc(collection(db, "reviews"), {
+            const reviewData = {
                 uid: currentUser.uid,
                 name: currentProfileName || "User",
                 photo: currentProfilePhoto || "",
                 rating: Number(rating),
                 comment: comment,
                 createdAt: serverTimestamp()
-            });
+            };
+
+            if (pendingCompletedBooking) {
+                const bookingId = pendingCompletedBooking.bookingUid || pendingCompletedBooking.id;
+
+                reviewData.bookingId = bookingId;
+                reviewData.from = pendingCompletedBooking.from || "";
+                reviewData.to = pendingCompletedBooking.to || "";
+                reviewData.travelDate = pendingCompletedBooking.date || "";
+                reviewData.trip = pendingCompletedBooking.trip || "";
+                reviewData.reviewType = "completed_journey";
+
+                localStorage.setItem("journeyReviewed_" + bookingId, "true");
+            }
+
+            await addDoc(collection(db, "reviews"), reviewData);
         
             document.getElementById("comment").value = "";
             document.getElementById("rating").value = "0";
             setStar(0);
+            pendingCompletedBooking = null;
+            setActiveJourneyReviewNote(null);
+            closeJourneyPopup();
+            alert("Thank you. Your review has been posted.");
         }
         
         window.addReview = addReview;
@@ -3202,6 +3445,11 @@ const q = query(
             </div>
         </div>
 
+        ${data.from || data.to || data.travelDate ? `
+        <div style="margin-top:8px; font-size:11px; color:#9a3412; background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:7px 9px; font-weight:700;">
+            ${safeText(data.from || "From")} → ${safeText(data.to || "To")} ${data.travelDate ? `• ${safeText(formatJourneyDate(data.travelDate))}` : ""}
+        </div>` : ""}
+
         <div class="review-text">
             ${safeText(data.comment)}
         </div>
@@ -3277,6 +3525,11 @@ function renderAllReviewsFromArray(reviews) {
                 <small style="color:#888;">${date}</small>
             </div>
         </div>
+
+        ${data.from || data.to || data.travelDate ? `
+        <div style="margin-top:8px; font-size:11px; color:#9a3412; background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:7px 9px; font-weight:700;">
+            ${safeText(data.from || "From")} → ${safeText(data.to || "To")} ${data.travelDate ? `• ${safeText(formatJourneyDate(data.travelDate))}` : ""}
+        </div>` : ""}
 
         <p style="font-size:13px; margin:8px 0 0;">
             ${safeText(data.comment)}
