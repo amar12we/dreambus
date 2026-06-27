@@ -20,17 +20,39 @@
 --primary-gradient:linear-gradient(135deg,#ff7a00,#ff9c40);
 }
 
-body {font-family:'Segoe UI',sans-serif; background:#f4f6f8;margin:0; padding:5px 0;text-align:center;overflow: hidden; height: 100dvh;}
+body {
+    font-family:'Segoe UI',sans-serif;
+    background:#f4f6f8;
+    margin:0;
+    padding:0;
+    text-align:center;
+    overflow:hidden;
+    height:100dvh;
+}
 .header { background:#ff7a00; color:white; padding:8px 15px; font-weight:bold; position:sticky; top:0; z-index:1000; display:flex; align-items:center; font-size:13px; gap:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
 .back-btn {width: 38px; height: 38px; border-radius: 12px;  border: 1px solid rgba(255,255,255,0.25);background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);display: flex; align-items: center; justify-content: center;margin-right: 15px;}
 .back-btn:hover { background:white; transform:translateX(-2px); }
 .route-info { flex:1; text-align:center; display:flex; flex-direction:column; line-height:1.2; }
 #route { font-size:14px; font-weight:600; }
 #dateTrip { font-size:12px; font-weight:400; }
-.bus { width:60%; max-width:360px; margin:10px auto; background:#fff; border-radius:15px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); position:relative; }
-.driver { text-align:right; font-size:18px; margin-bottom:6px; }
+.bus{
+    width:60%;
+    max-width:360px;
+    margin:8px auto;
+    background:#fff;
+    border-radius:15px;
+    padding:6px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    position:relative;
+}
+.driver { text-align:right; font-size:9px; margin-bottom:6px; }
 .driver::before { content:""; display:inline-block; width:30px; height:30px; background-image:url('driver.jpg'); background-size:cover; background-position:center; margin-right:3px; }
-.row { display:flex; justify-content:space-between; margin:3px 0; flex-wrap:wrap; }
+.row{
+    display:flex;
+    justify-content:space-between;
+    margin:1px 0;
+    flex-wrap:nowrap;
+}
 .last-row .group { justify-content: space-between; width: 100%;
     padding: 0 10px;
 }
@@ -898,7 +920,7 @@ transform:translateX(24px);
 <body>
 
 <div class="header">
-    <button class="back-btn" onclick="window.history.back()"><i class="fas fa-chevron-left"></i></button>
+    <button class="back-btn" onclick="safeBack()"><i class="fas fa-chevron-left"></i></button>
     <div class="route-info">
         <div id="routeTitle">Loading route...</div>
         <div id="dateTrip">Loading date & trip...</div>
@@ -969,9 +991,11 @@ transform:translateX(24px);
 
         <div class="content-section" id="photos">
             <div class="section-title"><i class="fas fa-camera"></i> Bus Gallery</div>
-            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600" class="fleet-img">
-            <img src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600" class="fleet-img">
-            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600" class="fleet-img">
+            <div id="busGallery">
+                <div style="padding:15px; color:#777; text-align:left;">
+                    Loading bus photos...
+                </div>
+            </div>
         </div>
 
         <div class="content-section section-grey" id="policies">
@@ -1405,7 +1429,7 @@ transform:translateX(24px);
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, onSnapshot, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     
     
@@ -1426,9 +1450,12 @@ transform:translateX(24px);
     const urlParams = params;
     const from = params.get("from") || "Start";
     const to = params.get("to") || "End";
-    const date = params.get("date") || "Today";
+    const rawDate = params.get("date") || params.get("newDate") || "";
+const date = rawDate;
     const trip = (params.get("trip") || "AM").toUpperCase();
     const farePerSeat = Number(params.get("fare")) || 250;
+    const busId = params.get("busId") || trip;
+    const serviceId = params.get("serviceId") || busId;
     
     
     
@@ -1445,7 +1472,9 @@ transform:translateX(24px);
     let oldBooking = null;
     
     /* 🔥 FIXED (was const → let) */
-    let maxSelect = 6;
+    let maxSelect = isReschedule
+    ? Number(urlParams.get("seatCount")) || 1
+    : 6;
     let appliedCoupon = null;
     let discountedFare = null;
     window.lastBusData = {}; 
@@ -1488,45 +1517,101 @@ const displayDate = isReschedule
 document.getElementById("routeTitle").innerText = `${from} → ${to}`;
 document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
     
-    const pickupLocations = {
-        "Guwahati": ["ISBT (03:30 PM)", "Games Village(03:40 PM)" , "Khanapara (04:40 PM)"],
-        "Nagaon": [], // will be handled dynamically
-        "Biswanath Charali": ["ASTC Bus Stand (06:15 AM)"],
-        "Sootea": ["Sootea(06:35 AM)"],
-        "Jamagurihat": ["Near FlyOver(07:00 AM)"],
-        "Tezpur": ["Poruwa Chariali(07:10 PM)" ,"Dolabari ByPass(07:20 AM)"],
-        "Kaliabor": ["Kaliabor Tinali (07:40 AM)"],
-        "Default": ["Select Your Location"]
-    };
-    const dropLocations = {
-        "Guwahati": ["Khanapara (11:15 AM)", "Games Village (11:25 AM)", "ISBT (11:45 AM)"],
-        "Nagaon": ["Borghat ByPass (08:35 AM)"],
-        "Biswanath Charali": ["ASTC Bus Stand (09:45 PM)"],
-        "Sootea": ["Sootea(09:25 PM)"],
-        "Jamagurihat": ["Near FlyOver(09:00 PM)"],
-        "Tezpur": ["Poruwa Chariali(08:50 PM)" ,"Dolabari ByPass(08:40 PM)"],
-        "Kaliabor": ["Kaliabor Tinali (08:15 PM)"],
-        "Default": ["Select Your Location"]
-    };
-    
-    function getPoints(cityName, dataset) {
-        const key = Object.keys(dataset).find(
-            k => k.toLowerCase() === cityName.toLowerCase()
-        );
-    
-        // 🔥 SPECIAL LOGIC FOR NAGAON
-        if (cityName.toLowerCase() === "nagaon") {
-            if (trip === "PM") {
-                return ["Borghat ByPass (06:55 PM)"];
-            } else {
-                return ["Borghat ByPass (08:35 AM)"];
-            }
-        }
-    
-        return dataset[key] || dataset["Default"];
+    let currentJourneyData = null;
+
+    function normalizeCityName(name) {
+        return String(name || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .replace("biswanth", "biswanath")
+            .replace("soote ", "sootea ")
+            .replace(/^soote$/, "sootea");
     }
-    
-    
+
+    function formatPoint(point) {
+        if (!point) return "";
+        const place = point.loc || point.name || "";
+        const timeText = point.time ? ` (${point.time})` : "";
+        return `${place}${timeText}`;
+    }
+
+    async function loadJourneyFromFirebase(fromCity, toCity, tripType) {
+        try {
+            const masterRouteQuery = query(
+                collection(db, "masterRoutes"),
+                where("active", "==", true),
+                where("trip", "==", tripType)
+            );
+
+            const snapshot = await getDocs(masterRouteQuery);
+
+            const fromNorm = normalizeCityName(fromCity);
+            const toNorm = normalizeCityName(toCity);
+
+            for (const routeDoc of snapshot.docs) {
+                const master = routeDoc.data();
+
+                if (!Array.isArray(master.stops)) continue;
+
+                const fromIndex = master.stops.findIndex(stop =>
+                    normalizeCityName(stop.loc) === fromNorm
+                );
+
+                const toIndex = master.stops.findIndex(stop =>
+                    normalizeCityName(stop.loc) === toNorm
+                );
+
+                if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
+                    const fromStop = master.stops[fromIndex];
+                    const toStop = master.stops[toIndex];
+
+                    const boardingPoints = master.boardingPoints?.[fromStop.loc] || [
+                        { loc: fromStop.loc, time: fromStop.time || "" }
+                    ];
+
+                    const droppingPoints = master.droppingPoints?.[toStop.loc] || [
+                        { loc: toStop.loc, time: toStop.time || "" }
+                    ];
+
+                    return {
+                        masterRouteId: routeDoc.id,
+                        label: `${fromStop.loc} → ${toStop.loc}`,
+                        route: master.stops.slice(fromIndex, toIndex + 1),
+                        boardingPoints,
+                        droppingPoints,
+                        rest: master.rest || "",
+                        restTime: master.restTime || "",
+                        direction: master.direction || ""
+                    };
+                }
+            }
+
+            return null;
+        } catch (error) {
+            console.error("Master route load error:", error);
+            showToast("Route details could not be loaded", "error");
+            return null;
+        }
+    }
+
+    function getPoints(cityName, type) {
+        if (!currentJourneyData) {
+            return ["Select Your Location"];
+        }
+
+        if (type === "pickup") {
+            return (currentJourneyData.boardingPoints || []).map(formatPoint);
+        }
+
+        if (type === "drop") {
+            return (currentJourneyData.droppingPoints || []).map(formatPoint);
+        }
+
+        return ["Select Your Location"];
+    }
+
+
     async function loadOldBooking() {
         if (!isReschedule || !bookingId) return;
     
@@ -1538,16 +1623,15 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
     
         oldBooking = snap.data();
     
-        maxSelect = oldBooking.passengers.length;
+        maxSelect = oldBooking.passengers?.length || maxSelect;
     
         showToast(`Rescheduling ${maxSelect} seat(s)`, "info");
     }
     loadOldBooking(); // 🔥 IMPORTANT FIX
+    loadBusGallery();
     
     /* ================= BUS DOC ID (FIXED) ================= */
-    const busDocId = isReschedule
-        ? `${newDate}_${trip}`
-        : `${date}_${trip}`;
+    const busDocId = `${date}_${serviceId}`;
     
     const docRef = doc(db,"buses",busDocId);
     
@@ -1671,10 +1755,46 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
         setTimeout(()=> toast.classList.add("show"),100);
         setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, 3000);
     }
-   
+    // ================= BUS GALLERY =================
+async function loadBusGallery() {
+    const gallery = document.getElementById("busGallery");
+    if (!gallery) return;
 
+    try {
+        const snap = await getDoc(doc(db, "siteSettings", "busImages"));
 
+        if (!snap.exists()) {
+            gallery.innerHTML = `<div style="padding:15px;color:#777;text-align:left;">No bus photos available.</div>`;
+            return;
+        }
 
+        const data = snap.data();
+
+const images =
+    data[busId] ||
+    data[serviceId] ||
+    [];
+
+        if (!Array.isArray(images) || images.length === 0) {
+            gallery.innerHTML = `<div style="padding:15px;color:#777;text-align:left;">No photos added for this bus.</div>`;
+            return;
+        }
+
+        gallery.innerHTML = images.map(url => `
+            <img
+                src="${url}"
+                class="fleet-img"
+                loading="lazy"
+                decoding="async"
+                onerror="this.style.display='none'"
+            >
+        `).join("");
+
+    } catch (error) {
+        console.error(error);
+        gallery.innerHTML = `<div style="padding:15px;color:#777;text-align:left;">Could not load bus photos.</div>`;
+    }
+}
     window.applyCoupon = function () {
     applyCoupon();
 };
@@ -1892,6 +2012,11 @@ document.getElementById("couponInput").addEventListener("focus", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             bookingId,
+            oldBusId: oldBooking.serviceId || oldBooking.busId || oldBooking.trip,
+            newBusId: serviceId,
+            oldServiceId: oldBooking.serviceId || oldBooking.busId || oldBooking.trip,
+            newServiceId: serviceId,
+            physicalBusId: busId,
             newDate,
             newTrip: trip,
             newSeats: selectedSeats.map(s => typeof s === "string" ? s : s.seat),
@@ -2077,50 +2202,93 @@ document.getElementById("gstToggle").onclick = () => {
         b.style.display = b.style.display === "block" ? "none" : "block";
     };
     
-    const allSeats = [];
-    for(let i=1;i<=45;i++) allSeats.push({name:`A${i}`});
-    
-    function renderSeats(bookedSeats){
-        seatContainer.innerHTML='';
-        let index = 0;
-    
-        // Normal rows (2x2 layout) until seat 40
-        while(index < 40){
-    
-            const row = document.createElement("div");
-            row.className="row";
-    
-            const left = document.createElement("div");
-            left.className="group";
-    
-            const right = document.createElement("div");
-            right.className="group";
-    
-            left.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-            left.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    
-            right.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-            right.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
-    
-            row.appendChild(left);
-            row.appendChild(right);
-    
-            seatContainer.appendChild(row);
+   
+
+const capacity = parseInt(params.get("capacity")) || 45;
+
+const layoutConfig = {
+    capacity: capacity,
+    normalRows: parseInt(params.get("normalRows")) || 10,
+    lastRowSeats: parseInt(params.get("lastRowSeats")) || 5,
+    leftSeats: parseInt(params.get("leftSeats")) || 2,
+    rightSeats: parseInt(params.get("rightSeats")) || 2
+};
+
+const allSeats = [];
+for (let i = 1; i <= layoutConfig.capacity; i++) {
+    allSeats.push({ name: `A${i}` });
+}
+
+let seatMatrix = [];
+
+function renderSeats(bookedSeats) {
+    seatContainer.innerHTML = "";
+    seatMatrix = [];
+
+    let index = 0;
+    const normalSeatLimit = layoutConfig.capacity - layoutConfig.lastRowSeats;
+
+    for (let r = 0; r < layoutConfig.normalRows; r++) {
+        if (index >= normalSeatLimit) break;
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const left = document.createElement("div");
+        left.className = "group";
+
+        const right = document.createElement("div");
+        right.className = "group";
+
+        const matrixRow = [];
+
+        for (let i = 0; i < layoutConfig.leftSeats; i++) {
+            if (index < normalSeatLimit) {
+                const seat = allSeats[index++];
+                left.appendChild(createSeatDiv(seat, bookedSeats));
+                matrixRow.push(seat.name);
+            }
         }
-    
-        // Last row with 5 seats
+
+        matrixRow.push("");
+
+        for (let i = 0; i < layoutConfig.rightSeats; i++) {
+            if (index < normalSeatLimit) {
+                const seat = allSeats[index++];
+                right.appendChild(createSeatDiv(seat, bookedSeats));
+                matrixRow.push(seat.name);
+            }
+        }
+
+        row.appendChild(left);
+        row.appendChild(right);
+        seatContainer.appendChild(row);
+        seatMatrix.push(matrixRow);
+    }
+
+    if (index < allSeats.length) {
         const lastRow = document.createElement("div");
-    lastRow.className = "row last-row";
-    
-    const group = document.createElement("div");
-    group.className = "group last-group";
-        while(index < allSeats.length){
-            group.appendChild(createSeatDiv(allSeats[index++], bookedSeats));
+        lastRow.className = "row last-row";
+        lastRow.style.justifyContent = "center";
+
+        const group = document.createElement("div");
+        group.className = "group last-group";
+        group.style.justifyContent = "center";
+        group.style.width = "100%";
+
+        const matrixRow = [];
+
+        while (index < allSeats.length) {
+            const seat = allSeats[index++];
+            group.appendChild(createSeatDiv(seat, bookedSeats));
+            matrixRow.push(seat.name);
         }
-    
+
         lastRow.appendChild(group);
         seatContainer.appendChild(lastRow);
+        seatMatrix.push(matrixRow);
     }
+}
     
     function createSeatDiv(seatObj, bookedSeats) {
         const div = document.createElement("div");
@@ -2176,33 +2344,23 @@ currentSeat = div;
     genderPopup.style.display="none";
     }
     });
-    
-    function getAdjacentSeat(seatName){
-    
-    const num = parseInt(seatName.replace("A",""));
-    
-    /* NORMAL ROWS (2x2 pattern)
-    A1 A2 | A3 A4
-    */
-    
-    if(num <= 40){
-    
-    let pos = (num - 1) % 4;
-    
-    if(pos === 0) return [`A${num+1}`]; 
-    if(pos === 1) return [`A${num-1}`];
-    if(pos === 2) return [`A${num+1}`];
-    if(pos === 3) return [`A${num-1}`];
-    
+    function getAdjacentSeat(seatName) {
+    const adjacent = [];
+
+    for (let r = 0; r < seatMatrix.length; r++) {
+        const row = seatMatrix[r];
+
+        for (let c = 0; c < row.length; c++) {
+            if (row[c] === seatName) {
+                if (row[c - 1]) adjacent.push(row[c - 1]);
+                if (row[c + 1]) adjacent.push(row[c + 1]);
+                return adjacent;
+            }
+        }
     }
-    if(num === 41) return ["A42"];
-    if(num === 42) return ["A41","A43"];
-    if(num === 43) return ["A42","A44"];
-    if(num === 44) return ["A43","A45"];
-    if(num === 45) return ["A44"];
-    
-    return [];
-    }
+
+    return adjacent;
+}
     function checkFemaleSafety(targetSeatName, gender){
     
     const adjacentSeat = getAdjacentSeat(targetSeatName);
@@ -2232,6 +2390,20 @@ currentSeat = div;
     
     }
     function selectGender(g) {
+        if (!currentSeat) return;
+
+if (!selectedSeats.find(s => s.seat === currentSeat.innerText)) {
+    if (selectedSeats.length >= maxSelect) {
+        showToast(
+            isReschedule
+                ? `You must select exactly ${maxSelect} seat(s) from your old booking`
+                : `You can select maximum ${maxSelect} seats`,
+            "error"
+        );
+        genderPopup.style.display = "none";
+        return;
+    }
+}
 
 if (selectedSeats.length >= maxSelect) { 
     showToast(`Max ${maxSelect} seats`); 
@@ -2302,6 +2474,12 @@ container.classList.remove('full-screen');
 appliedCoupon = null;
 discountedFare = null;
 
+if (!currentJourneyData) {
+    showToast("Route details are still loading. Please try again.", "info");
+    loadJourneyInfo();
+    return;
+}
+
 renderLocationPicker();
 
 document.getElementById('detailsOverlay').style.display = 'flex';
@@ -2322,8 +2500,8 @@ document.getElementById('payBtn').style.display = 'none';
     function renderLocationPicker() {
     const container = document.getElementById("locationPicker");
 
-    const pickupOpts = getPoints(from, pickupLocations) || [];
-    const dropOpts = getPoints(to, dropLocations) || [];
+    const pickupOpts = getPoints(from, "pickup") || [];
+    const dropOpts = getPoints(to, "drop") || [];
 
     // ✅ Prevent blank UI
     if (pickupOpts.length === 0 || dropOpts.length === 0) {
@@ -2543,6 +2721,47 @@ document.getElementById("backStepBtn").onclick = function() {
 }
     
     let razorpayInstance = null;
+    let bookingInProgress = false;
+
+    let criticalBookingLock = false;
+
+    window.safeBack = function () {
+        if (criticalBookingLock || bookingInProgress) {
+            showToast("Please wait. Your paid booking is being confirmed.", "info");
+            return;
+        }
+        window.history.back();
+    };
+
+    function setCriticalBookingLock(status) {
+        criticalBookingLock = status;
+
+        const headerBackBtn = document.querySelector(".back-btn");
+        if (headerBackBtn) {
+            headerBackBtn.disabled = status;
+            headerBackBtn.style.opacity = status ? "0.45" : "1";
+            headerBackBtn.style.pointerEvents = status ? "none" : "auto";
+        }
+
+        if (status) {
+            history.pushState(null, "", location.href);
+        }
+    }
+
+    window.addEventListener("popstate", function () {
+        if (criticalBookingLock || bookingInProgress) {
+            history.pushState(null, "", location.href);
+            showToast("Please wait. Your paid booking is being confirmed.", "info");
+        }
+    });
+
+    window.addEventListener("beforeunload", function (e) {
+        if (criticalBookingLock || bookingInProgress) {
+            e.preventDefault();
+            e.returnValue = "Your paid booking is being confirmed. Please do not leave this page.";
+            return e.returnValue;
+        }
+    });
     
     document.getElementById("payBtn").onclick = async () => {
     
@@ -2550,6 +2769,12 @@ document.getElementById("backStepBtn").onclick = function() {
             handleReschedule();
             return;
         }
+
+        if (bookingInProgress) return;
+        bookingInProgress = true;
+        const payBtn = document.getElementById("payBtn");
+        payBtn.disabled = true;
+        payBtn.style.opacity = "0.7";
     
         const names = document.querySelectorAll(".p-name");
         const phones = document.querySelectorAll(".p-phone");
@@ -2586,6 +2811,9 @@ document.getElementById("backStepBtn").onclick = function() {
     
         if (!valid) {
             showToast("Fix passenger details", "error");
+            bookingInProgress = false;
+            payBtn.disabled = false;
+            payBtn.style.opacity = "1";
             return;
         }
     
@@ -2596,6 +2824,7 @@ document.getElementById("backStepBtn").onclick = function() {
         const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    keepalive: true,
     body: JSON.stringify({
         seats: selectedSeats.length,
         from,
@@ -2610,7 +2839,10 @@ document.getElementById("backStepBtn").onclick = function() {
     
         if (!orderData.success) {
             document.getElementById("processingOverlay").style.display = "none";
-            showToast("Order creation failed", "error");
+            showToast(orderData.message || "Order creation failed", "error");
+            bookingInProgress = false;
+            payBtn.disabled = false;
+            payBtn.style.opacity = "1";
             return;
         }
     
@@ -2627,13 +2859,53 @@ document.getElementById("payAmount").textContent = totalAmount;
             description: `${selectedSeats.length} Seat(s)`,
     
             handler: async function (response) {
-    
+
+                setCriticalBookingLock(true);
+
                 document.getElementById("processingOverlay").style.display = "flex";
                 document.getElementById("processingText").innerText = "Verifying Payment...";
     
+
+                function extractTimeFromPoint(pointText) {
+                    const match = String(pointText || "").match(/\((.*?)\)/);
+                    return match ? match[1].trim() : "";
+                }
+
+                function makeISTDepartureDateTime(dateValue, pickupText) {
+                    const timeText = extractTimeFromPoint(pickupText);
+
+                    if (!dateValue || !timeText) return "";
+
+                    const parsed = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+                    if (!parsed) return "";
+
+                    let hour = Number(parsed[1]);
+                    const minute = parsed[2];
+                    const ampm = parsed[3].toUpperCase();
+
+                    if (ampm === "PM" && hour !== 12) hour += 12;
+                    if (ampm === "AM" && hour === 12) hour = 0;
+
+                    return `${dateValue}T${String(hour).padStart(2, "0")}:${minute}:00+05:30`;
+                }
+
+                const finalDepartureTime = extractTimeFromPoint(selectedPickup);
+                const finalDepartureDateTime = makeISTDepartureDateTime(date, selectedPickup);
+
+                if (!finalDepartureDateTime) {
+                    document.getElementById("processingOverlay").style.display = "none";
+                    showToast("Pickup time missing. Please select pickup point again.", "error");
+                    bookingInProgress = false;
+                    setCriticalBookingLock(false);
+                    payBtn.disabled = false;
+                    payBtn.style.opacity = "1";
+                    return;
+                }
+
                 const verifyRes = await fetch("https://backend-1-ci0t.onrender.com/verify-payment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    keepalive: true,
     body: JSON.stringify({
         razorpay_order_id: response.razorpay_order_id,
         razorpay_payment_id: response.razorpay_payment_id,
@@ -2644,20 +2916,19 @@ document.getElementById("payAmount").textContent = totalAmount;
             to, 
             date, 
             trip,
+            busId,
+            serviceId,
 
             pickup: selectedPickup,
             drop: selectedDrop,
+            departureTime: finalDepartureTime,
+            departureDateTime: finalDepartureDateTime,
             passengers: passengerData,
             remarks,
 
             uid: currentUser?.uid || "guest",
-
-            // ✅ 🔥 ADD THESE HERE
-            couponCode: appliedCoupon,
-            discount: discountedFare 
-                ? (Number(orderData.amount) - discountedFare) 
-                : 0,
-                finalAmount: discountedFare || totalAmount
+            userUid: currentUser?.uid || "guest",
+            couponCode: appliedCoupon
         }
     })
 });
@@ -2671,12 +2942,16 @@ document.getElementById("payAmount").textContent = totalAmount;
                     await finalizeBookingAfterPayment(
                         verifyData.bookingId,
                         response.razorpay_payment_id,
-                        totalAmount
+                        verifyData.fareData || orderData.breakdown || null
                     );
     
                 } else {
                     document.getElementById("processingOverlay").style.display = "none";
-                    showToast("Payment verification failed", "error");
+                    showToast(verifyData.message || "Payment verification failed", "error");
+                    bookingInProgress = false;
+                    setCriticalBookingLock(false);
+                    payBtn.disabled = false;
+                    payBtn.style.opacity = "1";
                 }
             },
     
@@ -2684,6 +2959,9 @@ document.getElementById("payAmount").textContent = totalAmount;
                 ondismiss: () => {
                     document.getElementById("processingOverlay").style.display = "none";
                     showToast("Payment cancelled", "error");
+                    bookingInProgress = false;
+                    payBtn.disabled = false;
+                    payBtn.style.opacity = "1";
                 }
             }
         };
@@ -2692,135 +2970,73 @@ document.getElementById("payAmount").textContent = totalAmount;
         razorpayInstance = rzp; // ✅ correct
         rzp.open();
     };
-    /* FINALIZE BOOKING AFTER PAYMENT */
-    async function finalizeBookingAfterPayment(bookingId, paymentId, totalFare){
+    /* FINALIZE BOOKING AFTER PAYMENT
+       SECURITY FIX:
+       Backend /verify-payment now saves seats + booking in one Firestore transaction.
+       Frontend only shows success and downloads ticket PDF. Do not write paid bookings from browser. */
+    async function finalizeBookingAfterPayment(bookingId, paymentId, fareData){
         try {
-    
             const processingOverlay = document.getElementById("processingOverlay");
             processingOverlay.style.display = "flex";
-            document.getElementById("processingText").innerText = "Saving Booking...";
-    
-            const docSnap = await getDoc(docRef);
-            let seats = (docSnap.exists() && docSnap.data().seats) ? docSnap.data().seats : {};
-            const uId = currentUser ? currentUser.uid : "GUEST";
-    
-            function extractTime(str) {
-                const match = str.match(/\((.*?)\)/);
-                return match ? match[1] : "12:00 PM";
-            }
-    
-            const departureTime = extractTime(selectedPickup);
-    
-            function parseDepartureDateTime(dateStr, timeStr) {
-                const [year, month, day] = dateStr.split("-").map(Number);
-                let [time, modifier] = timeStr.split(" ");
-                let [hours, minutes] = time.split(":").map(Number);
-    
-                if (modifier === "PM" && hours !== 12) hours += 12;
-                if (modifier === "AM" && hours === 12) hours = 0;
-    
-                return new Date(Date.UTC(year, month - 1, day, hours, minutes));
-            }
-    
-            const departureDateTime = parseDepartureDateTime(date, departureTime).toISOString();
-    
-            passengerData.forEach(p => {
-                seats[p.seat] = {
-                    status: "booked",
-                    gender: p.gender,
-                    name: p.name,
-                    phone: p.phone,
-                    age: p.age,
-                    from,
-                    to,
-                    pickup: selectedPickup,
-                    drop: selectedDrop,
-                    date,
-                    trip,
-                    departureTime,
-                    departureDateTime,
-                    totalFare,
-                    paymentId,
-                    bookingUid: bookingId,
-                    userUid: uId,
-                    timestamp: new Date().toISOString()
-                };
-            });
-    
-            await setDoc(doc(db, "buses", docRef.id), { seats }, { merge: true });
-    
-            await setDoc(doc(db, "bookings", bookingId), {
-                bookingUid: bookingId,
-                userUid: uId,
-                paymentId,
-                from,
-                to,
-                date,
-                trip,
-                pickup: selectedPickup,
-                drop: selectedDrop,
-                departureTime,
-                departureDateTime,
-                passengers: passengerData,
-                totalFare,
-                bookingDate: new Date().toLocaleDateString('en-GB'),
-                timestamp: new Date().toISOString()
-            });
-    
+            document.getElementById("processingText").innerText = "Booking Confirmed...";
+
             processingOverlay.style.display = "none";
 
-// ✅ SUCCESS POPUP
-showToast("Booking saved successfully!", "success");
+            showToast("Booking saved successfully!", "success");
 
-// ✅ CONFETTI START
-launchConfetti();
+            launchConfetti();
+            setTimeout(() => {
+                stopConfetti();
+            }, 2000);
 
-// stop confetti
-setTimeout(() => {
-    stopConfetti();
-}, 2000);
+            const pdfFareSnapshot = JSON.parse(JSON.stringify(fareData || window.currentFareData || {}));
 
-// 🔥 TAKE SAFE SNAPSHOT BEFORE ANY RESET
-const pdfFareSnapshot = JSON.parse(JSON.stringify(window.currentFareData || {}));
+            pdfFareSnapshot.baseFare =
+                pdfFareSnapshot.baseFare ||
+                (passengerData.length * farePerSeat);
 
-// safety fallback (VERY IMPORTANT)
-pdfFareSnapshot.baseFare =
-    pdfFareSnapshot.baseFare ||
-    (passengerData.length * farePerSeat);
+            pdfFareSnapshot.gstAmount =
+                pdfFareSnapshot.gstAmount ||
+                Math.ceil(pdfFareSnapshot.baseFare * 0.05);
 
-pdfFareSnapshot.gstAmount =
-    pdfFareSnapshot.gstAmount ||
-    Math.ceil(pdfFareSnapshot.baseFare * 0.05);
+            pdfFareSnapshot.finalFare =
+                pdfFareSnapshot.finalFare ||
+                pdfFareSnapshot.totalFare ||
+                (pdfFareSnapshot.baseFare + pdfFareSnapshot.gstAmount);
 
-pdfFareSnapshot.finalFare =
-    pdfFareSnapshot.finalFare ||
-    (pdfFareSnapshot.baseFare + pdfFareSnapshot.gstAmount);
+            await downloadTicketPDF(
+                passengerData,
+                selectedPickup,
+                selectedDrop,
+                "N/A",
+                bookingId,
+                paymentId,
+                pdfFareSnapshot
+            );
 
-// ✅ FIRST GENERATE PDF (IMPORTANT FIX)
-await downloadTicketPDF(
-    passengerData,
-    selectedPickup,
-    selectedDrop,
-    "N/A",
-    bookingId,
-    paymentId,
-    pdfFareSnapshot
-);
+            selectedSeats = [];
+            setCriticalBookingLock(false);
+            appliedCoupon = null;
+            discountedFare = null;
+            bookingInProgress = false;
+            setCriticalBookingLock(false);
+            const payBtn = document.getElementById("payBtn");
+            payBtn.disabled = false;
+            payBtn.style.opacity = "1";
 
-// ✅ THEN RESET UI
-selectedSeats = [];
-appliedCoupon = null;
-discountedFare = null;
+            resetModal();
+            document.getElementById('detailsOverlay').style.display = 'none';
+        } catch (error) {
+            console.error(error);
 
-resetModal();
-document.getElementById('detailsOverlay').style.display = 'none';
-} catch (error) {
-    console.error(error);
-
-    document.getElementById("processingOverlay").style.display = "none";
-    showToast("Booking failed!", "error");
-}
-}
+            document.getElementById("processingOverlay").style.display = "none";
+            showToast("Booking confirmed, but ticket PDF failed. Check My Trips.", "error");
+            bookingInProgress = false;
+            const payBtn = document.getElementById("payBtn");
+            payBtn.disabled = false;
+            payBtn.style.opacity = "1";
+        }
+    }
    async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId, fareData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -3068,383 +3284,135 @@ document.body.removeChild(a);
 setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-const journeyData = {
+// FIREBASE MASTER ROUTE DISPLAY LOGIC
+// Data is loaded from Firestore collection: masterRoutes
 
-"Guwahati-Biswanath Charali": {
-label: "Guwahati → Biswanath Charali",
-route: [
-{ loc: "Guwahati", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Soote", time: "" },
-{ loc: "Biswanth Charali", time: "" }
-],
-boardingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-droppingPoints: [
-{ loc: "Biswanth ASTC Bus Stand", time: "09:45 PM" }
-],
-rest: "Hotel Raazwaada (15 Mins)"
-},
+async function loadJourneyInfo() {
+    const routeLabel = document.getElementById("routeLabel");
+    const dynamicRoute = document.getElementById("dynamicRoute");
+    const dynamicPoints = document.getElementById("dynamicPoints");
+    const dynamicStops = document.getElementById("dynamicStops");
 
-"Biswanath Charali-Guwahati": {
-label: "Biswanath Charali→ Guwahati",
-route: [
-{ loc: "Biswanath Charali", time: "00:00 PM" },
-{ loc: "Sootea", time: "10:05 AM" },
-{ loc: "Jamagurihat", time: "09:30 PM" },
-{ loc: "Tezpur", time: "11:30 PM" },
-{ loc: "Kaliabor", time: "09:30 PM" },
-{ loc: "Nagaon", time: "09:30 PM" },
-{ loc: "Raha", time: "09:30 PM" },
-{ loc: "Jagiroad", time: "09:30 PM" },
-{ loc: "Guwahati", time: "09:30 PM" }
-],
-boardingPoints: [
-{ loc: "Jorhat ISBT Gate", time: "06:00 PM" }
-],
-droppingPoints: [
-{ loc: "Adabari Bus Stand", time: "11:20 PM" },
-{ loc: "ISBT Guwahati", time: "11:30 PM" }
-],
-rest: "Kams Restaurant(15 Min)"
-},
-"Sootea-Guwahati": {
-label: "Sootea → Guwahati",
-route: [
-{ loc: "Sootea", time: " " },
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Guwahati", time: "" }
-],
-boardingPoints: [
-{ loc: "SOOTEA", time: "06:30 AM" }
-],
-droppingPoints: [
-{ loc: "KHANAPARA", time: "11:15 AM" },
-{ loc: "GAMES VILLAGE", time: "11:25 AM" },
-{ loc: "ISBT", time: "11:45 AM" }
-],
-rest: "Kam's Restaurant(15 Min)"
-},
+    routeLabel.innerText = `${from} → ${to}`;
+    dynamicRoute.innerHTML = `
+        <div style="padding:15px; color:#777; text-align:left;">
+            <span class="loader"></span> Loading route details...
+        </div>
+    `;
+    dynamicPoints.innerHTML = `
+        <div style="padding:15px; color:#777; text-align:left;">
+            Loading boarding and dropping points...
+        </div>
+    `;
+    dynamicStops.innerHTML = `
+        <div style="padding:15px; color:#777; text-align:left;">
+            Loading rest stop...
+        </div>
+    `;
 
-"Jamagurihat-Guwahati": {
-label: "Jamagurihat → Guwahati",
-route: [
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Guwahati", time: "" }
-],
-boardingPoints: [
-{ loc: "JAMAGURIHAT FLYOVER", time: "07:00 AM" }
-],
-droppingPoints: [
-{ loc: "KHANAPARA", time: "11:15 AM" },
-{ loc: "GAMES VILLAGE", time: "11:25 AM" },
-{ loc: "ISBT", time: "11:45 AM" }
-],
-rest: "Kam's Restaurant(15 Min)"
-},
+    currentJourneyData = await loadJourneyFromFirebase(from, to, trip);
 
-"Tezpur-Guwahati": {
-label: "Tezpur → Guwahati",
-route: [
-{ loc: "Tezpur", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Guwahati", time: "" }
-],
-boardingPoints: [
-{ loc: "PORUWA CHARALI", time: "07:10 AM" },
-{ loc: "DOLABARI BYPASS", time: "07:20 AM" }
-],
-droppingPoints: [
-{ loc: "KHANAPARA", time: "11:15 AM" },
-{ loc: "GAMES VILLAGE", time: "11:25 AM" },
-{ loc: "ISBT", time: "11:45 AM" }
-],
-rest: "Kam's Restaurant(15 Min)"
-},
+    const data = currentJourneyData;
 
-"Kaliabor-Guwahati": {
-label: "Kaliabor → Guwahati",
-route: [
-{ loc: "Kaliabor", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Guwahati", time: "" }
-],
-boardingPoints: [
-{ loc: "KALIABOR TINALI", time: "07:40 AM" }
-],
-droppingPoints: [
-{ loc: "KHANAPARA", time: "11:15 AM" },
-{ loc: "GAMES VILLAGE", time: "11:25 AM" },
-{ loc: "ISBT", time: "11:45 AM" }
-],
-rest: "Kam's Restaurant(15 Min)"
-},
+    if (!data) {
+        routeLabel.innerText = `${from} → ${to}`;
+        dynamicRoute.innerHTML = `
+            <div style="padding:15px; color:#777; text-align:left;">
+                Route information not available for this journey.
+            </div>
+        `;
+        dynamicPoints.innerHTML = `
+            <div style="padding:15px; color:#777; text-align:left;">
+                Boarding and dropping points not available.
+            </div>
+        `;
+        dynamicStops.innerHTML = `
+            <div style="padding:15px; color:#777; text-align:left;">
+                Rest stop not available.
+            </div>
+        `;
+        return;
+    }
 
+    routeLabel.innerText = data.label;
 
-"Guwahati-Biswanath Charali": {
-label: "Guwahati → Biswanath Charali",
-route: [
-{ loc: "Guwahati", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Soote", time: "" },
-{ loc: "Biswanth Charali", time: "" }
-],
-boardingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-droppingPoints: [
-{ loc: "Biswanth ASTC Bus Stand", time: "09:45 PM" }
-],
-rest: "Hotel Raajwaada (15 Mins)"
-},
-
-"Guwahati-Sootea": {
-label: "Guwahati → Sootea",
-route: [
-{ loc: "Guwahati", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Soote", time: "" }
-],
-boardingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-droppingPoints: [
-{ loc: "SOOTEA", time: "09:25 PM" }
-],
-rest: "Hotel Raajwaada (15 Mins)"
-},
-
-"Guwahati-Jamagurihat": {
-label: "Guwahati → Jamagurihat",
-route: [
-{ loc: "Guwahati", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Jamagurihat", time: "" }
-],
-boardingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-droppingPoints: [
-{ loc: "JAMAGURIHAT NEAR FLYOVER", time: "09:00 PM" }
-],
-rest: "Hotel Raajwaada (15 Mins)"
-},
-"Guwahati-Tezpur": {
-label: "Guwahati → Tezpur",
-route: [
-{ loc: "Guwahati", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Tezpur", time: "" }
-],
-boardingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-droppingPoints: [
-{ loc: "PORUWA CHARALI", time: "08:50 PM" },
-{ loc: "DOLABARI BYPASS", time: "08:40 PM" }
-],
-rest: "Hotel Raajwaada (15 Mins)"
-},
-
-"Guwahati-Kaliabor": {
-label: "Guwahati → Kaliabor",
-route: [
-{ loc: "Guwahati", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" }
-],
-boardingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-droppingPoints: [
-{ loc: "KALIABOR TINALI", time: "08:15 PM" }
-],
-rest: "Hotel Raajwaada (15 Mins)"
-},
-
-"Nagaon-Biswanath Charali": {
-label: "Nagaon → Biswanath Charali",
-route: [
-{ loc: "Nagaon", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Soote", time: "" },
-{ loc: "Biswanth Charali", time: "" }
-],
-boardingPoints: [
-{ loc: "BORGHAT BYPASS", time: "06:55 PM" }
-],
-droppingPoints: [
-{ loc: "Biswanth ASTC Bus Stand", time: "09:45 PM" }
-],
-rest: "Hotel Raajwaada (15 Mins)"
-},
-
-"Biswanath Charali-Nagaon": {
-label: "Biswanath Charali → Nagaon",
-route: [
-{ loc: "Biswanath Charali", time: " " },
-{ loc: "Sootea", time: "" },
-{ loc: "Jamagurihat", time: "" },
-{ loc: "Tezpur", time: "" },
-{ loc: "Kaliabor", time: "" },
-{ loc: "Nagaon", time: "" }
-],
-boardingPoints: [
-{ loc: "Biswanth ASTC Bus Stand", time: "06:15 AM" }
-],
-droppingPoints: [
-{ loc: "BORGHAT BYPASS", time: "08:35 AM" }
-],
-rest: "Kam's Restaurant(15 Mins)"
-},
-
-"Nagaon-Guwahati": {
-label: "Nagaon → Guwahati ",
-route: [
-{ loc: "Nagaon", time: "" },
-{ loc: "Raha", time: "" },
-{ loc: "Jagiroad", time: "" },
-{ loc: "Guwahati", time: "" }
-],
-boardingPoints: [
-{ loc: "BORGHAT BYPASS", time: "08:35 AM" } 
-],
-droppingPoints: [
-{ loc: " ISBT", time: "03:30 PM" },
-{ loc: "Games Village", time: "03:40 PM" },
-{ loc: "Khanapara", time: "04:00 PM" } 
-],
-rest: "Kam's Resturant(15 Mins)"
-}
-};
-// SMOOTH TOGGLE LOGIC
-// Defined as a window property to ensure it's accessible from the HTML onclick attribute
-
-function loadJourneyInfo() {
-    // Ensure 'from' and 'to' variables are correctly defined in your scope
-    const routeKey = `${from}-${to}`;
-    const data = journeyData[routeKey];
-    
-    if (!data) return;
-
-    // Apply the Golden Heading
-    const labelElement = document.getElementById("routeLabel");
-    labelElement.innerText = data.label; 
-
-    // Build the Route Steps
-    document.getElementById("dynamicRoute").innerHTML = data.route.map((r, index) => {
+    dynamicRoute.innerHTML = data.route.map((r, index) => {
         const isFirst = index === 0;
         const isLast = index === data.route.length - 1;
-        
+
         return `
-        <div class="route-step ${isFirst ? 'first-step' : ''} ${isLast ? 'last-step' : ''}">
-            <div class="line-container">
-                <div class="dot ${isFirst ? 'start' : ''} ${isLast ? 'end' : ''}"></div>
-                ${!isLast ? `<div class="arrow-connector"><i class="fas fa-arrow-down"></i></div>` : ""}
+            <div class="route-step ${isFirst ? 'first-step' : ''} ${isLast ? 'last-step' : ''}">
+                <div class="line-container">
+                    <div class="dot ${isFirst ? 'start' : ''} ${isLast ? 'end' : ''}"></div>
+                    ${!isLast ? `<div class="arrow-connector"><i class="fas fa-arrow-down"></i></div>` : ""}
+                </div>
+                <div class="route-content">
+                    <strong>${r.loc}</strong>
+                    ${r.time ? `<div class="time-tag">${r.time}</div>` : ""}
+                </div>
             </div>
-            <div class="route-content">
-                <strong>${r.loc}</strong>
-                <div class="time-tag">${r.time}</div>
-            </div>
-        </div>
         `;
     }).join("");
 
-
-    // ... (Keep your existing Boarding/Dropping/Rest Stop logic below this)
-    
-    // BOARDING & DROPPING
     let points = `<div class="points-header" style="color:var(--orange);">BOARDING POINTS</div>`;
-    data.boardingPoints.forEach(p => {
+
+    (data.boardingPoints || []).forEach(p => {
         points += `
             <div class="card">
-                <div class="dot small-dot"></div>
                 <div class="card-info">
-                    <strong>${p.loc}</strong>
+                    <strong>${p.loc || p.name || ""}</strong>
                     <span class="point-subtext">Boarding point</span>
                 </div>
-                <div class="side-time">${p.time}</div>
-            </div>`;
+                <div class="side-time">${p.time || "--"}</div>
+            </div>
+        `;
     });
 
     points += `<div class="points-header" style="color:#28a745; margin-top:20px;">DROPPING POINTS</div>`;
-    data.droppingPoints.forEach(p => {
+
+    (data.droppingPoints || []).forEach(p => {
         points += `
             <div class="card">
-                <div class="dot small-dot"></div>
                 <div class="card-info">
-                    <strong>${p.loc}</strong>
+                    <strong>${p.loc || p.name || ""}</strong>
                     <span class="point-subtext">Arrival point</span>
                 </div>
-                <div class="side-time">${p.time}</div>
-            </div>`;
+                <div class="side-time">${p.time || "--"}</div>
+            </div>
+        `;
     });
-    document.getElementById("dynamicPoints").innerHTML = points;
 
-    // REST STOP
-    document.getElementById("dynamicStops").innerHTML = `
-    <div style="margin-bottom:6px; font-size:12px; font-weight:700; color:var(--text-dark); text-align:left; padding-left:5px;">
-        <i class="fas fa-clock" style="color:var(--orange); margin-right:5px;"></i> 10:30 AM
-    </div>
-    <div class="card rest-stop-container">
-        <div class="rest-title"><i class="fas fa-coffee" style="color:#b8860b;"></i> <span>${data.rest.split('(')[0].trim()}</span></div>
-        <div style="margin-top:6px; font-size:12px; color:#555; font-weight:600; padding-left:26px;">15 mins halt</div>
-    </div>`;
+    dynamicPoints.innerHTML = points;
+
+    const restName = data.rest
+        ? data.rest.split("(")[0].trim()
+        : "Rest stop not available";
+
+    const restDuration = data.rest && data.rest.includes("(")
+        ? data.rest.split("(")[1].replace(")", "")
+        : "15 Mins halt";
+
+    dynamicStops.innerHTML = `
+        ${data.restTime ? `
+            <div style="margin-bottom:6px; font-size:12px; font-weight:700; color:var(--text-dark); text-align:left; padding-left:5px;">
+                <i class="fas fa-clock" style="color:var(--orange); margin-right:5px;"></i>
+                ${data.restTime}
+            </div>
+        ` : ""}
+        <div class="card rest-stop-container">
+            <div class="rest-title">
+                <i class="fas fa-coffee" style="color:#b8860b;"></i>
+                <span>${restName}</span>
+            </div>
+            <div style="margin-top:6px; font-size:12px; color:#555; font-weight:600; padding-left:26px;">
+                ${restDuration}
+            </div>
+        </div>
+    `;
 }
+
+loadJourneyInfo();
+
 // Bottom Sheet Scroll and Tab Logic
 const sheetBody = document.getElementById('sheetBody');
 const tabs = document.querySelectorAll('.tab-btn');
