@@ -116,8 +116,37 @@
         }
         .booking-on-text { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 8px; display: block; }
         .route-row { font-weight: 800; font-size: 17px; display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .status-badge { background: #f0fdf4; color: #166534; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; border: 1px solid #bbf7d0; }
-        
+        .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    white-space: nowrap;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.status-confirmed {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.status-cancelled {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.status-completed {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
         .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .meta strong { display: block; font-size: 9px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; }
         .meta span { font-size: 13px; font-weight: 600; color: var(--text-main); }
@@ -190,17 +219,54 @@
 .expand-toggle:active {
     transform: scale(0.9);
 }
+.avatar-loading{
+    animation: profileSpin 1s linear infinite;
+    opacity:.75;
+    pointer-events:none;
+    filter:brightness(.9);
+}
+
+@keyframes profileSpin{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.upload-btn.loading{
+    pointer-events:none;
+    background:#bdbdbd;
+}
+
+.upload-btn.loading i{
+    animation: profileSpin .8s linear infinite;
+}
+.logo-img{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #fff;
+    display:block;
+}
     </style>
 </head>
 <body>
 
-<div class="header">
-    <button class="back-btn" onclick="window.history.back()"><i class="fas fa-chevron-left"></i></button>
-    <div class="logo">
-        <img src="logo-modified.png" alt="Logo" class="logo-img"> DREAMLINER PROFILE
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    
+        <div class="logo">
+            <img id="siteLogo" src="logo.png" alt="Logo" class="logo-img">
+            DREAMLINER PROFILE
+        </div>
+    
+        <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
-    <button class="logout-btn" id="logoutBtn">Logout</button>
-</div>
 
 <div class="container">
     <div class="profile-card">
@@ -363,6 +429,39 @@
 
     let allBookings = [];
     let currentSearchType = 'route';
+    async function loadInfoLogo() {
+    const siteLogo = document.getElementById("siteLogo");
+
+    if (!siteLogo) return;
+
+    try {
+        const assetRef = doc(db, "siteSettings", "homepage");
+        const assetSnap = await getDoc(assetRef);
+
+        if (assetSnap.exists()) {
+            const data = assetSnap.data();
+            const logoUrl = data.logoUrl;
+
+            if (logoUrl && logoUrl.startsWith("http")) {
+                const tempLogo = new Image();
+
+                tempLogo.onload = () => {
+                    siteLogo.src = logoUrl;
+                };
+
+                tempLogo.onerror = () => {
+                    console.log("Firebase logo failed to load");
+                };
+
+                tempLogo.src = logoUrl;
+            }
+        }
+    } catch (error) {
+        console.log("Info logo loading error:", error);
+    }
+}
+
+loadInfoLogo();
 
     window.toggleExpand = (el) => el.parentElement.classList.toggle('active');
 
@@ -374,22 +473,95 @@
             loadBookingHistory(user.uid);
         } else { window.location.href = "index.html"; }
     });
+    function resizeProfileImage(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = e => {
+            img.src = e.target.result;
+        };
+
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const size = 300;
+
+            canvas.width = size;
+            canvas.height = size;
+
+            const ctx = canvas.getContext("2d");
+
+            const minSide = Math.min(img.width, img.height);
+            const sx = (img.width - minSide) / 2;
+            const sy = (img.height - minSide) / 2;
+
+            ctx.drawImage(
+                img,
+                sx,
+                sy,
+                minSide,
+                minSide,
+                0,
+                0,
+                size,
+                size
+            );
+
+            canvas.toBlob(blob => {
+                if (!blob) {
+                    reject("Image compression failed");
+                    return;
+                }
+
+                resolve(new File([blob], "profile.jpg", {
+                    type: "image/jpeg"
+                }));
+            }, "image/jpeg", 0.75);
+        };
+
+        img.onerror = reject;
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
 
     document.getElementById('fileInput').addEventListener('change', async function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+        const file = e.target.files[0];
+if (!file) return;
+
+if (!file.type.startsWith("image/")) {
+    showMiniToast("Please upload an image file", "warning");
+    return;
+}
+
+if (file.size > 2 * 1024 * 1024) {
+    showMiniToast("Image size must be less than 2MB", "warning");
+    return;
+}
 
     const user = auth.currentUser;
     if (!user) return;
 
     try {
-        const storageRef = ref(storage, `profilePhotos/${user.uid}.jpg`);
+        const profileImg = document.getElementById("profileImg");
+const uploadBtn = document.querySelector(".upload-btn");
 
-        await uploadBytes(storageRef, file);
+profileImg.classList.add("avatar-loading");
+uploadBtn.classList.add("loading");
+const compressedFile = await resizeProfileImage(file);
+
+const storageRef = ref(storage, `profilePhotos/${user.uid}.jpg`);
+
+await uploadBytes(storageRef, compressedFile);
 
         const downloadURL = await getDownloadURL(storageRef);
 
-        document.getElementById('profileImg').src = downloadURL + "?v=" + Date.now();
+        profileImg.onload = () => {
+    profileImg.classList.remove("avatar-loading");
+    uploadBtn.classList.remove("loading");
+};
+
+profileImg.src = downloadURL + "?v=" + Date.now();
 
         await setDoc(doc(db, "profiles", user.uid), {
             photoURL: downloadURL,
@@ -409,11 +581,13 @@
             });
         }
 
-        alert("Profile photo updated!");
+        showMiniToast("Profile photo updated successfully", "success");
 
     } catch (err) {
         console.error("Upload failed:", err);
-        alert("Photo update failed");
+        profileImg.classList.remove("avatar-loading");
+uploadBtn.classList.remove("loading");
+showMiniToast("Photo upload failed", "error");
     }
 });
 
@@ -469,25 +643,66 @@
 
     async function loadBookingHistory(uid) {
     try {
-        const q = query(collection(db, "bookings"), where("userUid", "==", uid));
+        const q = query(
+            collection(db, "bookings"),
+            where("userUid", "==", uid)
+        );
+
         const snap = await getDocs(q);
 
         allBookings = [];
 
         snap.forEach(docItem => {
-            allBookings.push({ id: docItem.id, ...docItem.data() });
+            allBookings.push({
+                id: docItem.id,
+                ...docItem.data()
+            });
         });
 
+        // Sort newest booking first
         allBookings.sort((a, b) => {
-            const dateA = new Date(a.bookingDate || a.date || 0);
-            const dateB = new Date(b.bookingDate || b.date || 0);
-            return dateB - dateA;
+
+            const getTime = (item) => {
+
+                if (item.timestamp?.seconds) {
+                    return item.timestamp.seconds * 1000;
+                }
+
+                if (item.bookingDateTime) {
+                    return new Date(item.bookingDateTime).getTime();
+                }
+
+                if (item.bookingDate) {
+                    return new Date(item.bookingDate).getTime();
+                }
+
+                return 0;
+            };
+
+            return getTime(b) - getTime(a);
         });
 
         renderBookings(allBookings, uid);
+
     } catch (e) {
         console.error(e);
     }
+}
+function getIndianJourneyTime(dateTime, dateOnly) {
+
+if (dateTime) {
+
+    // Already contains timezone (+05:30 or Z)
+    if (dateTime.includes("+05:30") || dateTime.endsWith("Z")) {
+        return new Date(dateTime);
+    }
+
+    // Treat stored datetime as IST
+    return new Date(dateTime + "+05:30");
+}
+
+// Fallback
+return new Date(dateOnly + "T23:59:59+05:30");
 }
 
 function renderBookings(bookings, uid) {
@@ -503,7 +718,7 @@ function renderBookings(bookings, uid) {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    bookings.forEach(d => {
+    bookings.forEach((d, index) => {
         trips++;
 
         let seatDisplay = d.passengers && Array.isArray(d.passengers)
@@ -515,16 +730,37 @@ function renderBookings(bookings, uid) {
 
         const bId = d.bookingUid || d.id;
         const paymentId = d.paymentUid || d.paymentId || d.razorpay_payment_id || "N/A";
-        const isPast = new Date(d.date) < now;
-        const bookingDate = d.bookingDate ? d.bookingDate : (d.timestamp ? new Date(d.timestamp).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'));
+        const journeyTime = getIndianJourneyTime(d.departureDateTime, d.date);
+const isPast = journeyTime < new Date();
+const isCancelled = d.status === "CANCELLED";
+
+let statusText = "Confirmed";
+let statusClass = "status-confirmed";
+
+if (isCancelled) {
+    statusText = "Cancelled";
+    statusClass = "status-cancelled";
+} else if (isPast) {
+    statusText = "Completed";
+    statusClass = "status-completed";
+}
+let bookingDate = "N/A";
+
+if (d.bookingDate) {
+    bookingDate = new Date(d.bookingDate).toLocaleDateString("en-GB");
+} else if (d.timestamp?.seconds) {
+    bookingDate = new Date(d.timestamp.seconds * 1000).toLocaleDateString("en-GB");
+} else {
+    bookingDate = new Date().toLocaleDateString("en-GB");
+}
 
         historyBox.innerHTML += `
             <div class="booking-card">
-                <span class="booking-on-text">Booked On: ${bookingDate}</span>
+               <span class="booking-on-text">Booked On: ${bookingDate}</span>
 
                 <div class="route-row">
                     <span>${d.from} → ${d.to}</span>
-                    <span class="status-badge">${isPast ? 'Completed' : 'Confirmed'}</span>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
 
                 <div class="meta-grid">
@@ -544,7 +780,7 @@ function renderBookings(bookings, uid) {
 
                     <div class="id-row">
                         <span class="id-label">User UID</span>
-                        <span class="id-value">${uid}</span>
+                        <span class="id-value">${uid.substring(0, 8).toUpperCase()}******</span>
                     </div>
 
                     <div class="id-row">
@@ -558,20 +794,39 @@ function renderBookings(bookings, uid) {
                     <div class="qr-preview"><canvas id="qr-${bId}"></canvas></div>
                 </div>
 
-                ${!isPast ? `
-                <div class="journey-actions">
-                    <button class="j-btn btn-download" data-id="${bId}">
-                        <i data-lucide="download" style="width:14px;"></i>Ticket
-                    </button>
-                    <button class="j-btn btn-reschedule" onclick="openReschedule('${bId}')">
-    <i data-lucide="calendar-clock"></i>Reschedule
-</button>
-                    <button class="j-btn btn-cancel" onclick="window.location.href='cancelbus.html?bookingId=${bId}&paymentId=${paymentId}&amount=${d.totalFare}'">
-                        <i data-lucide="ban" style="width:14px;"></i>Cancel
-                    </button> 
-                </div>
-                ` : '<div style="margin-top:15px; font-size:11px; color:var(--text-muted); font-style:italic; text-align:center;">This journey has concluded. Actions are disabled.</div>'}
-            </div>
+                ${isCancelled ? `
+    <div style="
+        margin-top:15px;
+        padding:12px;
+        background:#fff7ed;
+        color:#9a3412;
+        border:1px solid #fed7aa;
+        border-radius:12px;
+        font-size:12px;
+        font-weight:700;
+        text-align:center;
+    ">
+        Ticket is cancelled. Refund will be processed within 2–7 working days.
+    </div>
+` : !isPast ? `
+    <div class="journey-actions">
+        <button class="j-btn btn-download" data-id="${bId}">
+            <i data-lucide="download" style="width:14px;"></i>Ticket
+        </button>
+
+        <button class="j-btn btn-reschedule" onclick="openReschedule('${bId}')">
+            <i data-lucide="calendar-clock"></i>Reschedule
+        </button>
+
+        <button class="j-btn btn-cancel" onclick="window.location.href='cancelbus.html?bookingId=${encodeURIComponent(bId)}&paymentId=${encodeURIComponent(paymentId)}&amount=${encodeURIComponent(d.totalFare)}'">
+            <i data-lucide="ban" style="width:14px;"></i>Cancel
+        </button> 
+    </div>
+` : `
+    <div style="margin-top:15px; font-size:11px; color:var(--text-muted); font-style:italic; text-align:center;">
+        This journey has concluded. Actions are disabled.
+    </div>
+`} </div>
         `;
 
         setTimeout(() => {
@@ -657,102 +912,260 @@ if (booking.rescheduled) {
 }
 
 /* ================= 12 HOUR RULE ================= */
-if (booking.departureDateTime) {
-    const departure = new Date(booking.departureDateTime);
-    const now = new Date();
-    const hoursLeft = (departure - now) / (1000 * 60 * 60);
+/* ================= STRICT 12 HOUR RULE (INDIAN TIME) ================= */
 
-    if (hoursLeft <= 12) {
-        showMiniToast("Reschedule not allowed within 12 hours", "error");
-        return;
-    }
+if (booking.departureDateTime) {
+
+// Journey departure in IST
+const departure = getIndianJourneyTime(
+    booking.departureDateTime,
+    booking.date
+);
+
+// Current Indian Time
+const nowIST = new Date(
+    new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Kolkata"
+    })
+);
+
+const hoursLeft = (departure.getTime() - nowIST.getTime()) / (1000 * 60 * 60);
+
+if (hoursLeft < 12) {
+    showMiniToast(
+        "Reschedule is allowed only until 12 hours before departure.",
+        "error"
+    );
+    return;
+}
 }
 
-/* ================= CUSTOM MODAL ================= */
+/* ================= MIN DATE = OLD TRAVEL DATE + 1 DAY ================= */
+const oldTravelDate = booking.date;
+const [year, month, day] = oldTravelDate.split("-").map(Number);
+const minDateObj = new Date(year, month - 1, day + 1);
+const minForwardDate =
+    minDateObj.getFullYear() + "-" +
+    String(minDateObj.getMonth() + 1).padStart(2, "0") + "-" +
+    String(minDateObj.getDate()).padStart(2, "0");
+
+/* ================= REMOVE OLD MODAL IF EXISTS ================= */
 const old = document.getElementById("rescheduleBox");
 if (old) old.remove();
 
+const seats = booking.passengers ? booking.passengers.length : 1;
+const seatText = booking.passengers
+    ? booking.passengers.map(p => p.seat).join(", ")
+    : booking.seatNumber || "N/A";
+
+/* ================= PROFESSIONAL RESCHEDULE MODAL ================= */
 const modal = document.createElement("div");
 modal.id = "rescheduleBox";
 
 modal.innerHTML = `
     <div style="
         position:fixed;
-        top:0;left:0;
-        width:100%;height:100%;
-        background:rgba(0,0,0,0.6);
+        inset:0;
+        background:rgba(15,23,42,0.68);
+        backdrop-filter:blur(8px);
+        -webkit-backdrop-filter:blur(8px);
         display:flex;
         align-items:center;
         justify-content:center;
         z-index:9999;
-        font-family:Arial;
+        padding:18px;
+        box-sizing:border-box;
+        font-family:'Inter','Segoe UI',Arial,sans-serif;
     ">
-
         <div style="
-            width:340px;
-            background:#fff;
-            padding:20px;
-            border-radius:14px;
-            text-align:center;
-            box-shadow:0 15px 40px rgba(0,0,0,0.3);
+            width:100%;
+            max-width:390px;
+            background:#ffffff;
+            border-radius:28px;
+            overflow:hidden;
+            box-shadow:0 24px 70px rgba(0,0,0,0.36);
+            animation:reschedulePop .22s ease-out;
         ">
+            <div style="
+                background:linear-gradient(135deg,#ff7a00,#ff512f);
+                padding:22px 20px 26px;
+                color:#fff;
+                position:relative;
+            ">
+                <button onclick="document.getElementById('rescheduleBox').remove()" style="
+                    position:absolute;
+                    top:14px;
+                    right:14px;
+                    width:34px;
+                    height:34px;
+                    border-radius:50%;
+                    border:1px solid rgba(255,255,255,0.35);
+                    background:rgba(255,255,255,0.18);
+                    color:#fff;
+                    cursor:pointer;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                ">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                </button>
 
-            <i data-lucide="calendar-clock"
-                style="width:42px;height:42px;color:#28a745;"></i>
+                <div style="
+                    width:56px;
+                    height:56px;
+                    border-radius:18px;
+                    background:rgba(255,255,255,0.2);
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    margin-bottom:14px;
+                    border:1px solid rgba(255,255,255,0.22);
+                ">
+                    <i data-lucide="calendar-clock" style="width:29px;height:29px;"></i>
+                </div>
 
-            <h3 style="margin:12px 0;">Reschedule Booking</h3>
+                <h2 style="margin:0;font-size:21px;font-weight:850;letter-spacing:-.3px;">Reschedule Journey</h2>
+                <p style="margin:5px 0 0;font-size:13px;opacity:.92;line-height:1.4;">
+                    Choose a new date for your existing ticket
+                </p>
+            </div>
 
-            <input id="newDateInput" type="date" style="
-                width:100%;
-                padding:10px;
-                border:1px solid #ddd;
-                border-radius:8px;
-                margin:10px 0 15px;
-            " />
+            <div style="padding:20px;">
+                <div style="
+                    background:#f8fafc;
+                    border:1px solid #e2e8f0;
+                    border-radius:20px;
+                    padding:14px;
+                    margin-bottom:16px;
+                ">
+                    <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:12px;">
+                        <div style="min-width:0;">
+                            <div style="font-size:10px;font-weight:850;color:#64748b;text-transform:uppercase;letter-spacing:.4px;">Route</div>
+                            <div style="font-size:14px;font-weight:850;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;">${booking.from} → ${booking.to}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:10px;font-weight:850;color:#64748b;text-transform:uppercase;letter-spacing:.4px;">Seats</div>
+                            <div style="font-size:14px;font-weight:850;color:#1e293b;">${seatText}</div>
+                        </div>
+                    </div>
 
-            <button id="confirmRescheduleBtn"
-                style="
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="background:#fff;border-radius:15px;padding:10px;border:1px solid #e5e7eb;">
+                            <div style="font-size:10px;font-weight:850;color:#64748b;text-transform:uppercase;letter-spacing:.4px;">Current Date</div>
+                            <div style="font-size:13px;font-weight:850;color:#1e293b;">${oldTravelDate}</div>
+                        </div>
+
+                        <div style="background:#fff;border-radius:15px;padding:10px;border:1px solid #e5e7eb;">
+                            <div style="font-size:10px;font-weight:850;color:#64748b;text-transform:uppercase;letter-spacing:.4px;">Passengers</div>
+                            <div style="font-size:13px;font-weight:850;color:#1e293b;">${seats}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <label style="
+                    display:block;
+                    font-size:12px;
+                    font-weight:850;
+                    color:#334155;
+                    margin-bottom:8px;
+                ">
+                    New Journey Date
+                </label>
+
+                <input id="newDateInput" type="date" min="${minForwardDate}" style="
                     width:100%;
-                    padding:10px;
-                    background:#28a745;
+                    box-sizing:border-box;
+                    padding:14px 14px;
+                    border:1.5px solid #e2e8f0;
+                    border-radius:16px;
+                    font-size:15px;
+                    font-weight:750;
+                    color:#1e293b;
+                    outline:none;
+                    background:#fff;
+                " />
+
+                <div style="
+                    margin-top:10px;
+                    background:#fff7ed;
+                    border:1px solid #fed7aa;
+                    color:#9a3412;
+                    border-radius:15px;
+                    padding:10px 12px;
+                    font-size:11px;
+                    font-weight:750;
+                    display:flex;
+                    gap:8px;
+                    align-items:flex-start;
+                    line-height:1.4;
+                ">
+                    <i data-lucide="info" style="width:15px;height:15px;min-width:15px;margin-top:1px;"></i>
+                    <span>Reschedule is allowed only once. New date must be after your current travel date.</span>
+                    <i data-lucide="info" style="width:15px;height:15px;min-width:15px;margin-top:1px;"></i>
+                    <span>Reschedule is allowed only before 12h of Departure.</span>
+                </div>
+
+                <button id="confirmRescheduleBtn" style="
+                    width:100%;
+                    margin-top:18px;
+                    padding:14px;
+                    background:linear-gradient(135deg,#ff7a00,#ff512f);
                     color:#fff;
                     border:none;
-                    border-radius:10px;
-                    font-weight:600;
+                    border-radius:17px;
+                    font-weight:850;
+                    font-size:14px;
+                    cursor:pointer;
                     display:flex;
                     align-items:center;
                     justify-content:center;
-                    gap:6px;
-                    cursor:pointer;
+                    gap:8px;
+                    box-shadow:0 10px 22px rgba(255,122,0,0.28);
                 ">
-                <i data-lucide="check-circle"></i>
-                Confirm
-            </button>
+                    <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
+                    Continue to Select Seats
+                </button>
 
-            <button onclick="document.getElementById('rescheduleBox').remove()"
-                style="
-                    margin-top:10px;
+                <button onclick="document.getElementById('rescheduleBox').remove()" style="
                     width:100%;
-                    padding:10px;
-                    background:#f1f1f1;
-                    border:none;
-                    border-radius:10px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    gap:6px;
+                    margin-top:10px;
+                    padding:13px;
+                    background:#f1f5f9;
+                    color:#334155;
+                    border:1px solid #e2e8f0;
+                    border-radius:17px;
+                    font-weight:800;
+                    font-size:14px;
                     cursor:pointer;
                 ">
-                <i data-lucide="x"></i>
-                Cancel
-            </button>
-
+                    Cancel
+                </button>
+            </div>
         </div>
     </div>
 `;
 
 document.body.appendChild(modal);
 lucide.createIcons();
+
+/* ================= MODAL ANIMATION STYLE ================= */
+if (!document.getElementById("rescheduleAnimationStyle")) {
+    const style = document.createElement("style");
+    style.id = "rescheduleAnimationStyle";
+    style.innerHTML = `
+        @keyframes reschedulePop {
+            from {
+                opacity:0;
+                transform:translateY(20px) scale(.96);
+            }
+            to {
+                opacity:1;
+                transform:translateY(0) scale(1);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
 /* ================= CONFIRM ACTION ================= */
 document.getElementById("confirmRescheduleBtn").onclick = () => {
@@ -764,16 +1177,21 @@ document.getElementById("confirmRescheduleBtn").onclick = () => {
         return;
     }
 
-    const seats = booking.passengers ? booking.passengers.length : 1;
+    if (newDate <= oldTravelDate) {
+        showMiniToast(`Please select date from ${minForwardDate}`, "error");
+        return;
+    }
 
     document.getElementById("rescheduleBox").remove();
 
-    window.location.href = `seat.html?bookingId=${bookingId}
+    window.location.href = `seat.html?bookingId=${encodeURIComponent(bookingId)}
 &reschedule=true
-&newDate=${newDate}
-&from=${booking.from}
-&to=${booking.to}
-&trip=${booking.trip || "AM"}
+&newDate=${encodeURIComponent(newDate)}
+&seatCount=${encodeURIComponent(seats)}
+&from=${encodeURIComponent(booking.from)}
+&to=${encodeURIComponent(booking.to)}
+&trip=${encodeURIComponent(booking.trip || "AM")}
+&busId=${encodeURIComponent(booking.busId || booking.trip || "AM")}
 &fare=${Math.floor((booking.totalFare || 250) / seats)}`;
 };
 };
@@ -837,22 +1255,17 @@ async function downloadTicketPDF(booking, currentUser) {
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
 
-// ================= DEBUG =================
-console.log("PDF Booking Data:", booking);
-
-// ================= BOOKING DATA =================
 const passengers = booking.passengers || [];
 
 const from = booking.from || "N/A";
 const to = booking.to || "N/A";
 const date = booking.date || "N/A";
-const trip = booking.trip || "1";
+const trip = booking.trip || "N/A";
 
-const pickup = booking.pickup;
-const drop = booking.drop;
+const pickup = booking.pickup || booking.pickupPoint || booking.boarding || "N/A";
+const drop = booking.drop || booking.dropPoint || booking.dropping || "N/A";
 
 const remarks = booking.remarks || "N/A";
-
 const bookingId = booking.bookingUid || booking.id;
 
 const paymentId =
@@ -861,21 +1274,49 @@ const paymentId =
     booking.razorpay_payment_id ||
     "N/A";
 
-// ================= FINAL TRUSTED AMOUNT =================
-const finalPaid = booking.totalFare || 0;
+const baseFare =
+    booking.baseFare ||
+    booking.ticketBaseFare ||
+    booking.fareBeforeGst ||
+    Math.round((booking.totalFare || 0) / 1.05);
 
-// ================= PARSE PICKUP / DROP =================
+const gstAmount =
+    booking.gstAmount ||
+    Math.round(baseFare * 0.05);
+
+const subTotal = baseFare + gstAmount;
+
+const discountAmount =
+    booking.discountAmount ||
+    booking.discount ||
+    0;
+
+const couponCode =
+    booking.couponCode ||
+    booking.appliedCoupon ||
+    "";
+
+    const finalPaid = Math.max(
+    0,
+    Number(
+        booking.finalAmount ||
+        booking.finalFare ||
+        booking.totalFare ||
+        subTotal - discountAmount
+    )
+);
 const pLoc = pickup.split("(")[0]?.trim() || pickup;
 const pTime = pickup.match(/\((.*?)\)/)?.[1] || "N/A";
 
 const dLoc = drop.split("(")[0]?.trim() || drop;
 const dTime = drop.match(/\((.*?)\)/)?.[1] || "N/A";
 
-// ================= HEADER =================
 doc.setFillColor(255,122,0);
 doc.rect(0,0,210,40,'F');
 
 try {
+    doc.setFillColor(255,255,255);
+    doc.circle(27,20,13,'F');
     doc.addImage("logo-modified.png","PNG",14,7,26,26);
 } catch(e){}
 
@@ -886,18 +1327,18 @@ doc.text("DREAMLINER BUS E-TICKET",105,18,{align:"center"});
 
 doc.setFontSize(11);
 doc.setFont("helvetica","normal");
-doc.text("Bharat Benz AC Semi Sleeper",105,27,{align:"center"});
+doc.text("Bharat Benz 2X2 A/C Semi Sleeper",105,25,{align:"center"});
+doc.text("Fully Air Suspension",105,31,{align:"center"});
 
-// ================= MAIN BOX =================
 let y = 50;
 
 doc.setFillColor(245,245,245);
-doc.roundedRect(10,y-5,190,130+(passengers.length*7),3,3,'F');
+doc.roundedRect(10,y-5,190,155+(passengers.length*7),3,3,'F');
 
 doc.setTextColor(0);
 doc.setFont("helvetica","bold");
 doc.setFontSize(12);
-doc.text("Travel Details",15,y);
+doc.text("Travel & Passenger Details",15,y);
 
 y += 10;
 
@@ -909,19 +1350,27 @@ doc.text(`To: ${to}`,110,y);
 
 y += 7;
 
-doc.text(`Pickup: ${pLoc}`,15,y);
-doc.text(`Drop: ${dLoc}`,110,y);
+doc.setFontSize(9);
+doc.setTextColor(100);
+doc.text(`Pickup Point: ${pLoc}`,15,y);
+doc.text(`Drop Point: ${dLoc}`,110,y);
 
-y += 7;
+y += 6;
 
-doc.text(`Date: ${date}`,15,y);
+doc.text(`Pickup Time: ${pTime}`,15,y);
+doc.text(`Drop Time: ${dTime}`,110,y);
+
+y += 8;
+
+doc.setTextColor(0);
+doc.setFontSize(11);
+doc.text(`Date of Journey: ${date}`,15,y);
 doc.text(`Trip: ${trip}`,110,y);
 
 y += 12;
 
-// ================= PASSENGERS =================
 doc.setFont("helvetica","bold");
-doc.text("Passenger List",15,y);
+doc.text("Passengers:",15,y);
 
 y += 7;
 
@@ -929,19 +1378,14 @@ doc.setFont("helvetica","normal");
 
 passengers.forEach(p => {
     const gender = p.gender === "male" ? "M" : "F";
-    doc.text(
-        `${p.seat} ${p.name} (${gender}) Age:${p.age} Ph:${p.phone}`,
-        15,
-        y
-    );
+    doc.text(`${p.seat}: ${p.name} (${gender}), Age: ${p.age}, Ph: ${p.phone}`,15,y);
     y += 7;
 });
 
 y += 5;
 
-// ================= REMARKS =================
 doc.setFont("helvetica","bold");
-doc.text("Remarks",15,y);
+doc.text("Remarks:",15,y);
 
 y += 6;
 
@@ -949,82 +1393,111 @@ doc.setFont("helvetica","normal");
 doc.setFontSize(10);
 doc.text(remarks,15,y,{maxWidth:180});
 
-y += 15;
+y += 14;
 
-// ================= FINAL AMOUNT ONLY (CLEAN) =================
+doc.setDrawColor(200);
+doc.line(15,y-5,195,y-5);
+
+doc.setFontSize(11);
+doc.setFont("helvetica","bold");
+doc.text("Fare Breakdown:",15,y);
+
+y += 8;
+
+doc.setFont("helvetica","normal");
+doc.setTextColor(0);
+
+doc.text("Ticket Base Fare:",15,y);
+doc.text(`INR ${baseFare}`,110,y);
+
+y += 7;
+
+doc.text("GST (5%):",15,y);
+doc.text(`INR ${gstAmount}`,110,y);
+
+y += 7;
+
 doc.setDrawColor(210);
-doc.roundedRect(10, y, 190, 25, 3, 3);
+doc.line(15,y,195,y);
 
-doc.setFont("helvetica", "bold");
+y += 6;
+
+doc.text("Subtotal:",15,y);
+doc.text(`INR ${subTotal}`,110,y);
+
+y += 7;
+
+doc.setTextColor(0,150,0);
+
+if (discountAmount > 0) {
+
+    doc.text(
+        `Discount Applied${couponCode ? ` (${couponCode})` : ""}:`,
+        15,
+        y
+    );
+
+    doc.text(`- INR ${discountAmount}`,110,y);
+
+} else {
+
+    doc.text("Discount Applied:",15,y);
+
+    doc.text("INR 0",110,y);
+
+}
+
+y += 8;
+
+doc.setTextColor(255,122,0);
+doc.setFont("helvetica","bold");
 doc.setFontSize(13);
-doc.setTextColor(0);
 
-doc.text("TOTAL AMOUNT PAID", 105, y + 10, { align: "center" });
+doc.text("Total Fare Paid:",15,y);
+doc.text(`INR ${finalPaid}`,110,y);
 
-doc.setFontSize(16);
-doc.setTextColor(255, 122, 0);
-
-doc.text(`${finalPaid}`, 105, y + 20, { align: "center" });
+y += 14;
 
 doc.setTextColor(0);
+doc.setFontSize(10);
+doc.text(`Payment ID: ${paymentId}`,15,y);
 
-y += 40;
-
-doc.text(`Payment ID: ${paymentId}`,15,y+10);
-
-// ================= THANK YOU =================
-y += 20;
+y += 18;
 
 doc.setDrawColor(220);
-doc.line(15, y + 2, 195, y + 2);
+doc.line(15,y,195,y);
 
 y += 10;
 
-doc.setFont("helvetica", "bold");
+doc.setFont("helvetica","bold");
 doc.setFontSize(12);
-doc.setTextColor(255, 0, 0);
+doc.setTextColor(255,0,0);
+doc.text("Thank you for choosing Dreamliner!",105,y,{align:"center"});
 
-doc.text("Thank you for choosing Dreamliner!", 105, y, {align:"center"});
+y += 8;
 
-y += 10;
-
-// ================= SUPPORT =================
-doc.setDrawColor(255, 122, 0);
-doc.roundedRect(55, y, 100, 25, 3, 3, 'D');
-
+doc.setFont("helvetica","italic");
 doc.setFontSize(10);
-doc.text("Need Help?", 105, y + 8, { align: "center" });
+doc.text("This ticket will help you in your journey",105,y,{align:"center"});
 
-doc.setFont("helvetica", "bold");
-doc.setTextColor(0, 100, 255);
-doc.text("Dreamliner Support", 105, y + 14, { align: "center" });
-
-const whatsapp =
-`whatsapp://send?phone=919954506113&text=Hello%20Dreamliner`;
-
-doc.link(80, y + 10, 50, 8, { url: whatsapp });
-
-// ================= META =================
-y += 35;
-
-doc.setFontSize(9);
-doc.text(`Booking ID: ${bookingId}`,15,y);
-
-const uid = currentUser?.uid?.substring(0,6) || "GUEST";
-doc.text(`User ID: ${uid}`,15,y+5);
-
-doc.text(`Date Issued: ${new Date().toLocaleDateString()}`,15,y-5);
-
-// ================= QR =================
 const qrCanvas = document.createElement("canvas");
 
 await QRCode.toCanvas(qrCanvas,
 JSON.stringify({bookingId,from,to,date}),
 {width:80});
 
-doc.addImage(qrCanvas.toDataURL("image/png"),"PNG",160,y-25,35,35);
+doc.addImage(qrCanvas.toDataURL("image/png"),"PNG",160,y-42,35,35);
 
-// ================= POLICY PAGE =================
+y += 20;
+
+doc.setFontSize(9);
+doc.setTextColor(0);
+doc.text(`Booking ID: ${bookingId}`,15,y);
+
+const uid = currentUser?.uid?.substring(0,6) || "GUEST";
+doc.text(`User ID: ${uid}`,15,y+5);
+doc.text(`Date Issued: ${new Date().toLocaleDateString()}`,15,y+10);
+
 doc.addPage();
 
 doc.setFillColor(240,244,255);
@@ -1033,51 +1506,44 @@ doc.rect(10,15,190,10,'F');
 doc.setTextColor(0,60,150);
 doc.setFont("helvetica","bold");
 doc.setFontSize(12);
-
 doc.text("BOOKING POLICIES",15,22);
-// policies with icons (circle style)
+
 const policies = [
-{icon:"C",title:"Child Policy",desc:"Children above 6 years require ticket"},
-{icon:"L",title:"Luggage Policy",desc:"2 bags allowed per passenger"},
-{icon:"P",title:"Pet Policy",desc:"Pets not allowed in bus"},
-{icon:"R",title:"Reporting Time",desc:"Arrive 15 mins before departure"}
+    {icon:"C",title:"Child Policy",desc:"Children above 6 years require ticket"},
+    {icon:"L",title:"Luggage Policy",desc:"2 bags allowed per passenger"},
+    {icon:"P",title:"Pet Policy",desc:"Pets not allowed in bus"},
+    {icon:"R",title:"Reporting Time",desc:"Arrive 15 mins before departure"}
 ];
 
 let py = 35;
 
 policies.forEach(p => {
+    doc.setDrawColor(220);
+    doc.roundedRect(10,py-8,190,24,3,3);
 
-doc.setDrawColor(220);
-doc.roundedRect(10,py-8,190,24,3,3);
+    doc.setDrawColor(180);
+    doc.circle(20,py,5,'D');
 
-doc.setDrawColor(180);
-doc.circle(20,py,5,'D');
+    doc.setFontSize(9);
+    doc.setTextColor(0);
+    doc.text(p.icon,19,py+2);
 
-doc.setFontSize(9);
-doc.setTextColor(0);
-doc.text(p.icon,19,py+2);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(10);
+    doc.text(p.title,30,py-1);
 
-doc.setFont("helvetica","bold");
-doc.setFontSize(10);
-doc.text(p.title,30,py-1);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(p.desc,30,py+6);
 
-doc.setFont("helvetica","normal");
-doc.setFontSize(9);
-doc.setTextColor(100);
-doc.text(p.desc,30,py+6);
-
-py += 30;
+    py += 30;
 });
 
-// ================= FOOTER =================
 doc.setTextColor(150);
 doc.setFontSize(8);
+doc.text("This is a computer generated e-ticket. No signature required.",105,285,{align:"center"});
 
-doc.text(
-"This is a computer generated e-ticket. No signature required.",
-105,285,{align:"center"}
-);
-// ================= SAVE =================
 doc.save(`Dreamliner_Ticket_${bookingId}.pdf`);
 }
 </script>
