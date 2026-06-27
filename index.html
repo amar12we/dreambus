@@ -1902,6 +1902,14 @@ body {
     background:linear-gradient(to right,#ff7a00,#ff512f);
     color:white;
 }
+.asset-fade {
+    opacity: 0;
+    transition: opacity .45s ease;
+}
+
+.asset-fade.show {
+    opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -2359,18 +2367,21 @@ limit
         ]
     };
 
-    // ✅ SHOW IMAGES IMMEDIATELY
-    renderHomepageAssets(fallbackAssets);
+    // ✅ 1) Show website/local assets instantly
+    await renderHomepageAssets(fallbackAssets, false);
 
     try {
         const assetRef = doc(db, "siteSettings", "homepage");
         const assetSnap = await getDoc(assetRef);
 
         if (assetSnap.exists()) {
-            const data = { ...fallbackAssets, ...assetSnap.data() };
+            const data = {
+                ...fallbackAssets,
+                ...assetSnap.data()
+            };
 
-            // ✅ replace with Firebase images after they are ready
-            renderHomepageAssets(data);
+            // ✅ 2) Firebase assets are preloaded first, then swapped smoothly
+            await renderHomepageAssets(data, true);
         }
 
     } catch (error) {
@@ -2378,102 +2389,274 @@ limit
     }
 }
 
-function renderHomepageAssets(data) {
+function safeAssetUrl(url) {
+    url = String(url || "").trim();
+
+    if (!url) return "";
+
+    // allow Firebase / normal web links
+    if (
+        url.startsWith("https://") ||
+        url.startsWith("http://") ||
+        url.startsWith("data:image/") ||
+        url.startsWith("blob:")
+    ) {
+        return url;
+    }
+
+    // allow local files like logo.png, coupon1.jpg, t1.mp4
+    if (
+        !url.includes("javascript:") &&
+        !url.includes("<") &&
+        !url.includes(">") &&
+        !url.startsWith("//")
+    ) {
+        return url;
+    }
+
+    return "";
+}
+
+function preloadImage(url) {
+    return new Promise((resolve, reject) => {
+        const cleanUrl = safeAssetUrl(url);
+
+        if (!cleanUrl) {
+            reject(new Error("Invalid image URL"));
+            return;
+        }
+
+        const img = new Image();
+
+        img.onload = () => resolve(cleanUrl);
+        img.onerror = () => reject(new Error("Image failed: " + cleanUrl));
+
+        img.src = cleanUrl;
+    });
+}
+
+async function preloadImages(urls) {
+    const validUrls = Array.isArray(urls)
+        ? urls.map(safeAssetUrl).filter(Boolean)
+        : [];
+
+    const results = await Promise.allSettled(
+        validUrls.map(url => preloadImage(url))
+    );
+
+    return results
+        .filter(result => result.status === "fulfilled")
+        .map(result => result.value);
+}
+
+function preloadVideoMetadata(url) {
+    return new Promise((resolve) => {
+        const cleanUrl = safeAssetUrl(url);
+
+        if (!cleanUrl) {
+            resolve("");
+            return;
+        }
+
+        const video = document.createElement("video");
+        let finished = false;
+
+        const done = () => {
+            if (finished) return;
+            finished = true;
+            resolve(cleanUrl);
+        };
+
+        video.preload = "metadata";
+        video.muted = true;
+        video.playsInline = true;
+        video.onloadedmetadata = done;
+        video.oncanplay = done;
+        video.onerror = done;
+
+        // Do not wait forever for heavy Firebase videos
+        setTimeout(done, 1600);
+
+        video.src = cleanUrl;
+        video.load();
+    });
+}
+
+async function preloadVideos(videos) {
+    const list = Array.isArray(videos)
+        ? videos.filter(video => video && video.videoUrl)
+        : [];
+
+    const results = await Promise.all(
+        list.map(async (video) => {
+            const loadedUrl = await preloadVideoMetadata(video.videoUrl);
+
+            if (!loadedUrl) return null;
+
+            return {
+                ...video,
+                videoUrl: loadedUrl
+            };
+        })
+    );
+
+    return results.filter(Boolean);
+}
+
+function replaceChildrenSmooth(container, fragment) {
+    if (!container || !fragment) return;
+
+    container.style.transition = "opacity .35s ease, transform .35s ease";
+    container.style.opacity = "0.55";
+    container.style.transform = "translateY(4px)";
+
+    setTimeout(() => {
+        container.innerHTML = "";
+        container.appendChild(fragment);
+        container.scrollLeft = 0;
+
+        requestAnimationFrame(() => {
+            container.style.opacity = "1";
+            container.style.transform = "translateY(0)";
+        });
+    }, 120);
+}
+
+async function renderHomepageAssets(data, isFirebase = false) {
     const siteLogo = document.getElementById("siteLogo");
 
     if (siteLogo && data.logoUrl) {
-        siteLogo.src = data.logoUrl;
+        const cleanLogo = safeAssetUrl(data.logoUrl);
+
+        if (cleanLogo) {
+            preloadImage(cleanLogo)
+                .then((loadedLogo) => {
+                    siteLogo.style.transition = "opacity .25s ease";
+                    siteLogo.style.opacity = "0.65";
+
+                    setTimeout(() => {
+                        siteLogo.src = loadedLogo;
+                        siteLogo.onload = () => {
+                            siteLogo.style.opacity = "1";
+                        };
+                    }, 90);
+                })
+                .catch(() => {
+                    console.log("Logo failed to load:", cleanLogo);
+                });
+        }
     }
 
     const slides = document.getElementById("slides");
 
-    if (slides) {
-        slides.innerHTML = "";
+    if (slides && Array.isArray(data.heroImages)) {
+        const heroImages = isFirebase
+            ? await preloadImages(data.heroImages)
+            : data.heroImages.map(safeAssetUrl).filter(Boolean);
 
-        const heroImages = Array.isArray(data.heroImages)
-            ? data.heroImages.filter(Boolean)
-            : [];
-            let firstHeroShown = false;
+        if (heroImages.length > 0) {
+            const fragment = document.createDocumentFragment();
 
-heroImages.forEach((url, index) => {
-    const img = document.createElement("img");
+            heroImages.forEach((url, index) => {
+                const img = document.createElement("img");
 
-    img.alt = "Dreamliner Bus";
-    img.loading = index === 0 ? "eager" : "lazy";
-    img.className = index === 0 ? "active" : "";
+                img.src = url;
+                img.alt = "Dreamliner Bus";
+                img.loading = index === 0 ? "eager" : "lazy";
+                img.className = index === 0 ? "active asset-fade show" : "asset-fade";
 
-    img.onload = function () {
-        if (!firstHeroShown) {
-            firstHeroShown = true;
-            document.querySelector(".hero").classList.add("ready");
+                fragment.appendChild(img);
+            });
+
+            // ✅ Firebase hero replaces local only after images are loaded
+            replaceChildrenSmooth(slides, fragment);
+
+            const hero = document.querySelector(".hero");
+            if (hero) hero.classList.add("ready");
         }
-    };
-
-    img.onerror = function () {
-        console.log("Hero image failed:", url);
-
-        // if first image fails, still show section after next images try
-        if (!firstHeroShown && index === heroImages.length - 1) {
-            document.querySelector(".hero").classList.add("ready");
-        }
-    };
-
-    img.src = url; // ✅ src must be after onload/onerror
-
-    slides.appendChild(img);
-});
     }
 
     const offerSlider = document.getElementById("offerSlider");
 
-    if (offerSlider) {
-        offerSlider.innerHTML = "";
+    if (offerSlider && Array.isArray(data.offerImages)) {
+        const offerImages = isFirebase
+            ? await preloadImages(data.offerImages)
+            : data.offerImages.map(safeAssetUrl).filter(Boolean);
 
-        const offerImages = Array.isArray(data.offerImages)
-            ? data.offerImages.filter(Boolean)
-            : [];
+        if (offerImages.length > 0) {
+            const fragment = document.createDocumentFragment();
 
-        offerImages.forEach((url, index) => {
-            const card = document.createElement("div");
-            card.className = "coupon-img-card";
+            offerImages.forEach((url, index) => {
+                const card = document.createElement("div");
+                card.className = "coupon-img-card";
 
-            const img = document.createElement("img");
-            img.src = url;
-            img.alt = "Dreamliner Offer " + (index + 1);
-            img.loading = "lazy";
+                const img = document.createElement("img");
+                img.src = url;
+                img.alt = "Dreamliner Offer " + (index + 1);
+                img.loading = index === 0 ? "eager" : "lazy";
 
-            card.appendChild(img);
-            offerSlider.appendChild(card);
-        });
+                card.appendChild(img);
+                fragment.appendChild(card);
+            });
 
-        autoSlide("offerSlider", ".coupon-img-card", 1000);
+            // ✅ Local coupon stays visible until Firebase coupons are ready
+            replaceChildrenSmooth(offerSlider, fragment);
+
+            setTimeout(() => {
+                autoSlide("offerSlider", ".coupon-img-card", 1000);
+            }, 450);
+        }
     }
 
     const tutorialSlider = document.getElementById("tutorialSlider");
 
-    if (tutorialSlider) {
-        tutorialSlider.innerHTML = "";
+    if (tutorialSlider && Array.isArray(data.tutorialVideos)) {
+        const tutorialVideos = isFirebase
+            ? await preloadVideos(data.tutorialVideos)
+            : data.tutorialVideos
+                .filter(video => video && video.videoUrl)
+                .map(video => ({
+                    ...video,
+                    videoUrl: safeAssetUrl(video.videoUrl)
+                }))
+                .filter(video => video.videoUrl);
 
-        const tutorialVideos = Array.isArray(data.tutorialVideos)
-            ? data.tutorialVideos.filter(video => video && video.videoUrl)
-            : [];
+        if (tutorialVideos.length > 0) {
+            const fragment = document.createDocumentFragment();
 
-        tutorialVideos.forEach(video => {
-            const card = document.createElement("div");
-            card.className = "tutorial-card";
-            card.onclick = () => openVideo(video.videoUrl);
+            tutorialVideos.forEach((video) => {
+                const card = document.createElement("div");
+                card.className = "tutorial-card";
+                card.onclick = () => openVideo(video.videoUrl);
 
-            card.innerHTML = `
-                <video muted autoplay loop playsinline preload="metadata">
-                    <source src="${safeImageUrl(video.videoUrl)}" type="video/mp4">
-                </video>
-                <h3>${safeText(video.title || "Tutorial")}</h3>
-            `;
+                const videoEl = document.createElement("video");
+                videoEl.muted = true;
+                videoEl.autoplay = true;
+                videoEl.loop = true;
+                videoEl.playsInline = true;
+                videoEl.preload = "metadata";
 
-            tutorialSlider.appendChild(card);
-        });
+                const source = document.createElement("source");
+                source.src = video.videoUrl;
+                source.type = "video/mp4";
 
-        autoSlide("tutorialSlider", ".tutorial-card", 3000);
+                videoEl.appendChild(source);
+
+                const title = document.createElement("h3");
+                title.textContent = video.title || "Tutorial";
+
+                card.appendChild(videoEl);
+                card.appendChild(title);
+                fragment.appendChild(card);
+            });
+
+            // ✅ Local video cards stay visible until Firebase videos are ready
+            replaceChildrenSmooth(tutorialSlider, fragment);
+
+            setTimeout(() => {
+                autoSlide("tutorialSlider", ".tutorial-card", 3000);
+            }, 450);
+        }
     }
 }
 
