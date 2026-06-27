@@ -9,220 +9,81 @@
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:system-ui;
-}
-
-body{
-height:100vh;
-background:#f4f7fb;
-overflow:hidden;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui;}
+body{height:100vh;background:#f4f7fb;overflow:hidden;}
 
 .header{
-position:fixed;
-top:0;
-left:0;
-right:0;
-height:56px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 9px;
-background:linear-gradient(135deg,#ff7a00,#ff3d2e);
-color:#fff;
-font-weight:600;
-z-index:1000;
+position:fixed;top:0;left:0;right:0;height:56px;
+display:flex;align-items:center;justify-content:space-between;
+padding:0 9px;background:linear-gradient(135deg,#ff7a00,#ff3d2e);
+color:#fff;font-weight:600;z-index:1000;
 }
 
-.lang-box{
-display:flex;
-gap:6px;
-}
-
-.lang-box button{ 
-border:none;
-padding:6px 10px;
-border-radius:8px;
-font-size:12px;
-cursor:pointer;
-font-weight:600;
-}
-
-.lang-box button.active{
-background:#222;
-color:#fff;
-}
-
-.lang-box button:not(.active){
-background:#fff;
-color:#ff3d2e;
-}
+.lang-box{display:flex;gap:6px;}
+.lang-box button{border:none;padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;}
+.lang-box button.active{background:#222;color:#fff;}
+.lang-box button:not(.active){background:#fff;color:#ff3d2e;}
 
 .chat-container{
-position:absolute;
-top:56px;
-bottom:64px;
-left:0;
-right:0;
-overflow-y:auto;
-padding:12px;
-display:flex;
-flex-direction:column;
-gap:10px;
+position:absolute;top:56px;bottom:64px;left:0;right:0;
+overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;
 }
 
 .message{
-max-width:80%;
-padding:10px 12px;
-border-radius:14px;
-font-size:13px;
-line-height:1.5;
-word-break:break-word;
+max-width:80%;padding:10px 12px;border-radius:14px;
+font-size:13px;line-height:1.5;word-break:break-word;
 }
 
 .bot{background:#fff;align-self:flex-start;}
 .user{background:#ff6a00;color:#fff;align-self:flex-end;}
 
 .input-area{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-height:64px;
-display:flex;
-gap:6px;
-padding:8px;
-background:#fff;
-border-top:1px solid #ddd;
+position:fixed;bottom:0;left:0;right:0;height:64px;
+display:flex;gap:6px;padding:8px;background:#fff;border-top:1px solid #ddd;
 }
 
 .input-area input{
-flex:1;
-border:none;
-outline:none;
-padding:10px;
-border-radius:10px;
-background:#f3f5f9;
+flex:1;border:none;outline:none;padding:10px;border-radius:10px;background:#f3f5f9;
 }
 
 .input-area button{
-width:44px;
-border:none;
-border-radius:10px;
-background:#ff7a00;
-color:#fff;
-cursor:pointer;
+width:44px;border:none;border-radius:10px;background:#ff7a00;color:#fff;cursor:pointer;
 }
 
 .options button{
-display:block;
-width:100%;
-margin-top:6px;
-padding:10px;
-border:none;
-border-radius:10px;
-background:#f2f2f2;
-cursor:pointer;
-font-weight:600;
+display:block;width:100%;margin-top:6px;padding:10px;border:none;
+border-radius:10px;background:#f2f2f2;cursor:pointer;font-weight:600;
 }
 
-.options button:hover{
-background:#ffe7d1;
-color:#ff3d2e;
-}
+.options button:hover{background:#ffe7d1;color:#ff3d2e;}
 
 .end-card{
-background:#ffffff;
-padding:14px;
-border-radius:18px;
-font-size:13px;
-box-shadow:0 8px 24px rgba(15,23,42,0.10);
-width:88%;
-border:1px solid #eef0f4;
+background:#ffffff;padding:14px;border-radius:18px;font-size:13px;
+box-shadow:0 8px 24px rgba(15,23,42,0.10);width:88%;border:1px solid #eef0f4;
 }
 
-.end-card strong{
-display:block;
-font-size:14px;
-color:#222;
-margin-bottom:10px;
-}
-
-.action-buttons{
-display:grid;
-grid-template-columns:1fr;
-gap:10px;
-}
+.end-card strong{display:block;font-size:14px;color:#222;margin-bottom:10px;}
+.action-buttons{display:grid;grid-template-columns:1fr;gap:10px;}
 
 .action-buttons button{
-border:none;
-padding:12px 14px;
-border-radius:14px;
-font-weight:650;
-font-size:13px;
-cursor:pointer;
-display:flex;
-align-items:center;
-justify-content:center;
-gap:8px;
-transition:0.2s ease;
+border:none;padding:12px 14px;border-radius:14px;font-weight:650;
+font-size:13px;cursor:pointer;display:flex;align-items:center;
+justify-content:center;gap:8px;transition:0.2s ease;
 }
 
-.chat-again-btn{
-background:#fff3e8;
-color:#e65300;
-border:1px solid #ffd8b8 !important;
-}
+.chat-again-btn{background:#fff3e8;color:#e65300;border:1px solid #ffd8b8 !important;}
+.employee-btn{background:#eafff2;color:#128c43;border:1px solid #bff0d1 !important;}
 
-.employee-btn{
-background:#eafff2;
-color:#128c43;
-border:1px solid #bff0d1 !important;
-}
+.action-buttons button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,0.08);}
+.action-buttons button:active{transform:scale(0.98);}
 
-.action-buttons button:hover{
-transform:translateY(-1px);
-box-shadow:0 6px 14px rgba(0,0,0,0.08);
-}
+.typing{display:flex;align-items:center;gap:5px;padding:12px;width:58px;}
+.dot{width:7px;height:7px;background:#ff7a00;border-radius:50%;animation:bounce 1s infinite;}
 
-.action-buttons button:active{
-transform:scale(0.98);
-}
-
-.typing{
-display:flex;
-align-items:center;
-gap:5px;
-padding:12px;
-width:58px;
-}
-
-.dot{
-width:7px;
-height:7px;
-background:#ff7a00;
-border-radius:50%;
-animation:bounce 1s infinite;
-}
-
-.back-btn {
-width:38px;
-height:38px;
-border-radius:12px;
-border:1px solid rgba(255,255,255,0.25);
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(10px);
-display:flex;
-align-items:center;
-justify-content:center;
-margin-right:15px;
-color:white;
-cursor:pointer;
+.back-btn{
+width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,0.25);
+background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);
+display:flex;align-items:center;justify-content:center;margin-right:15px;color:white;cursor:pointer;
 }
 
 .dot:nth-child(2){animation-delay:0.2s;}
@@ -232,7 +93,6 @@ cursor:pointer;
 0%,100%{transform:translateY(0);}
 50%{transform:translateY(-4px);}
 }
-
 </style>
 </head>
 
@@ -261,9 +121,22 @@ cursor:pointer;
 <button onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const API_URL = "https://backend-1-ci0t.onrender.com/chatbot";
+/* PASTE YOUR SAME FIREBASE CONFIG HERE */
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  projectId: "dreamliner-421b0",
+  storageBucket: "PASTE_HERE",
+  messagingSenderId: "PASTE_HERE",
+  appId: "PASTE_HERE"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const LANG = {
 en:{
@@ -279,10 +152,9 @@ input:"Type your message...",
 whatNext:"What next?",
 chatAgain:"Chat Again",
 employee:"Chat with Employee",
-serverError:"Server connection failed.",
+serverError:"Answer not found. Please try again later.",
 invalid:"Sorry, I can help only with the options below. Please select one from here:"
 },
-
 hi:{
 welcome:"ड्रीमलाइन में आपका स्वागत है। मैं आपका ट्रैवल असिस्टेंट हूँ।🙏🏼",
 choose:"एक विकल्प चुनें:",
@@ -296,7 +168,7 @@ input:"अपना संदेश लिखें...",
 whatNext:"आगे क्या?",
 chatAgain:"फिर से चैट करें",
 employee:"कर्मचारी से चैट करें",
-serverError:"सर्वर कनेक्शन फेल हो गया।",
+serverError:"उत्तर नहीं मिला। कृपया बाद में प्रयास करें।",
 invalid:"माफ़ करें, मैं केवल नीचे दिए गए विकल्पों में मदद कर सकता हूँ। कृपया यहाँ से एक विकल्प चुनें:"
 }
 };
@@ -329,41 +201,22 @@ return questions[currentLang][type];
 function detectOption(text){
 text = text.toLowerCase();
 
-if(text.includes("book") || text.includes("ticket book") || text.includes("टिकट बुक")){
-return "book";
-}
-
-if(text.includes("cancel") || text.includes("टिकट रद्द") || text.includes("रद्द")){
-return "cancel";
-}
-
-if(text.includes("refund") || text.includes("रिफंड")){
-return "refund";
-}
-
-if(text.includes("boarding") || text.includes("board") || text.includes("बोर्डिंग")){
-return "boarding";
-}
-
-if(text.includes("reschedule") || text.includes("change journey") || text.includes("यात्रा पुनः")){
-return "reschedule";
-}
-
-if(text.includes("support") || text.includes("help") || text.includes("सहायता")){
-return "support";
-}
+if(text.includes("book") || text.includes("ticket book") || text.includes("टिकट बुक")) return "book";
+if(text.includes("cancel") || text.includes("टिकट रद्द") || text.includes("रद्द")) return "cancel";
+if(text.includes("refund") || text.includes("रिफंड")) return "refund";
+if(text.includes("boarding") || text.includes("board") || text.includes("बोर्डिंग")) return "boarding";
+if(text.includes("reschedule") || text.includes("change journey") || text.includes("यात्रा पुनः")) return "reschedule";
+if(text.includes("support") || text.includes("help") || text.includes("सहायता")) return "support";
 
 return null;
 }
 
 function loadUI(){
-
 document.getElementById("welcome").innerText = LANG[currentLang].welcome;
 document.getElementById("question").placeholder = LANG[currentLang].input;
 
 document.getElementById("options").innerHTML = `
 <strong>${LANG[currentLang].choose}</strong>
-
 <div class="options">
 <button onclick="ask('book')">${LANG[currentLang].book}</button>
 <button onclick="ask('cancel')">${LANG[currentLang].cancel}</button>
@@ -375,16 +228,12 @@ document.getElementById("options").innerHTML = `
 `;
 }
 
-loadUI();
-
 function showOptionsAgain(){
-
 const chat = document.getElementById("chat");
 
 chat.innerHTML += `
 <div class="message bot">
 <strong>${LANG[currentLang].choose}</strong>
-
 <div class="options">
 <button onclick="ask('book')">${LANG[currentLang].book}</button>
 <button onclick="ask('cancel')">${LANG[currentLang].cancel}</button>
@@ -400,12 +249,10 @@ chat.scrollTop = chat.scrollHeight;
 }
 
 function setLang(lang){
-
 currentLang = lang;
 
 document.getElementById("enBtn").classList.remove("active");
 document.getElementById("hiBtn").classList.remove("active");
-
 document.getElementById(lang + "Btn").classList.add("active");
 
 loadUI();
@@ -415,8 +262,23 @@ async function ask(type){
 await sendMessage(type);
 }
 
-async function sendMessage(type = null){
+async function getFirebaseAnswer(type){
+const snap = await getDoc(doc(db, "supportAnswers", type));
 
+if(!snap.exists()){
+return null;
+}
+
+const data = snap.data();
+
+if(data.active === false){
+return null;
+}
+
+return data[currentLang]?.answer || data.en?.answer || null;
+}
+
+async function sendMessage(type = null){
 const input = document.getElementById("question");
 const chat = document.getElementById("chat");
 
@@ -429,9 +291,7 @@ return;
 if(!type){
 const matchedType = detectOption(typedText);
 
-chat.innerHTML += `
-<div class="message user">${typedText}</div>
-`;
+chat.innerHTML += `<div class="message user">${typedText}</div>`;
 
 input.value = "";
 chat.scrollTop = chat.scrollHeight;
@@ -439,18 +299,14 @@ chat.scrollTop = chat.scrollHeight;
 if(matchedType){
 type = matchedType;
 }else{
-chat.innerHTML += `
-<div class="message bot">${LANG[currentLang].invalid}</div>
-`;
+chat.innerHTML += `<div class="message bot">${LANG[currentLang].invalid}</div>`;
 showOptionsAgain();
 chat.scrollTop = chat.scrollHeight;
 return;
 }
 
 }else{
-chat.innerHTML += `
-<div class="message user">${getUserQuestion(type)}</div>
-`;
+chat.innerHTML += `<div class="message user">${getUserQuestion(type)}</div>`;
 input.value = "";
 chat.scrollTop = chat.scrollHeight;
 }
@@ -458,35 +314,19 @@ chat.scrollTop = chat.scrollHeight;
 showTyping();
 
 setTimeout(async ()=>{
-
 try{
-
-const res = await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type:type,
-question:typedText,
-lang:currentLang
-})
-});
-
-const data = await res.json();
+const answer = await getFirebaseAnswer(type);
 
 removeTyping();
 
-if(!data.success){
-chat.innerHTML += `
-<div class="message bot">${data.answer || LANG[currentLang].serverError}</div>
-`;
+if(!answer){
+chat.innerHTML += `<div class="message bot">${LANG[currentLang].serverError}</div>`;
 chat.scrollTop = chat.scrollHeight;
 return;
 }
 
 chat.innerHTML += `
-<div class="message bot">${data.answer}</div>
+<div class="message bot">${answer}</div>
 
 <div class="message bot end-card">
 <strong>${LANG[currentLang].whatNext}</strong>
@@ -503,22 +343,15 @@ chat.innerHTML += `
 </div>
 `;
 
-speak(data.answer);
+speak(answer);
 
-}
-catch(err){
-
+}catch(err){
 removeTyping();
-
-chat.innerHTML += `
-<div class="message bot">${LANG[currentLang].serverError}</div>
-`;
-
+chat.innerHTML += `<div class="message bot">${LANG[currentLang].serverError}</div>`;
 }
 
 chat.scrollTop = chat.scrollHeight;
-
-},900);
+},500);
 }
 
 document.getElementById("question").addEventListener("keydown", function(e){
@@ -568,6 +401,13 @@ function stopVoice(){
 window.speechSynthesis.cancel();
 }
 
+window.setLang = setLang;
+window.ask = ask;
+window.sendMessage = sendMessage;
+window.showOptionsAgain = showOptionsAgain;
+window.openWhatsApp = openWhatsApp;
+window.stopVoice = stopVoice;
+
 window.addEventListener("beforeunload", stopVoice);
 window.addEventListener("pagehide", stopVoice);
 window.addEventListener("blur", stopVoice);
@@ -577,7 +417,7 @@ stopVoice();
 }
 });
 
+loadUI();
 </script>
-
 </body>
 </html>
