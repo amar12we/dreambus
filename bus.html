@@ -365,6 +365,220 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* LAPTOP / DESKTOP PROFESSIONAL LAYOUT
+   Mobile design above is kept same. These styles only start on wider screens. */
+@media (min-width: 900px) {
+    body {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top left, rgba(255,122,0,0.10), transparent 32%),
+            radial-gradient(circle at top right, rgba(255,81,47,0.08), transparent 34%),
+            linear-gradient(180deg, #fffaf5 0%, #f5f7fb 36%, #eef3f7 100%);
+    }
+
+    .header {
+        padding: 22px calc((100vw - 1120px) / 2 + 24px);
+        min-height: 72px;
+        box-sizing: border-box;
+        box-shadow: 0 14px 35px rgba(255, 81, 47, 0.20);
+    }
+
+    .back-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .back-btn:hover {
+        transform: translateX(-2px);
+        background: rgba(255,255,255,0.24);
+    }
+
+    #routeHeader {
+        font-size: 22px;
+        letter-spacing: 0.2px;
+    }
+
+    #routeDate {
+        font-size: 13px;
+        margin-top: 3px;
+    }
+
+    #busList {
+        width: min(1120px, calc(100% - 48px));
+        margin: 34px auto 60px;
+    }
+
+    .bus-card {
+        margin: 0 0 20px;
+        padding: 26px 28px;
+        border-radius: 24px;
+        display: grid;
+        grid-template-columns: 240px minmax(360px, 1fr) 210px;
+        align-items: center;
+        gap: 26px;
+        border: 1px solid rgba(255,255,255,0.75);
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.91));
+        box-shadow:
+            0 16px 44px rgba(15, 23, 42, 0.08),
+            0 2px 10px rgba(15, 23, 42, 0.04);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .bus-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 122, 0, 0.24);
+        box-shadow:
+            0 22px 55px rgba(15, 23, 42, 0.11),
+            0 8px 20px rgba(255, 122, 0, 0.08);
+    }
+
+    .brand-section {
+        margin-bottom: 0;
+        padding-right: 10px;
+    }
+
+    .brand-name {
+        font-size: 18px;
+        padding: 7px 14px;
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(255,122,0,0.20);
+    }
+
+    .bus-type {
+        font-size: 12px;
+        margin-top: 10px;
+        line-height: 1.45;
+        color: #64748b;
+    }
+
+    .journey-row {
+        margin: 0;
+        min-height: 92px;
+        padding: 0 8px;
+    }
+
+    .time-box {
+        min-width: 104px;
+        text-align: left;
+    }
+
+    .journey-row .time-box:last-child {
+        text-align: right;
+    }
+
+    .time {
+        font-size: 23px;
+        letter-spacing: -0.3px;
+    }
+
+    .location {
+        font-size: 12px;
+        margin-top: 8px;
+        color: #64748b;
+    }
+
+    .duration-container {
+        min-width: 190px;
+        padding: 0 10px;
+    }
+
+    .line-visual {
+        width: 92%;
+        height: 4px;
+    }
+
+    .duration-text {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+
+    .seat-tag {
+        margin-top: 12px;
+        font-size: 12px;
+        padding: 6px 14px;
+        background: #fff7ed;
+        border-color: #fed7aa;
+    }
+
+    .footer-row {
+        border-top: 0;
+        border-left: 1px solid #eef2f7;
+        padding-top: 0;
+        padding-left: 24px;
+        height: 100%;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 14px;
+    }
+
+    .status-box {
+        padding: 7px 13px;
+        border-radius: 999px;
+    }
+
+    .fare-amount {
+        font-size: 24px;
+        text-align: right;
+        margin-bottom: 10px;
+    }
+
+    .book-btn {
+        min-width: 132px;
+        padding: 13px 18px;
+        font-size: 13px;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(255, 122, 0, 0.22);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .book-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(255, 122, 0, 0.28);
+    }
+
+    .loading-wrapper {
+        height: 360px;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(255,255,255,0.85);
+        border-radius: 26px;
+        box-shadow: 0 18px 45px rgba(15,23,42,0.08);
+    }
+
+    .no-bus-wrapper {
+        margin: 70px auto;
+    }
+
+    .no-bus-card {
+        max-width: 460px;
+        padding: 42px 34px;
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(15,23,42,0.10);
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1050px) {
+    .bus-card {
+        grid-template-columns: 205px minmax(320px, 1fr) 190px;
+        gap: 18px;
+        padding: 24px 22px;
+    }
+
+    .time {
+        font-size: 21px;
+    }
+
+    .footer-row {
+        padding-left: 18px;
+    }
+}
+
 </style>
 </head>
 
