@@ -7,6 +7,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="preconnect" href="https://backend-1-ci0t.onrender.com" crossorigin>
+<link rel="preconnect" href="https://api.razorpay.com" crossorigin>
+<link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
    <style>
     :root{
@@ -632,6 +635,7 @@ transform:translateX(24px);
     flex-direction: column;
     gap: 10px;
 }
+.coupon-list.show{ display:flex; }
 
 .coupon-card{
     display: flex;
@@ -915,6 +919,562 @@ transform:translateX(24px);
 }
 
 
+
+/* ===== DESKTOP / LAPTOP PROFESSIONAL BOOKING LAYOUT ===== */
+/* Mobile layout stays unchanged. This only activates on laptop/desktop screens. */
+.desktop-booking-layout{
+    width:100%;
+}
+
+.seat-payment-panel{
+    width:100%;
+}
+
+.journey-info-panel{
+    width:100%;
+}
+
+/* small helper headings are hidden on mobile */
+.desktop-panel-title,
+.desktop-side-title{
+    display:none;
+}
+
+@media (min-width: 1024px){
+
+    html, body{
+        height:auto !important;
+        min-height:100vh;
+        overflow:auto !important;
+        background:
+            radial-gradient(circle at 12% 10%, rgba(255,122,0,.13), transparent 32%),
+            linear-gradient(180deg,#fff7ef 0%, #f4f6f8 38%, #eef2f7 100%) !important;
+        text-align:left;
+    }
+
+    .header{
+        height:64px;
+        padding:10px 28px;
+        background:linear-gradient(135deg,#ff7a00,#ff512f);
+        box-shadow:0 10px 28px rgba(255,81,47,.22);
+    }
+
+    .back-btn{
+        margin-right:8px;
+        cursor:pointer;
+        transition:.25s ease;
+    }
+
+    .route-info{
+        text-align:left;
+        align-items:flex-start;
+    }
+
+    #routeTitle{
+        font-size:18px;
+        font-weight:850;
+        letter-spacing:.2px;
+    }
+
+    #dateTrip{
+        font-size:13px;
+        opacity:.92;
+        margin-top:2px;
+    }
+
+    .desktop-booking-layout{
+        max-width:1280px;
+        margin:28px auto 40px;
+        padding:0 28px;
+        display:grid;
+        grid-template-columns:minmax(0, 1fr) 420px;
+        gap:26px;
+        align-items:start;
+    }
+
+    .seat-payment-panel{
+        background:rgba(255,255,255,.88);
+        border:1px solid rgba(255,122,0,.12);
+        border-radius:28px;
+        box-shadow:0 24px 60px rgba(16,24,40,.10);
+        padding:24px;
+        min-height:calc(100vh - 128px);
+    }
+
+    .seat-payment-panel::before{
+        content:"Select Your Seats";
+        display:block;
+        font-size:24px;
+        line-height:1;
+        font-weight:900;
+        color:#1f2937;
+        margin:2px 0 6px;
+        letter-spacing:-.4px;
+    }
+
+    .seat-payment-panel::after{
+        content:"Choose seats on the left, then continue to secure payment.";
+        display:block;
+        font-size:13px;
+        color:#777;
+        margin-bottom:20px;
+    }
+
+    .bus{
+        width:100%;
+        max-width:520px;
+        margin:0 auto 18px;
+        border-radius:26px;
+        padding:22px 26px 24px;
+        box-shadow:
+            0 18px 45px rgba(17,24,39,.10),
+            inset 0 0 0 1px rgba(255,122,0,.08);
+        background:
+            linear-gradient(180deg,#ffffff,#fffaf6);
+    }
+
+    .driver{
+        margin-bottom:16px;
+        color:#777;
+        font-size:11px;
+        font-weight:800;
+        letter-spacing:.5px;
+        text-transform:uppercase;
+    }
+
+    .driver::before{
+        width:38px;
+        height:38px;
+        border-radius:12px;
+        vertical-align:middle;
+        box-shadow:0 6px 14px rgba(0,0,0,.12);
+    }
+
+    .row{
+        margin:4px 0;
+    }
+
+    .group{
+        gap:8px;
+    }
+
+    .seat{
+        width:38px;
+        height:38px;
+        font-size:11px;
+        border-radius:8px;
+    }
+
+    .last-row .group{
+        padding:0 18px;
+    }
+
+    #fareInfo{
+        max-width:620px;
+        margin:18px auto 12px;
+        padding:15px 18px;
+        background:#fff;
+        border:1px solid #ffe0c2;
+        color:#1f2937;
+        border-radius:18px;
+        box-shadow:0 12px 28px rgba(255,122,0,.09);
+        text-align:center;
+        font-size:15px;
+    }
+
+    .legend{
+        max-width:620px;
+        margin:0 auto 18px;
+        padding:14px 16px;
+        justify-content:center;
+        gap:18px;
+        background:#ffffff;
+        border:1px solid #edf0f4;
+        border-radius:18px;
+        box-shadow:0 8px 22px rgba(16,24,40,.06);
+    }
+
+    .legend .seat{
+        width:22px;
+        height:22px;
+        border-radius:5px;
+    }
+
+    .legend-item{
+        font-weight:700;
+        color:#4b5563;
+    }
+
+    .footer-action{
+        max-width:620px;
+        margin:0 auto;
+        background:#fff;
+        border:1px solid #edf0f4;
+        border-radius:22px;
+        padding:18px;
+        box-shadow:0 16px 36px rgba(16,24,40,.08);
+        text-align:center;
+    }
+
+    button#bookBtn{
+        width:100%;
+        max-width:none;
+        border-radius:16px;
+        padding:16px 24px;
+        font-size:16px;
+        background:linear-gradient(135deg,#ff7a00,#ff512f);
+        box-shadow:0 12px 28px rgba(255,81,47,.28);
+        transition:.25s ease;
+    }
+
+    button#bookBtn:hover{
+        transform:translateY(-2px);
+        box-shadow:0 18px 36px rgba(255,81,47,.32);
+    }
+
+    .journey-info-panel{
+        position:sticky;
+        top:84px;
+        height:calc(100vh - 108px);
+    }
+
+    .journey-info-panel::before{
+        content:"Journey Details";
+        display:block;
+        font-size:20px;
+        font-weight:900;
+        color:#1f2937;
+        margin:0 0 12px;
+        letter-spacing:-.2px;
+    }
+
+    .bottom-sheet{
+        position:static !important;
+        width:100% !important;
+        height:calc(100% - 36px) !important;
+        transform:none !important;
+        border-radius:26px !important;
+        box-shadow:0 24px 60px rgba(16,24,40,.12);
+        border:1px solid rgba(255,122,0,.13);
+        overflow:hidden;
+        background:#ffffff;
+    }
+
+    .bottom-sheet.active{
+        transform:none !important;
+    }
+
+    .sheet-header{
+        border-radius:26px 26px 0 0;
+        cursor:default;
+        padding-top:14px;
+        background:linear-gradient(180deg,#fff,#fff8f1);
+    }
+
+    .handle{
+        display:none;
+    }
+
+    .sheet-tabs{
+        padding:0 16px 12px;
+        gap:8px;
+        overflow-x:auto;
+    }
+
+    .tab-btn{
+        background:#fff;
+        border:1px solid #f0e1d5;
+        padding:9px 12px;
+        border-radius:999px;
+        font-size:10px;
+        color:#6b7280;
+    }
+
+    .tab-btn.active{
+        background:linear-gradient(135deg,#ff7a00,#ff512f);
+        color:#fff;
+        border-color:transparent;
+        box-shadow:0 8px 18px rgba(255,81,47,.22);
+    }
+
+    .tab-btn.active::after{
+        display:none;
+    }
+
+    .sheet-body{
+        height:100%;
+        overflow-y:auto;
+        padding-bottom:18px;
+    }
+
+    .content-section{
+        padding:20px 18px;
+    }
+
+    .section-title{
+        font-size:16px;
+        margin-bottom:14px;
+    }
+
+    #routeLabel{
+        font-size:14px;
+        color:#ff7a00;
+    }
+
+    .route-step.first-step strong,
+    .route-step.last-step strong{
+        font-size:17px;
+    }
+
+    .amenities-grid{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .amenity-item{
+        border-radius:16px;
+        padding:13px 12px;
+        min-height:58px;
+        background:linear-gradient(180deg,#fff,#fffaf6);
+        box-shadow:0 8px 20px rgba(16,24,40,.05);
+    }
+
+    .fleet-img{
+        height:210px;
+    }
+
+    .policy-table{
+        font-size:11px;
+    }
+
+    #detailsOverlay{
+        align-items:center;
+        padding-top:0;
+    }
+
+    #detailsOverlay .details-container:not(.full-screen){
+        max-width:760px;
+        border-radius:24px;
+    }
+
+    .details-body{
+        padding:20px;
+    }
+
+    .points-grid{
+        gap:18px;
+    }
+
+    .point-box{
+        border-radius:16px;
+        padding:16px;
+    }
+}
+
+@media (min-width: 1300px){
+    .desktop-booking-layout{
+        grid-template-columns:minmax(0, 1fr) 450px;
+    }
+
+    .bus{
+        max-width:560px;
+    }
+
+    .seat{
+        width:40px;
+        height:40px;
+    }
+}
+
+
+
+/* ===== FINAL LAPTOP FIT FIX (same seat size/design, no extra subtitle) ===== */
+@media (min-width: 1024px){
+    html, body{
+        height:100vh !important;
+        min-height:100vh !important;
+        overflow:hidden !important;
+    }
+
+    .desktop-booking-layout{
+        height:calc(100vh - 76px) !important;
+        max-width:1280px !important;
+        margin:12px auto 0 !important;
+        padding:0 28px !important;
+        gap:24px !important;
+        align-items:stretch !important;
+    }
+
+    .seat-payment-panel{
+        min-height:0 !important;
+        height:100% !important;
+        overflow:hidden !important;
+        padding:18px 24px 16px !important;
+        display:flex !important;
+        flex-direction:column !important;
+    }
+
+    .seat-payment-panel::before{
+        margin:0 0 8px !important;
+        flex-shrink:0 !important;
+    }
+
+    .seat-payment-panel::after{
+        content:none !important;
+        display:none !important;
+    }
+
+    .bus{
+        margin:0 auto 10px !important;
+        padding:18px 26px 18px !important;
+        flex-shrink:1 !important;
+    }
+
+    .driver{
+        margin-bottom:10px !important;
+    }
+
+    .row{
+        margin:2px 0 !important;
+    }
+
+    #fareInfo{
+        margin:10px auto 8px !important;
+        padding:12px 16px !important;
+        flex-shrink:0 !important;
+    }
+
+    .legend{
+        margin:0 auto 10px !important;
+        padding:10px 14px !important;
+        flex-shrink:0 !important;
+    }
+
+    .footer-action{
+        margin:0 auto !important;
+        padding:12px 16px !important;
+        flex-shrink:0 !important;
+    }
+
+    .footer-action > div{
+        margin-bottom:6px !important;
+    }
+
+    button#bookBtn{
+        padding:14px 24px !important;
+    }
+
+    .journey-info-panel{
+        top:auto !important;
+        height:100% !important;
+        position:relative !important;
+    }
+
+    .journey-info-panel::before{
+        margin:0 0 10px !important;
+        line-height:1 !important;
+        height:22px !important;
+    }
+
+    .bottom-sheet{
+        height:calc(100% - 32px) !important;
+    }
+
+    .sheet-header{
+        padding-top:10px !important;
+    }
+
+    .sheet-tabs{
+        padding:0 14px 10px !important;
+    }
+
+    .content-section{
+        padding:16px 18px !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-height: 760px){
+    .desktop-booking-layout{
+        height:calc(100vh - 70px) !important;
+        margin:6px auto 0 !important;
+    }
+
+    .seat-payment-panel{
+        padding:14px 22px 12px !important;
+    }
+
+    .seat-payment-panel::before{
+        font-size:22px !important;
+        margin-bottom:6px !important;
+    }
+
+    .bus{
+        padding-top:14px !important;
+        padding-bottom:14px !important;
+        margin-bottom:8px !important;
+    }
+
+    .driver{
+        margin-bottom:7px !important;
+    }
+
+    #fareInfo{
+        margin:8px auto 7px !important;
+        padding:10px 14px !important;
+    }
+
+    .legend{
+        padding:8px 14px !important;
+        margin-bottom:8px !important;
+    }
+
+    .footer-action{
+        padding:10px 16px !important;
+    }
+
+    button#bookBtn{
+        padding:12px 22px !important;
+    }
+}
+
+
+
+/* ===== DESKTOP RIGHT PANEL SCROLL FIX ===== */
+@media (min-width: 1024px){
+    .journey-info-panel{
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .bottom-sheet{
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .sheet-header{
+        flex: 0 0 auto !important;
+    }
+
+    .sheet-body{
+        flex: 1 1 auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 28px !important;
+    }
+
+    #amenities,
+    #photos,
+    #policies{
+        scroll-margin-top: 72px;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -927,6 +1487,9 @@ transform:translateX(24px);
     </div>
 </div>
 
+
+<div class="desktop-booking-layout">
+    <main class="seat-payment-panel">
 <div class="bus">
     <div class="driver"></div>
     <div id="seats"></div>
@@ -934,6 +1497,27 @@ transform:translateX(24px);
 
 
 
+
+<div id="fareInfo">Selected Seats: 0 | Total Fare: ₹0</div>
+
+<div class="legend">
+    <div class="legend-item"><div class="seat"></div> Available</div>
+    <div class="legend-item"><div class="seat male"></div> Male</div>
+    <div class="legend-item"><div class="seat female"></div> Female</div>
+    <div class="legend-item"><div class="seat booked"></div> Booked</div>
+</div>
+
+<div class="footer-action">
+    <div style="font-size:11px; opacity:0.8; margin-bottom:8px;">
+        Secure Booking • Fast Checkout • Trusted by Travelers
+    </div>
+    <button id="bookBtn">Book Selected Seats</button>
+</div>
+
+
+    </main>
+
+    <aside class="journey-info-panel">
 <div class="bottom-sheet" id="sheet">
     <div class="sheet-header" id="headerArea">
         <div class="handle"></div>
@@ -1129,20 +1713,8 @@ transform:translateX(24px);
 
 
 
-<div id="fareInfo">Selected Seats: 0 | Total Fare: ₹0</div>
 
-<div class="legend">
-    <div class="legend-item"><div class="seat"></div> Available</div>
-    <div class="legend-item"><div class="seat male"></div> Male</div>
-    <div class="legend-item"><div class="seat female"></div> Female</div>
-    <div class="legend-item"><div class="seat booked"></div> Booked</div>
-</div>
-
-<div class="footer-action">
-    <div style="font-size:11px; opacity:0.8; margin-bottom:8px;">
-        Secure Booking • Fast Checkout • Trusted by Travelers
-    </div>
-    <button id="bookBtn">Book Selected Seats</button>
+    </aside>
 </div>
 
 <div id="detailsOverlay">
@@ -1283,29 +1855,7 @@ transform:translateX(24px);
         
             <div class="coupon-list" id="couponList">
         
-                <div class="coupon-card">
-                    <div>
-                        <strong>FIRST2026</strong>
-                        <p style="font-size:11px;">₹50 OFF On First Booking</p>
-                    </div>
-                    <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('FIRST2026')">APPLY</button>
-                </div>
-        
-                <div class="coupon-card">
-                    <div>
-                        <strong>DREAMLINER26</strong>
-                        <p style="font-size:11px;">Upto 15% Discount For Using Dreamliner</p>
-                    </div>
-                    <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('DREAMLINER26')">APPLY</button>
-                </div>
-        
-                <div class="coupon-card">
-                    <div>
-                        <strong>LOYAL26CTM</strong>
-                        <p style="font-size:11px;">Upto 15% Discount OnLoyalty Reward</p>
-                    </div>
-                    <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('LOYAL26CTM')">APPLY</button>
-                </div>
+                <div style="font-size:11px;color:#777;padding:8px;">Loading coupons...</div>
         
             </div>
         </div>
@@ -1424,13 +1974,14 @@ transform:translateX(24px);
 <!-- CONFETTI CANVAS -->
 <canvas id="confettiCanvas"></canvas>
 
+<div id="ownerCouponRecaptcha" style="position:fixed; left:-9999px; top:-9999px;"></div>
 <div id="toastContainer"></div>
 
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, onSnapshot, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, RecaptchaVerifier, signInWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     
     
     const firebaseConfig = {
@@ -1443,8 +1994,14 @@ transform:translateX(24px);
     };
     
     const app = initializeApp(firebaseConfig);
+    const ownerCouponApp = initializeApp(firebaseConfig, "ownerCouponPhoneApp");
     const db = getFirestore(app);
     const auth = getAuth(app);
+    const ownerCouponAuth = getAuth(ownerCouponApp);
+    let ownerCouponRecaptcha = null;
+
+    // Warm backend early so /create-order is already connected before Pay is clicked.
+    fetch("https://backend-1-ci0t.onrender.com/health", { method: "GET", cache: "no-store" }).catch(() => {});
     
     const params = new URLSearchParams(window.location.search);
     const urlParams = params;
@@ -1453,7 +2010,7 @@ transform:translateX(24px);
     const rawDate = params.get("date") || params.get("newDate") || "";
 const date = rawDate;
     const trip = (params.get("trip") || "AM").toUpperCase();
-    const farePerSeat = Number(params.get("fare")) || 250;
+    let farePerSeat = Number(params.get("fare")) || 250;
     const busId = params.get("busId") || trip;
     const serviceId = params.get("serviceId") || busId;
     
@@ -1477,6 +2034,15 @@ const date = rawDate;
     : 6;
     let appliedCoupon = null;
     let discountedFare = null;
+    let ownerCouponToken = null;
+    let availableCoupons = [];
+
+    // FAST CHECKOUT: pre-create Razorpay order after coupon is applied
+    // so clicking Pay can open Razorpay immediately.
+    let cachedPaymentOrder = null;
+    let cachedPaymentOrderKey = "";
+    let cachedPaymentOrderPromise = null;
+
     window.lastBusData = {}; 
     
     const seatContainer = document.getElementById("seats");
@@ -1738,6 +2304,8 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
     // ✅ RESET LOGIC (VERY IMPORTANT)
     appliedCoupon = null;
     discountedFare = null;
+    ownerCouponToken = null;
+    invalidatePreparedPaymentOrder();
 
     // ✅ RESET MESSAGE
     const msgBox = document.getElementById("couponMessage");
@@ -1754,6 +2322,72 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
         document.getElementById("toastContainer").appendChild(toast);
         setTimeout(()=> toast.classList.add("show"),100);
         setTimeout(()=>{ toast.classList.remove("show"); setTimeout(()=>toast.remove(),400); }, 3000);
+    }
+
+    function getPaymentOrderKey() {
+        return JSON.stringify({
+            seats: selectedSeats.length,
+            from,
+            to,
+            trip,
+            couponCode: appliedCoupon || "",
+            userUid: currentUser?.uid || null,
+            ownerTokenReady: ownerCouponToken ? "yes" : "no"
+        });
+    }
+
+    function invalidatePreparedPaymentOrder() {
+        cachedPaymentOrder = null;
+        cachedPaymentOrderKey = "";
+        cachedPaymentOrderPromise = null;
+    }
+
+    async function preparePaymentOrder(options = {}) {
+        if (isReschedule || selectedSeats.length <= 0) return null;
+
+        const key = getPaymentOrderKey();
+
+        if (cachedPaymentOrder && cachedPaymentOrderKey === key) {
+            return cachedPaymentOrder;
+        }
+
+        if (cachedPaymentOrderPromise && cachedPaymentOrderKey === key) {
+            return cachedPaymentOrderPromise;
+        }
+
+        cachedPaymentOrderKey = key;
+        cachedPaymentOrderPromise = fetch("https://backend-1-ci0t.onrender.com/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                seats: selectedSeats.length,
+                from,
+                to,
+                trip,
+                couponCode: appliedCoupon,
+                userUid: currentUser?.uid || null,
+                ownerCouponToken,
+                ownerPhoneAuthToken: ownerCouponToken || null
+            })
+        })
+        .then(async (res) => {
+            const data = await res.json();
+            if (!data.success) {
+                throw new Error(data.message || "Order creation failed");
+            }
+            cachedPaymentOrder = data;
+            return data;
+        })
+        .catch((err) => {
+            if (!options.silent) showToast(err.message || "Order creation failed", "error");
+            invalidatePreparedPaymentOrder();
+            throw err;
+        })
+        .finally(() => {
+            cachedPaymentOrderPromise = null;
+        });
+
+        return cachedPaymentOrderPromise;
     }
     // ================= BUS GALLERY =================
 async function loadBusGallery() {
@@ -1793,6 +2427,131 @@ const images =
     } catch (error) {
         console.error(error);
         gallery.innerHTML = `<div style="padding:15px;color:#777;text-align:left;">Could not load bus photos.</div>`;
+    }
+}
+
+function routeFareDocId(fromCity, toCity) {
+    return `${String(fromCity || "").trim()}_${String(toCity || "").trim()}`;
+}
+
+function normalizeCouponCode(code) {
+    return String(code || "").trim().toUpperCase();
+}
+
+function normalizeOwnerPhone(phone) {
+    const value = String(phone || "").trim();
+    if (!value) return "";
+    if (value.startsWith("+")) return value;
+    const digits = value.replace(/\D/g, "");
+    if (digits.length === 10) return "+91" + digits;
+    if (digits.length === 12 && digits.startsWith("91")) return "+" + digits;
+    return value;
+}
+
+function maskOwnerPhone(phone) {
+    const value = String(phone || "");
+    if (value.length <= 5) return "owner phone";
+    return value.slice(0, 3) + "****" + value.slice(-2);
+}
+
+function getOwnerCouponRecaptcha() {
+    if (!ownerCouponRecaptcha) {
+        ownerCouponRecaptcha = new RecaptchaVerifier(ownerCouponAuth, "ownerCouponRecaptcha", {
+            size: "invisible"
+        });
+    }
+    return ownerCouponRecaptcha;
+}
+
+async function verifyOwnerPhoneWithFirebase(ownerPhone, couponCode) {
+    const phone = normalizeOwnerPhone(ownerPhone);
+
+    if (!phone) {
+        throw new Error("Owner phone is not configured for this coupon");
+    }
+
+    const appVerifier = getOwnerCouponRecaptcha();
+    const confirmationResult = await signInWithPhoneNumber(ownerCouponAuth, phone, appVerifier);
+    const enteredOtp = prompt(`Owner OTP sent to ${maskOwnerPhone(phone)}. Enter OTP:`);
+
+    if (!enteredOtp) {
+        throw new Error("Owner OTP cancelled");
+    }
+
+    const result = await confirmationResult.confirm(enteredOtp.trim());
+    const token = await result.user.getIdToken(true);
+    ownerCouponToken = token;
+
+    try {
+        await signOut(ownerCouponAuth);
+    } catch (e) {
+        console.warn("Owner coupon auth signout skipped", e);
+    }
+
+    return token;
+}
+
+function couponDescription(coupon) {
+    if (coupon.description) return coupon.description;
+    const type = String(coupon.type || "fixed").toLowerCase();
+    const amount = Number(coupon.amount ?? coupon.discount ?? coupon.value ?? 0);
+    if (type === "percent" || type === "percentage") return `Upto ${amount}% OFF`;
+    return `₹${amount} OFF`;
+}
+
+function renderCouponList() {
+    const list = document.getElementById("couponList");
+    if (!list) return;
+
+    if (isReschedule) {
+        list.innerHTML = `<div style="font-size:11px;color:#777;padding:8px;">Coupons are disabled during reschedule.</div>`;
+        return;
+    }
+
+    if (!availableCoupons.length) {
+        list.innerHTML = `<div style="font-size:11px;color:#777;padding:8px;">No active coupons available right now.</div>`;
+        return;
+    }
+
+    list.innerHTML = availableCoupons.map(c => `
+        <div class="coupon-card">
+            <div>
+                <strong>${c.code}</strong>
+                <p style="font-size:11px;">${couponDescription(c)}</p>
+            </div>
+            <button style="padding:4px 8px; font-size:11px;" onclick="selectCoupon('${c.code}')">APPLY</button>
+        </div>
+    `).join("");
+}
+
+async function loadFareAndCouponsFromFirebase() {
+    try {
+        const fareSnap = await getDoc(doc(db, "fareRoutes", routeFareDocId(from, to)));
+        if (fareSnap.exists()) {
+            const data = fareSnap.data() || {};
+            const firebaseFare = Number(data.farePerSeat ?? data.fare ?? data.price);
+            if (data.active !== false && Number.isFinite(firebaseFare) && firebaseFare > 0) {
+                farePerSeat = firebaseFare;
+                updateFareInfo();
+            }
+        }
+    } catch (err) {
+        console.error("Fare config load error:", err);
+    }
+
+    try {
+        const couponSnap = await getDocs(collection(db, "coupons"));
+        availableCoupons = couponSnap.docs
+            .map(d => {
+                const data = d.data() || {};
+                return { ...data, code: normalizeCouponCode(data.code || d.id) };
+            })
+            .filter(c => c.active !== false && c.code && c.secret !== true && c.ownerOnly !== true && c.requiresOtp !== true)
+            .sort((a, b) => Number(a.sortOrder || 999) - Number(b.sortOrder || 999));
+        renderCouponList();
+    } catch (err) {
+        console.error("Coupon config load error:", err);
+        renderCouponList();
     }
 }
     window.applyCoupon = function () {
@@ -1845,19 +2604,64 @@ try {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            couponCode,
+            couponCode: normalizeCouponCode(couponCode),
             userUid,
-            totalFare
+            totalFare,
+            seats: selectedSeats.length,
+            from,
+            to,
+            ownerPhoneAuthToken: ownerCouponToken || null
         })
     });
 
     const data = await response.json();
 
+    if (data.success && (data.requiresOwnerPhoneAuth || data.requiresOwnerOtp)) {
+        try {
+            msgBox.innerHTML = `<span class="loader"></span> Verifying owner phone with Firebase...`;
+            msgBox.style.color = "#444";
+
+            const ownerPhoneAuthToken = await verifyOwnerPhoneWithFirebase(data.ownerPhone, couponCode);
+
+            msgBox.innerHTML = `<span class="loader"></span> Confirming owner coupon...`;
+
+            const ownerVerifyRes = await fetch("https://backend-1-ci0t.onrender.com/verify-coupon", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    couponCode: normalizeCouponCode(couponCode),
+                    userUid,
+                    totalFare,
+                    seats: selectedSeats.length,
+                    from,
+                    to,
+                    ownerPhoneAuthToken
+                })
+            });
+
+            const ownerVerifyData = await ownerVerifyRes.json();
+
+            if (!ownerVerifyData.success || ownerVerifyData.requiresOwnerPhoneAuth) {
+                msgBox.innerText = "❌ " + (ownerVerifyData.message || "Owner phone verification failed");
+                msgBox.style.color = "red";
+                return;
+            }
+
+            data.discount = ownerVerifyData.discount;
+            data.finalPrice = ownerVerifyData.finalPrice;
+            data.couponCode = ownerVerifyData.couponCode;
+        } catch (otpErr) {
+            msgBox.innerText = "❌ " + (otpErr.message || "Owner phone verification failed");
+            msgBox.style.color = "red";
+            return;
+        }
+    }
+
     if (data.success) {
 
 showDiscountAnimation(data.discount);
 
-appliedCoupon = couponCode;
+appliedCoupon = normalizeCouponCode(data.couponCode || couponCode);
 discountedFare = data.finalPrice;
 
 // ✅ UI SUCCESS
@@ -1875,6 +2679,11 @@ document.getElementById("modalTotalFare").innerText = "₹" + data.finalPrice;
 
 // ✅ UPDATE BREAKDOWN
 document.getElementById("breakdownDiscount").innerText = `-₹${Math.round(data.discount)}`;
+
+// Start creating the Razorpay order in the background now.
+// This removes the long wait when the user clicks Pay after applying a coupon.
+invalidatePreparedPaymentOrder();
+preparePaymentOrder({ silent: true }).catch(() => {});
 
 const oldFareEl = document.getElementById("oldFare");
 if (oldFareEl) oldFareEl.innerText = "₹" + totalFare;
@@ -1918,8 +2727,11 @@ function selectCoupon(code){
     const input = document.getElementById("couponInput");
     const list = document.getElementById("couponList");
 
-    if (input) input.value = code;
-    if (list) list.style.display = "none";
+    if (input) input.value = normalizeCouponCode(code);
+    if (list) {
+        list.classList.remove("show");
+        list.style.display = "none";
+    }
 }
 
 function applyCouponFromInput(e){
@@ -1942,9 +2754,13 @@ try {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            couponCode: appliedCoupon,
+            couponCode: normalizeCouponCode(appliedCoupon),
             userUid: currentUser.uid,
-            totalFare
+            totalFare,
+            seats: selectedSeats.length,
+            from,
+            to,
+            ownerPhoneAuthToken: ownerCouponToken || null
         })
     });
 
@@ -1956,11 +2772,14 @@ try {
 
         document.getElementById("payAmount").innerText = data.finalPrice;
         document.getElementById("modalTotalFare").innerText = "₹" + data.finalPrice;
+        invalidatePreparedPaymentOrder();
+        preparePaymentOrder({ silent: true }).catch(() => {});
 
     } else {
         // if coupon invalid for new seat count → remove
         appliedCoupon = null;
         discountedFare = null;
+        invalidatePreparedPaymentOrder();
         updateFareInfo();
     }
 
@@ -1990,7 +2809,11 @@ function showDiscountAnimation(savedAmount) {
 }
 document.getElementById("couponInput").addEventListener("focus", () => {
     const list = document.getElementById("couponList");
-    if (list) list.style.display = "flex";
+    if (list) {
+        renderCouponList();
+        list.style.display = "flex";
+        list.classList.add("show");
+    }
 });
     async function handleReschedule() {
     
@@ -2208,29 +3031,56 @@ const capacity = parseInt(params.get("capacity")) || 45;
 
 const layoutConfig = {
     capacity: capacity,
-    normalRows: parseInt(params.get("normalRows")) || 10,
-    lastRowSeats: parseInt(params.get("lastRowSeats")) || 5,
+    // Default layout stays 2 + 2 horizontally, but numbering is now row-wise:
+    // Row A = A1 A2 A3 A4, Row B = B1 B2 B3 B4, and so on.
     leftSeats: parseInt(params.get("leftSeats")) || 2,
     rightSeats: parseInt(params.get("rightSeats")) || 2
 };
 
-const allSeats = [];
-for (let i = 1; i <= layoutConfig.capacity; i++) {
-    allSeats.push({ name: `A${i}` });
-}
-
 let seatMatrix = [];
+
+function getRowLabel(rowIndex) {
+    let label = "";
+    let n = rowIndex;
+
+    do {
+        label = String.fromCharCode(65 + (n % 26)) + label;
+        n = Math.floor(n / 26) - 1;
+    } while (n >= 0);
+
+    return label;
+}
 
 function renderSeats(bookedSeats) {
     seatContainer.innerHTML = "";
     seatMatrix = [];
 
-    let index = 0;
-    const normalSeatLimit = layoutConfig.capacity - layoutConfig.lastRowSeats;
+    const seatsPerNormalRow = layoutConfig.leftSeats + layoutConfig.rightSeats;
+    const lastRowSeats = seatsPerNormalRow + 1; // keeps the earlier 5-seat last row layout
 
-    for (let r = 0; r < layoutConfig.normalRows; r++) {
-        if (index >= normalSeatLimit) break;
+    let normalRows = Math.floor(layoutConfig.capacity / seatsPerNormalRow);
+    let remainingSeats = layoutConfig.capacity % seatsPerNormalRow;
 
+    // If the bus can support the 5-seat rear bench, keep one extra seat for the last row.
+    // For 45 seats: 10 rows of 4 + last row of 5 = 45.
+    if (layoutConfig.capacity >= lastRowSeats) {
+        normalRows = Math.floor((layoutConfig.capacity - lastRowSeats) / seatsPerNormalRow);
+        remainingSeats = layoutConfig.capacity - (normalRows * seatsPerNormalRow);
+    }
+
+    let seatCount = 0;
+    let rowIndex = 0;
+
+    function buildSeat(rowLabel, seatNumber, parent, matrixRow, bookedSeats) {
+        const seat = { name: `${rowLabel}${seatNumber}` };
+        parent.appendChild(createSeatDiv(seat, bookedSeats));
+        matrixRow.push(seat.name);
+        seatCount++;
+    }
+
+    // Normal rows: A1 A2 | A3 A4, B1 B2 | B3 B4 ...
+    for (let r = 0; r < normalRows; r++) {
+        const rowLabel = getRowLabel(rowIndex++);
         const row = document.createElement("div");
         row.className = "row";
 
@@ -2242,22 +3092,14 @@ function renderSeats(bookedSeats) {
 
         const matrixRow = [];
 
-        for (let i = 0; i < layoutConfig.leftSeats; i++) {
-            if (index < normalSeatLimit) {
-                const seat = allSeats[index++];
-                left.appendChild(createSeatDiv(seat, bookedSeats));
-                matrixRow.push(seat.name);
-            }
+        for (let i = 1; i <= layoutConfig.leftSeats; i++) {
+            buildSeat(rowLabel, i, left, matrixRow, bookedSeats);
         }
 
-        matrixRow.push("");
+        matrixRow.push(""); // aisle gap, so A2 and A3 are not treated as adjacent
 
-        for (let i = 0; i < layoutConfig.rightSeats; i++) {
-            if (index < normalSeatLimit) {
-                const seat = allSeats[index++];
-                right.appendChild(createSeatDiv(seat, bookedSeats));
-                matrixRow.push(seat.name);
-            }
+        for (let i = layoutConfig.leftSeats + 1; i <= seatsPerNormalRow; i++) {
+            buildSeat(rowLabel, i, right, matrixRow, bookedSeats);
         }
 
         row.appendChild(left);
@@ -2266,26 +3108,24 @@ function renderSeats(bookedSeats) {
         seatMatrix.push(matrixRow);
     }
 
-    if (index < allSeats.length) {
-        const lastRow = document.createElement("div");
-        lastRow.className = "row last-row";
-        lastRow.style.justifyContent = "center";
+    // Final row: keeps the old full rear bench layout with 5 seats.
+    // Example for 45 seats: K1 K2 K3 K4 K5.
+    if (remainingSeats > 0) {
+        const rowLabel = getRowLabel(rowIndex++);
+        const row = document.createElement("div");
+        row.className = "row last-row";
 
-        const group = document.createElement("div");
-        group.className = "group last-group";
-        group.style.justifyContent = "center";
-        group.style.width = "100%";
+        const full = document.createElement("div");
+        full.className = "group";
 
         const matrixRow = [];
 
-        while (index < allSeats.length) {
-            const seat = allSeats[index++];
-            group.appendChild(createSeatDiv(seat, bookedSeats));
-            matrixRow.push(seat.name);
+        for (let i = 1; i <= remainingSeats; i++) {
+            buildSeat(rowLabel, i, full, matrixRow, bookedSeats);
         }
 
-        lastRow.appendChild(group);
-        seatContainer.appendChild(lastRow);
+        row.appendChild(full);
+        seatContainer.appendChild(row);
         seatMatrix.push(matrixRow);
     }
 }
@@ -2316,6 +3156,7 @@ div.classList.remove("male", "female");
 
 // 🔥 STEP 1: RESET OLD DISCOUNT
 discountedFare = null;
+invalidatePreparedPaymentOrder();
 
 // 🔥 STEP 2: UPDATE BASE FARE
 updateFareInfo();
@@ -2431,6 +3272,7 @@ genderPopup.style.display = "none";
 
 // 🔥 STEP 1: RESET DISCOUNT TEMPORARILY
 discountedFare = null;
+invalidatePreparedPaymentOrder();
 
 // 🔥 STEP 2: UPDATE BASE FARE FIRST
 updateFareInfo();
@@ -2473,6 +3315,7 @@ container.classList.remove('full-screen');
 // 🔥 UI RESET ONLY
 appliedCoupon = null;
 discountedFare = null;
+invalidatePreparedPaymentOrder();
 
 if (!currentJourneyData) {
     showToast("Route details are still loading. Please try again.", "info");
@@ -2816,36 +3659,113 @@ document.getElementById("backStepBtn").onclick = function() {
             payBtn.style.opacity = "1";
             return;
         }
+
+        function extractTimeFromPointForBooking(pointText) {
+            const match = String(pointText || "").match(/\((.*?)\)/);
+            return match ? match[1].trim() : "";
+        }
+
+        function makeISTDepartureDateTimeForBooking(dateValue, pickupText) {
+            const timeText = extractTimeFromPointForBooking(pickupText);
+
+            if (!dateValue || !timeText) return "";
+
+            const parsed = timeText.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            if (!parsed) return "";
+
+            let hour = Number(parsed[1]);
+            const minute = parsed[2];
+            const ampm = parsed[3].toUpperCase();
+
+            if (ampm === "PM" && hour !== 12) hour += 12;
+            if (ampm === "AM" && hour === 12) hour = 0;
+
+            return `${dateValue}T${String(hour).padStart(2, "0")}:${minute}:00+05:30`;
+        }
+
+        const finalDepartureTimeBeforePayment = extractTimeFromPointForBooking(selectedPickup);
+        const finalDepartureDateTimeBeforePayment = makeISTDepartureDateTimeForBooking(date, selectedPickup);
+
+        if (!finalDepartureDateTimeBeforePayment) {
+            showToast("Pickup time missing. Please select pickup point again.", "error");
+            bookingInProgress = false;
+            payBtn.disabled = false;
+            payBtn.style.opacity = "1";
+            return;
+        }
+
+        const bookingPayload = {
+            from,
+            to,
+            date,
+            trip,
+            busId,
+            serviceId,
+            pickup: selectedPickup,
+            drop: selectedDrop,
+            departureTime: finalDepartureTimeBeforePayment,
+            departureDateTime: finalDepartureDateTimeBeforePayment,
+            passengers: passengerData,
+            remarks,
+            uid: currentUser?.uid || "guest",
+            userUid: currentUser?.uid || "guest",
+            couponCode: appliedCoupon,
+            ownerCouponToken: ownerCouponToken || null,
+            ownerPhoneAuthToken: ownerCouponToken || null
+        };
     
         // PROCESSING
         document.getElementById("processingOverlay").style.display = "flex";
-        document.getElementById("processingText").innerText = "Creating Order...";
-    
-        const orderRes = await fetch("https://backend-1-ci0t.onrender.com/create-order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    keepalive: true,
-    body: JSON.stringify({
-        seats: selectedSeats.length,
-        from,
-        to,
-        trip,
-        couponCode: appliedCoupon,
-        userUid: currentUser?.uid || null
-    })
-});
-    
-        const orderData = await orderRes.json();
-    
-        if (!orderData.success) {
+        document.getElementById("processingText").innerText = cachedPaymentOrder && cachedPaymentOrderKey === getPaymentOrderKey()
+            ? "Opening Payment..."
+            : "Preparing Payment...";
+
+        let orderData;
+        try {
+            orderData = await preparePaymentOrder({ silent: false });
+        } catch (err) {
             document.getElementById("processingOverlay").style.display = "none";
-            showToast(orderData.message || "Order creation failed", "error");
+            showToast(err.message || "Order creation failed", "error");
             bookingInProgress = false;
             payBtn.disabled = false;
             payBtn.style.opacity = "1";
             return;
         }
     
+        if (orderData.freeBooking) {
+            setCriticalBookingLock(true);
+            document.getElementById("processingText").innerText = "Confirming owner free booking...";
+
+            const freeBookingRes = await fetch("https://backend-1-ci0t.onrender.com/owner-free-booking", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    ownerCouponToken,
+                    bookingData: bookingPayload
+                })
+            });
+
+            const freeBookingData = await freeBookingRes.json();
+
+            if (freeBookingData.success) {
+                await finalizeBookingAfterPayment(
+                    freeBookingData.bookingId,
+                    freeBookingData.paymentId || "OWNER-FREE",
+                    freeBookingData.fareData || orderData.breakdown || null
+                );
+                return;
+            }
+
+            document.getElementById("processingOverlay").style.display = "none";
+            showToast(freeBookingData.message || "Owner free booking failed", "error");
+            bookingInProgress = false;
+            setCriticalBookingLock(false);
+            payBtn.disabled = false;
+            payBtn.style.opacity = "1";
+            return;
+        }
+
         const order = orderData.order;
         const totalAmount = discountedFare || orderData.amount;
 document.getElementById("payAmount").textContent = totalAmount;
@@ -2966,6 +3886,7 @@ document.getElementById("payAmount").textContent = totalAmount;
             }
         };
     
+        document.getElementById("processingOverlay").style.display = "none";
         const rzp = new Razorpay(options);
         razorpayInstance = rzp; // ✅ correct
         rzp.open();
@@ -3037,6 +3958,61 @@ document.getElementById("payAmount").textContent = totalAmount;
             payBtn.style.opacity = "1";
         }
     }
+
+async function getDreamlinerPdfLogoDataUrl() {
+    const fallbackLogos = ["logo-modified.png", "logo.png"];
+
+    function imageToDataUrl(src) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                } catch (e) {
+                    resolve(null);
+                }
+            };
+            img.onerror = () => resolve(null);
+            img.src = src;
+        });
+    }
+
+    try {
+        const snap = await getDoc(doc(db, "siteSettings", "homepage"));
+        const firebaseLogoUrl = snap.exists() ? snap.data().logoUrl : "";
+        if (firebaseLogoUrl && String(firebaseLogoUrl).startsWith("http")) {
+            const logoDataUrl = await imageToDataUrl(firebaseLogoUrl);
+            if (logoDataUrl) return logoDataUrl;
+        }
+    } catch (e) {
+        console.log("PDF Firebase logo skipped:", e);
+    }
+
+    for (const logo of fallbackLogos) {
+        const logoDataUrl = await imageToDataUrl(logo);
+        if (logoDataUrl) return logoDataUrl;
+    }
+
+    return null;
+}
+
+function isDreamlinerOwnerBooking(data = {}, paymentId = "") {
+    const pay = String(paymentId || data.paymentId || data.paymentUid || "").toUpperCase();
+    return pay.startsWith("OWNER-FREE") ||
+        data.ownerBooking === true ||
+        data.ownerOnly === true ||
+        data.bookedByOwner === true ||
+        data.ownerCoupon === true ||
+        data.isOwnerCoupon === true ||
+        Boolean(data.ownerCouponToken || data.ownerPhoneAuthToken);
+}
+
    async function downloadTicketPDF(passengers, pickup, drop, remarks, bookingId, paymentId, fareData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -3051,6 +4027,8 @@ const finalPaid =
     window.currentFareData?.finalFare ??
     discountedFare ??
     (baseFare + gstAmount);
+
+const ownerSecretBooking = isDreamlinerOwnerBooking(fareData || {}, paymentId);
 
 // 🔥 SAFE DISCOUNT CALCULATION
 let discountAmount = 0;
@@ -3069,6 +4047,11 @@ else if (window.currentFareData && window.currentFareData.discountAmount !== und
 else if (finalPaid) {
     discountAmount = Math.max(0, (baseFare + gstAmount) - finalPaid);
 }
+
+if (ownerSecretBooking) {
+    discountAmount = 0;
+}
+
     const pLoc = pickup.split('(')[0].trim();
     const pTime = pickup.includes('(') ? pickup.match(/\(([^)]+)\)/)[1] : "N/A";
     const dLoc = drop.split('(')[0].trim();
@@ -3078,9 +4061,12 @@ else if (finalPaid) {
     doc.rect(0, 0, 210, 40, 'F');
 
     try {
+        const pdfLogoDataUrl = await getDreamlinerPdfLogoDataUrl();
         doc.setFillColor(255,255,255);
-        doc.circle(27, 20, 13, 'F');  
-        doc.addImage('logo-modified.png', 'PNG', 14, 7, 26, 26);
+        doc.circle(27, 20, 13, 'F');
+        if (pdfLogoDataUrl) {
+            doc.addImage(pdfLogoDataUrl, 'PNG', 14, 7, 26, 26);
+        }
     } catch(e) {}
 
     doc.setTextColor(255, 255, 255);
@@ -3177,16 +4163,23 @@ doc.text(`Subtotal:`, 15, startY);
 doc.text(`INR ${subTotal}`, 110, startY);
 startY += 7;
 
-// Discount
-doc.setTextColor(0, 150, 0);
-doc.text(`Discount Applied${appliedCoupon ? ` (${appliedCoupon})` : ""}:`, 15, startY);
-doc.text(`- INR ${Math.ceil(discountAmount)}`, 110, startY);
-startY += 8;
+// Discount / owner booking privacy
+if (!ownerSecretBooking && discountAmount > 0) {
+    doc.setTextColor(0, 150, 0);
+    doc.text(`Discount Applied${appliedCoupon ? ` (${appliedCoupon})` : ""}:`, 15, startY);
+    doc.text(`- INR ${Math.ceil(discountAmount)}`, 110, startY);
+    startY += 8;
+} else if (ownerSecretBooking) {
+    doc.setTextColor(0, 0, 0);
+    doc.text("Booked By:", 15, startY);
+    doc.text("Dreamliner", 110, startY);
+    startY += 8;
+}
 
 doc.setTextColor(0, 0, 0);
 
 // 🔥 FINAL TOTAL (AFTER DISCOUNT)
-const totalFare = subTotal - discountAmount;
+const totalFare = ownerSecretBooking ? subTotal : Math.max(0, subTotal - discountAmount);
 
   
 
@@ -3198,7 +4191,13 @@ doc.setFontSize(13);
     doc.text(`INR ${totalFare}`, 110, startY);
 
     startY += 15;
-    doc.text(`Payment ID: ${paymentId || 'N/A'}`, 15, startY);
+    if (!ownerSecretBooking) {
+        doc.text(`Payment ID: ${paymentId || 'N/A'}`, 15, startY);
+    } else {
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.text("Booking Source: Dreamliner", 15, startY);
+    }
 
     doc.setTextColor(0, 0, 0);
     startY += 20;
@@ -3411,6 +4410,7 @@ async function loadJourneyInfo() {
     `;
 }
 
+loadFareAndCouponsFromFirebase();
 loadJourneyInfo();
 
 // Bottom Sheet Scroll and Tab Logic
