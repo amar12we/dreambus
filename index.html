@@ -170,6 +170,23 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif;background: #e0e0e0;}
     vertical-align: middle;
 }
 
+/* DATE INPUT FIX FOR PC + MOBILE */
+.date-box {
+    position: relative;
+}
+
+.journey-date-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
 .route-box {
     position: relative;
 }
@@ -1520,6 +1537,47 @@ body {
     display: none;
 }
 
+/* ===== REVIEWS FIREBASE LOADER ===== */
+.review-loading {
+    min-height: 145px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #777;
+    font-size: 13px;
+    background: linear-gradient(135deg, #fff, #fff7f1);
+    border: 1px dashed #ffd8b8;
+    border-radius: 16px;
+    margin-bottom: 10px;
+}
+
+.review-spinner {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 4px solid #ffe0cc;
+    border-top-color: #ff7a00;
+    animation: reviewSpin .8s linear infinite;
+}
+
+@keyframes reviewSpin {
+    to { transform: rotate(360deg); }
+}
+
+.review-empty {
+    min-width: 260px;
+    padding: 18px;
+    border-radius: 16px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
 .review-box {
     min-width: 260px;   /* was 280px → slightly reduced */
     background: #fff;
@@ -1578,6 +1636,57 @@ body {
     word-break: break-word;     /* force wrap if needed */
 
     white-space: normal;        /* allow multi-line */
+}
+
+
+
+/* ===== REVIEW PROFILE IMAGE LOADER ===== */
+.review-avatar-wrap{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    position:relative;
+    flex-shrink:0;
+}
+
+.review-avatar-wrap.big{
+    width:40px;
+    height:40px;
+}
+
+.review-avatar-wrap img{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #ff7a00;
+    box-sizing:border-box;
+    opacity:0;
+    transition:none;
+    background:#fff7ed;
+}
+
+.review-avatar-wrap.loaded img{
+    opacity:1;
+}
+
+.review-avatar-loader{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:3px solid #ffe0cc;
+    border-top-color:#ff7a00;
+    animation:reviewAvatarSpin .8s linear infinite;
+    box-sizing:border-box;
+    background:#fff7ed;
+}
+
+.review-avatar-wrap.loaded .review-avatar-loader{
+    display:none;
+}
+
+@keyframes reviewAvatarSpin{
+    to{ transform:rotate(360deg); }
 }
 
 /* STAR INPUT */
@@ -1641,6 +1750,63 @@ body {
     font-weight: 600;
     margin-top: 4px;
     color: #222;
+}
+
+
+/* ===== LOGIN USER PREVIEW PHOTO LOADER ===== */
+#previewPhoto .preview-avatar-wrap{
+    width:44px !important;
+    height:44px !important;
+    border-radius:50%;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none !important;
+    box-shadow:none !important;
+}
+
+#previewPhoto .preview-avatar-wrap img{
+    width:44px !important;
+    height:44px !important;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #ff7a00;
+    box-sizing:border-box;
+    opacity:0;
+    transition:none;
+    box-shadow:0 4px 10px rgba(255,122,0,0.25);
+}
+
+#previewPhoto .preview-avatar-wrap.loaded img{
+    opacity:1;
+}
+
+#previewPhoto .preview-avatar-loader{
+    position:absolute;
+    inset:0;
+    width:44px !important;
+    height:44px !important;
+    border-radius:50%;
+    border:3px solid #ffe0cc !important;
+    border-top-color:#ff7a00 !important;
+    animation:previewAvatarSpin .8s linear infinite;
+    box-sizing:border-box;
+    background:#fff7ed;
+    box-shadow:0 4px 10px rgba(255,122,0,0.18) !important;
+}
+
+#previewPhoto .preview-avatar-wrap.loaded .preview-avatar-loader{
+    display:none;
+}
+
+#previewName.profile-loading-text{
+    color:#888;
+    font-weight:600;
+}
+
+@keyframes previewAvatarSpin{
+    to{ transform:rotate(360deg); }
 }
 
 /* SMALL SUBTEXT */
@@ -2159,6 +2325,1172 @@ body {
     100%{box-shadow:0 0 0 0 rgba(255,122,0,0);}
 }
 
+
+
+/* ===== LAPTOP / DESKTOP RESPONSIVE UPGRADE =====
+   Mobile design stays same. These rules only apply on bigger screens. */
+@media (min-width: 900px) {
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(180deg, #ff7a00 0%, #fff2e8 260px, #f5f6fa 620px);
+        overflow-x: hidden;
+    }
+
+    .header {
+        padding: 10px 38px;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, #ff7a00, #ff512f);
+        z-index: -1;
+    }
+
+    .header .logo,
+    .header #auth-section {
+        width: 50%;
+        max-width: 590px;
+    }
+
+    .header #auth-section {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .logo-img {
+        width: 46px;
+        height: 46px;
+    }
+
+    .login-btn {
+        padding: 9px 22px;
+        font-size: 14px;
+    }
+
+    .hero.ready,
+    .hero {
+        height: 500px;
+        border-bottom-left-radius: 42px;
+        border-bottom-right-radius: 42px;
+    }
+
+    .hero-text {
+        width: min(920px, 90%);
+        top: 47%;
+    }
+
+    .hero-text h1 {
+        font-size: clamp(42px, 4.5vw, 64px);
+        margin-bottom: 12px;
+        letter-spacing: -1px;
+    }
+
+    .hero-text p {
+        font-size: 20px;
+    }
+
+    .booking-card {
+        width: min(92%, 820px);
+        max-width: 820px;
+        margin: -125px auto 34px;
+        padding: 26px;
+        border-radius: 28px;
+        box-shadow: 0 28px 70px rgba(0,0,0,0.24);
+    }
+
+    .booking-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 34px 80px rgba(0,0,0,0.28);
+    }
+
+    .bus-route {
+        padding: 20px;
+        border-radius: 22px;
+    }
+
+    .bus-header {
+        font-size: 16px;
+        margin-bottom: 14px;
+    }
+
+    .route-point {
+        padding: 15px 18px;
+    }
+
+    .route-text small {
+        font-size: 12px;
+    }
+
+    .route-text span {
+        font-size: 16px;
+    }
+
+    .route-line {
+        height: 26px;
+    }
+
+    .swap-btn {
+        width: 42px;
+        height: 42px;
+        right: 20px;
+    }
+
+    .date-box,
+    .input-box {
+        padding: 16px 18px;
+        font-size: 15px;
+        border-radius: 18px;
+    }
+
+    .quick-date {
+        gap: 14px;
+    }
+
+    .quick-btn {
+        padding: 13px 14px;
+        font-size: 14px;
+    }
+
+    .search-btn {
+        padding: 15px;
+        border-radius: 16px;
+        font-size: 16px;
+    }
+
+    .main-content {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px 130px;
+    }
+
+    .drag-handle {
+        display: none;
+    }
+
+    .coupon-section,
+    .section,
+    .feature-section,
+    .contact-hero,
+    .app-download {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 1180px;
+    }
+
+    .coupon-section {
+        margin-top: 26px;
+    }
+
+    .coupon-section h3,
+    .feature-header h3,
+    .section h2,
+    .app-download h2 {
+        font-size: 24px;
+    }
+
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider,
+    .review-track {
+        gap: 18px;
+        padding: 4px 2px 16px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .coupon-img-card {
+        min-width: 360px;
+        height: 190px;
+        border-radius: 22px;
+    }
+
+    .feature-section,
+    .section,
+    .contact-hero,
+    .app-download {
+        padding: 26px;
+        border-radius: 24px;
+    }
+
+    .feature-card {
+        min-width: 270px;
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    .feature-card h4 {
+        font-size: 16px;
+    }
+
+    .feature-card p {
+        font-size: 13px;
+    }
+
+    .review-header h1 {
+        font-size: 26px;
+        margin: 0;
+    }
+
+    #userPreview {
+        max-width: 520px;
+        padding: 18px;
+    }
+
+    .review-box,
+    .review-empty {
+        min-width: 340px;
+        padding: 14px;
+    }
+
+    .review-text {
+        font-size: 14px;
+    }
+
+    .tutorial-slider {
+        margin: 0 auto 24px;
+        max-width: 1180px;
+    }
+
+    .tutorial-card {
+        min-width: 350px;
+        border-radius: 22px;
+    }
+
+    .tutorial-card video,
+    .tutorial-card img {
+        height: 190px;
+    }
+
+    .tutorial-card h3 {
+        font-size: 16px;
+        padding: 14px;
+    }
+
+    .contact-hero {
+        min-height: 420px;
+        display: flex;
+        align-items: center;
+    }
+
+    .contact-content {
+        width: 100%;
+    }
+
+    .contact-content h2 {
+        font-size: 30px;
+        color: #fff;
+    }
+
+    .contact-tagline {
+        font-size: 16px;
+        max-width: 680px;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 24px;
+    }
+
+    .contact-card {
+        min-height: 112px;
+        padding: 18px;
+    }
+
+    .contact-card h4 {
+        font-size: 16px;
+        color: #fff;
+    }
+
+    .contact-card p {
+        font-size: 13px;
+    }
+
+    .app-sub {
+        font-size: 15px;
+    }
+
+    .app-buttons {
+        gap: 18px;
+    }
+
+    .store-btn {
+        max-width: 230px;
+        padding: 15px 20px;
+    }
+
+    .site-footer {
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 82px;
+    }
+
+    .footer-top,
+    .footer-bottom {
+        max-width: 1180px;
+    }
+
+    .bottom-nav {
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(560px, calc(100% - 34px));
+        bottom: 16px;
+        border-radius: 24px;
+        padding: 11px 8px;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+        border: 1px solid rgba(255,255,255,0.75);
+    }
+
+    .bottom-nav div {
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .bottom-nav i {
+        font-size: 18px;
+    }
+
+    .floating-offer {
+        bottom: 100px;
+        right: 36px;
+        width: 58px;
+        height: 58px;
+    }
+
+    .modal {
+        background: rgba(0,0,0,0.45);
+        justify-content: flex-start;
+        align-items: center;
+        padding-top: 96px;
+    }
+
+    .modal-header {
+        width: min(92%, 560px);
+        max-width: 560px;
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+    }
+
+    .list {
+        width: min(92%, 560px);
+        max-width: 560px;
+        max-height: 520px;
+        border-radius: 0 0 18px 18px;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+    }
+
+    .login-popup-content {
+        max-width: 430px;
+        height: 590px;
+    }
+
+    .reviews-box {
+        width: min(760px, 92%);
+        height: 86vh;
+        margin: 7vh auto;
+        border-radius: 22px;
+        overflow: hidden;
+    }
+}
+
+@media (min-width: 1200px) {
+    .booking-card {
+        width: 860px;
+        max-width: 860px;
+    }
+
+    .coupon-img-card {
+        min-width: 370px;
+    }
+
+    .feature-card {
+        min-width: 275px;
+    }
+}
+
+
+/* ===== DREAMLINER REAL DESKTOP HOMEPAGE UPGRADE =====
+   This keeps the mobile design unchanged and only improves laptop/desktop. */
+@media (min-width: 1024px) {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 15% 8%, rgba(255,255,255,.26), transparent 28%),
+            linear-gradient(180deg, #ff7a00 0%, #ff7436 280px, #f6f7fb 680px);
+        text-align: left;
+        overflow-x: hidden;
+    }
+
+    .header {
+        height: 70px;
+        padding: 0 48px;
+        background: rgba(255,122,0,.88);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(255,255,255,.22);
+        box-shadow: 0 12px 35px rgba(154,52,18,.18);
+    }
+
+    .header .logo,
+    .header #auth-section {
+        max-width: 620px;
+    }
+
+    .logo {
+        font-size: 24px;
+        letter-spacing: -.3px;
+    }
+
+    .logo-img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .login-btn {
+        padding: 10px 26px;
+        font-size: 15px;
+        box-shadow: 0 10px 24px rgba(0,0,0,.12);
+    }
+
+    .hero,
+    .hero.ready {
+        height: 640px !important;
+        border-bottom-left-radius: 54px;
+        border-bottom-right-radius: 54px;
+    }
+
+    .hero::after,
+    .hero-overlay {
+        background:
+            linear-gradient(90deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.45) 43%, rgba(0,0,0,.12) 100%),
+            linear-gradient(180deg, rgba(255,122,0,.18), rgba(0,0,0,.28));
+    }
+
+    .hero-text {
+        width: min(560px, 42vw);
+        left: max(72px, calc((100vw - 1180px) / 2));
+        top: 52%;
+        transform: translateY(-50%);
+        text-align: left;
+    }
+
+    .hero-text h1 {
+        font-size: clamp(48px, 5vw, 76px);
+        line-height: .98;
+        letter-spacing: -2.2px;
+        margin: 0 0 18px;
+        text-shadow: 0 12px 35px rgba(0,0,0,.38);
+    }
+
+    .hero-text p {
+        font-size: 21px;
+        line-height: 1.45;
+        max-width: 500px;
+        opacity: .94;
+    }
+
+    .booking-card {
+        width: 470px !important;
+        max-width: 470px !important;
+        margin: -490px max(56px, calc((100vw - 1180px) / 2)) 135px auto !important;
+        padding: 28px !important;
+        border-radius: 32px;
+        background: rgba(255,255,255,.96);
+        border: 1px solid rgba(255,255,255,.68);
+        box-shadow:
+            0 34px 90px rgba(0,0,0,.32),
+            inset 0 1px 0 rgba(255,255,255,.8);
+        backdrop-filter: blur(22px);
+    }
+
+    .booking-card::before {
+        content: "Search your journey";
+        display: block;
+        font-size: 24px;
+        font-weight: 850;
+        color: #1f2937;
+        margin-bottom: 16px;
+        letter-spacing: -.5px;
+    }
+
+    .bus-route {
+        box-shadow: none;
+        border: 1px solid #f0edea;
+        background: linear-gradient(180deg, #fff, #fffaf6);
+        padding: 18px;
+        border-radius: 22px;
+    }
+
+    .bus-header {
+        font-size: 15px;
+        margin-bottom: 14px;
+    }
+
+    .route-point {
+        padding: 15px 16px;
+        background: #f8fafc;
+        border: 1px solid #edf2f7;
+    }
+
+    .route-point:hover {
+        background: #fff6ed;
+        border-color: #ffd5b0;
+    }
+
+    .route-text small {
+        font-size: 12px;
+    }
+
+    .route-text span {
+        font-size: 16px;
+    }
+
+    .route-line {
+        height: 28px;
+    }
+
+    .swap-btn {
+        width: 44px;
+        height: 44px;
+        right: 19px;
+        box-shadow: 0 10px 24px rgba(255,81,47,.32);
+    }
+
+    .date-box {
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: #f8fafc;
+        border: 1px solid #edf2f7;
+        font-size: 15px;
+    }
+
+    .quick-date {
+        gap: 14px;
+        margin: 14px 0;
+    }
+
+    .quick-btn {
+        padding: 13px 14px;
+        font-size: 14px;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 7px 18px rgba(15,23,42,.06);
+    }
+
+    .search-btn {
+        padding: 16px;
+        border-radius: 18px;
+        font-size: 16px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff7a00, #ff512f);
+        box-shadow: 0 16px 30px rgba(255,81,47,.32);
+    }
+
+    .main-content {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px 130px;
+    }
+
+    .drag-handle {
+        display: none;
+    }
+
+    .coupon-section {
+        margin: 34px auto 28px;
+        max-width: 1180px;
+    }
+
+    .coupon-section h3,
+    .feature-header h3,
+    .review-header h1,
+    .review-header h2,
+    .app-download h2 {
+        font-size: 28px;
+        letter-spacing: -.7px;
+        color: #111827;
+    }
+
+    .coupon-section h3::after,
+    .feature-header h3::after,
+    .review-header h1::after,
+    .app-download h2::after {
+        content: "";
+        display: block;
+        width: 54px;
+        height: 4px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,#ff7a00,#ff512f);
+        margin-top: 9px;
+    }
+
+    .coupon-scroll {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        overflow: visible;
+        padding: 4px 0 8px;
+    }
+
+    .coupon-img-card {
+        min-width: 0;
+        width: 100%;
+        height: 205px;
+        border-radius: 26px;
+        box-shadow: 0 18px 38px rgba(15,23,42,.12);
+    }
+
+    .feature-section,
+    .section,
+    .contact-hero,
+    .app-download {
+        max-width: 1180px;
+        margin: 28px auto;
+        padding: 30px;
+        border-radius: 30px;
+        border: 1px solid rgba(226,232,240,.88);
+        box-shadow: 0 18px 45px rgba(15,23,42,.08);
+    }
+
+    .feature-header p,
+    .app-sub {
+        font-size: 15px;
+    }
+
+    .feature-slider {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        overflow: visible;
+        padding-top: 6px;
+    }
+
+    .feature-card {
+        min-width: 0;
+        height: 100%;
+        padding: 20px;
+        border-radius: 22px;
+        box-shadow: 0 10px 26px rgba(15,23,42,.07);
+    }
+
+    .feature-card h4 {
+        font-size: 17px;
+        margin-bottom: 6px;
+    }
+
+    .feature-card p {
+        font-size: 13px;
+    }
+
+    .review-carousel {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 26px;
+        align-items: start;
+    }
+
+    .review-carousel > .review-header:first-child {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+    }
+
+    #userPreview {
+        max-width: none;
+        width: 100%;
+        margin: 0;
+        padding: 22px;
+        border-radius: 24px;
+        box-shadow: 0 14px 34px rgba(15,23,42,.08);
+    }
+
+    .review-carousel > .review-header:nth-of-type(2),
+    #reviewLoader,
+    #reviewTrack {
+        grid-column: 2;
+    }
+
+    .review-track {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        overflow: visible;
+        padding: 0;
+    }
+
+    .review-box,
+    .review-empty {
+        min-width: 0;
+        width: 100%;
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    .tutorial-slider {
+        max-width: 1180px;
+        margin: 28px auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        overflow: visible;
+        padding: 0 24px;
+    }
+
+    .tutorial-card {
+        min-width: 0;
+        border-radius: 26px;
+        box-shadow: 0 16px 38px rgba(15,23,42,.10);
+    }
+
+    .tutorial-card video,
+    .tutorial-card img {
+        height: 210px;
+    }
+
+    .tutorial-card h3 {
+        padding: 16px;
+        font-size: 17px;
+    }
+
+    .contact-hero {
+        min-height: 430px;
+        display: flex;
+        align-items: center;
+        padding: 38px;
+        overflow: hidden;
+    }
+
+    .contact-overlay {
+        background:
+            linear-gradient(90deg, rgba(17,24,39,.88), rgba(255,122,0,.72)),
+            linear-gradient(135deg, rgba(255,122,0,.75), rgba(255,81,47,.68));
+    }
+
+    .contact-content h2 {
+        font-size: 34px;
+        color: #fff;
+        letter-spacing: -.9px;
+    }
+
+    .contact-tagline {
+        font-size: 16px;
+        max-width: 660px;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 26px;
+    }
+
+    .contact-card {
+        min-height: 124px;
+        padding: 20px;
+        border-radius: 22px;
+    }
+
+    .contact-card h4 {
+        color: #fff;
+        font-size: 17px;
+    }
+
+    .contact-card p {
+        font-size: 13px;
+    }
+
+    .app-download {
+        text-align: center;
+    }
+
+    .app-buttons {
+        gap: 18px;
+    }
+
+    .store-btn {
+        flex: 0 0 230px;
+        max-width: 230px;
+        padding: 16px 22px;
+        border-radius: 18px;
+    }
+
+    .site-footer {
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        padding: 10px 40px 90px;
+        border-top-left-radius: 38px;
+        border-top-right-radius: 38px;
+    }
+
+    .footer-top,
+    .footer-bottom {
+        max-width: 1180px;
+    }
+
+    .footer-top {
+        gap: 48px;
+    }
+
+    .bottom-nav {
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(590px, calc(100% - 42px));
+        bottom: 18px;
+        border-radius: 28px;
+        padding: 12px 10px;
+        border: 1px solid rgba(255,255,255,.8);
+        box-shadow: 0 18px 45px rgba(15,23,42,.18);
+    }
+
+    .bottom-nav div {
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .bottom-nav i {
+        font-size: 19px;
+    }
+
+    .floating-offer {
+        right: 42px;
+        bottom: 110px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .modal {
+        background: rgba(15,23,42,.52);
+        align-items: center;
+        padding-top: 90px;
+    }
+
+    .modal-header,
+    .list {
+        width: min(560px, 92%);
+        max-width: 560px;
+    }
+
+    .modal-header {
+        border-radius: 22px 22px 0 0;
+        box-shadow: 0 25px 55px rgba(0,0,0,.20);
+    }
+
+    .list {
+        max-height: 520px;
+        border-radius: 0 0 22px 22px;
+        box-shadow: 0 25px 55px rgba(0,0,0,.20);
+    }
+
+    .login-popup-content {
+        max-width: 440px;
+        height: 600px;
+    }
+
+    .reviews-box {
+        width: min(820px, 92%);
+        height: 86vh;
+        margin: 7vh auto;
+        border-radius: 26px;
+        overflow: hidden;
+    }
+}
+
+@media (min-width: 1440px) {
+    .main-content,
+    .coupon-section,
+    .feature-section,
+    .section,
+    .contact-hero,
+    .app-download,
+    .tutorial-slider,
+    .footer-top,
+    .footer-bottom {
+        max-width: 1280px;
+    }
+
+    .hero-text {
+        left: calc((100vw - 1280px) / 2);
+    }
+
+    .booking-card {
+        margin-right: calc((100vw - 1280px) / 2) !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1160px) {
+    .booking-card {
+        width: 430px !important;
+        max-width: 430px !important;
+        margin-right: 38px !important;
+    }
+
+    .hero-text {
+        left: 48px;
+        width: 440px;
+    }
+
+    .hero-text h1 {
+        font-size: 48px;
+    }
+
+    .feature-slider,
+    .coupon-scroll,
+    .tutorial-slider {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .review-carousel {
+        grid-template-columns: 1fr;
+    }
+
+    .review-carousel > .review-header:nth-of-type(2),
+    #reviewLoader,
+    #reviewTrack {
+        grid-column: 1;
+    }
+}
+
+
+/* ===== FINAL LAPTOP PROFESSIONAL FIX =====
+   Only applies on laptop/desktop. Mobile remains same.
+   Fixes repeating-looking coupons/features/videos by turning them into clean grids. */
+@media (min-width: 1024px) {
+    .main-content {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 0 28px 130px;
+    }
+
+    .coupon-section,
+    .feature-section,
+    .section,
+    .contact-hero,
+    .app-download {
+        max-width: 1220px;
+    }
+
+    .coupon-section {
+        padding: 0;
+        margin-top: 42px;
+    }
+
+    .coupon-section h3,
+    .feature-header h3,
+    .section h2,
+    .review-header h1,
+    .review-header h2,
+    .app-download h2 {
+        font-size: 30px;
+        line-height: 1.15;
+        color: #101827;
+    }
+
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider,
+    .review-track {
+        scroll-snap-type: none !important;
+        scrollbar-width: none;
+    }
+
+    .coupon-scroll::-webkit-scrollbar,
+    .feature-slider::-webkit-scrollbar,
+    .tutorial-slider::-webkit-scrollbar,
+    .review-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .coupon-scroll {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+        overflow: visible !important;
+        padding: 8px 0 4px;
+    }
+
+    .coupon-img-card {
+        min-width: 0 !important;
+        width: 100%;
+        height: 215px;
+        border-radius: 28px;
+        scroll-snap-align: unset;
+        box-shadow: 0 20px 44px rgba(15, 23, 42, .12);
+        border: 1px solid rgba(255,255,255,.75);
+        background: #fff;
+    }
+
+    .coupon-img-card img {
+        transition: transform .35s ease;
+    }
+
+    .coupon-img-card:hover img {
+        transform: scale(1.04);
+    }
+
+    .feature-section {
+        background: linear-gradient(180deg, #ffffff, #fffaf7);
+    }
+
+    .feature-slider {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        overflow: visible !important;
+        padding: 8px 0 0;
+    }
+
+    .feature-card {
+        min-width: 0 !important;
+        width: 100%;
+        min-height: 150px;
+        border-radius: 24px;
+        background: #fff;
+        border: 1px solid #edf0f4;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, .07);
+        scroll-snap-align: unset;
+    }
+
+    .tutorial-slider {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+        overflow: visible !important;
+        padding: 0;
+        margin: 30px auto;
+    }
+
+    .tutorial-card {
+        min-width: 0 !important;
+        width: 100%;
+        border-radius: 28px;
+        scroll-snap-align: unset;
+        background: #fff;
+        border: 1px solid #edf0f4;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, .10);
+    }
+
+    .tutorial-card video,
+    .tutorial-card img {
+        height: 230px;
+    }
+
+    .review-track {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        overflow: visible !important;
+    }
+
+    .review-box,
+    .review-empty {
+        min-width: 0 !important;
+        width: 100%;
+        scroll-snap-align: unset;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1160px) {
+    .coupon-scroll,
+    .tutorial-slider {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .feature-slider {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+
+/* ===== REVIEW SECTION FIX: 6 ON HOME + DESKTOP ALIGNMENT ===== */
+#reviewTrack .review-box:nth-child(n+7){
+    display:none !important;
+}
+
+@media (min-width: 1024px){
+    .review-carousel{
+        display:grid !important;
+        grid-template-columns: 360px minmax(0, 1fr) !important;
+        grid-template-areas:
+            "form title"
+            "form reviews" !important;
+        gap: 12px 26px !important;
+        align-items:start !important;
+    }
+
+    .review-carousel > .review-header:first-child{
+        display:none !important;
+    }
+
+    #userPreview{
+        grid-area: form !important;
+        margin-top:0 !important;
+        align-self:start !important;
+    }
+
+    .review-carousel > .review-header:nth-of-type(2){
+        grid-area:title !important;
+        grid-column:auto !important;
+        margin:0 0 6px !important;
+        min-height:auto !important;
+        align-self:start !important;
+    }
+
+    .review-carousel > .review-header:nth-of-type(2) h2{
+        margin:0 !important;
+        line-height:1.05 !important;
+    }
+
+    #reviewLoader,
+    #reviewTrack{
+        grid-area:reviews !important;
+        grid-column:auto !important;
+        margin-top:0 !important;
+        align-self:start !important;
+    }
+
+    .review-track{
+        display:grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap:16px !important;
+        overflow:visible !important;
+        padding:0 !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1160px){
+    .review-carousel{
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "form"
+            "title"
+            "reviews" !important;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -2241,10 +3573,10 @@ body {
 
 
 
-    <div class="date-box" onclick="document.getElementById('date').showPicker();">
+    <div class="date-box" onclick="openJourneyDatePicker()">
         <i class="fas fa-calendar-alt"></i>
         <span id="dateText">Select Date</span>
-        <input type="date" id="date" hidden onchange="document.getElementById('dateText').innerText=this.value;">
+        <input type="date" id="date" class="journey-date-input" onchange="handleJourneyDateChange()" onclick="event.stopPropagation()">
     </div>
 
     <div class="quick-date">
@@ -2380,8 +3712,14 @@ body {
             <h2>What Travelers Say</h2>
             <button onclick="openAllReviews()">View All</button>
         </div>
+        <!-- REVIEWS LOADER -->
+        <div class="review-loading" id="reviewLoader">
+            <div class="review-spinner"></div>
+            <span>Loading traveler reviews...</span>
+        </div>
+
         <!-- SLIDER -->
-        <div class="review-track" id="reviewTrack"></div>
+        <div class="review-track" id="reviewTrack" style="display:none;"></div>
     
     </section>
     <div id="allReviewsModal" class="reviews-modal">
@@ -2395,7 +3733,11 @@ body {
             </div>
     
             <!-- SCROLLABLE CONTENT -->
-            <div id="allReviewsList" class="reviews-list"></div>
+            <div class="review-loading" id="allReviewsLoader" style="margin:12px 15px;">
+                <div class="review-spinner"></div>
+                <span>Loading all reviews...</span>
+            </div>
+            <div id="allReviewsList" class="reviews-list" style="display:none;"></div>
     
         </div>
     
@@ -2672,6 +4014,7 @@ limit
         /* ===== ANNOUNCEMENT NOTIFICATION COUNT ===== */
         const announcementBadge = document.getElementById("announcementBadge");
         let currentAnnouncementIds = [];
+        let currentAnnouncementsData = [];
 
         function getSeenAnnouncementIds(){
             try{
@@ -2679,6 +4022,22 @@ limit
             }catch(error){
                 return [];
             }
+        }
+
+        function getSeenAnnouncementsTime(){
+            return Number(localStorage.getItem("seenAnnouncementsTime") || "0");
+        }
+
+        function markAnnouncementsSeen(ids, latestMillis){
+            const oldSeenIds = getSeenAnnouncementIds();
+            const mergedIds = Array.from(new Set([...(oldSeenIds || []), ...(ids || [])]));
+            localStorage.setItem("seenAnnouncements", JSON.stringify(mergedIds));
+
+            const safeLatestMillis = Number(latestMillis || Date.now());
+            const previousSeenTime = getSeenAnnouncementsTime();
+            localStorage.setItem("seenAnnouncementsTime", String(Math.max(previousSeenTime, safeLatestMillis)));
+
+            updateAnnouncementBadge(0);
         }
 
         function updateAnnouncementBadge(unreadCount){
@@ -2694,10 +4053,11 @@ limit
         }
 
         window.openAnnouncementsPage = function(){
-            if(currentAnnouncementIds.length){
-                localStorage.setItem("seenAnnouncements", JSON.stringify(currentAnnouncementIds));
-                localStorage.setItem("lastSeenAnnouncementId", currentAnnouncementIds[0]);
-            }
+            const latestMillis = currentAnnouncementsData.length
+                ? Math.max(...currentAnnouncementsData.map(item => item.createdAtMillis || 0))
+                : Date.now();
+
+            markAnnouncementsSeen(currentAnnouncementIds, latestMillis);
             window.location.href = "announcements.html";
         };
 
@@ -2710,15 +4070,32 @@ limit
 
             onSnapshot(announcementQuery, snapshot => {
                 currentAnnouncementIds = [];
+                currentAnnouncementsData = [];
 
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
                     if(data.active === false) return;
+
+                    const createdAtMillis = data.createdAt?.toMillis?.()
+                        ? data.createdAt.toMillis()
+                        : 0;
+
                     currentAnnouncementIds.push(docSnap.id);
+                    currentAnnouncementsData.push({
+                        id: docSnap.id,
+                        createdAtMillis
+                    });
                 });
 
                 const seenIds = getSeenAnnouncementIds();
-                const unreadCount = currentAnnouncementIds.filter(id => !seenIds.includes(id)).length;
+                const seenTime = getSeenAnnouncementsTime();
+
+                const unreadCount = currentAnnouncementsData.filter(item => {
+                    if(seenIds.includes(item.id)) return false;
+                    if(item.createdAtMillis && item.createdAtMillis <= seenTime) return false;
+                    return true;
+                }).length;
+
                 updateAnnouncementBadge(unreadCount);
             }, error => {
                 console.error("Announcement notification error:", error);
@@ -2733,7 +4110,10 @@ limit
         let currentProfileName = "User";
         let currentProfilePhoto = "";
         let latestReviews = [];
+const HOME_REVIEW_LIMIT = 6;
         let profilesMap = new Map();
+        let reviewsLoaded = false;
+        let profilesLoaded = false;
         async function loadHomepageAssets() {
     const fallbackAssets = {
         logoUrl: "logo.png",
@@ -2893,6 +4273,7 @@ function replaceChildrenSmooth(container, fragment) {
         container.innerHTML = "";
         container.appendChild(fragment);
         container.scrollLeft = 0;
+        container.removeAttribute("data-auto-slide-started");
 
         requestAnimationFrame(() => {
             container.style.opacity = "1";
@@ -3040,12 +4421,20 @@ async function renderHomepageAssets(data, isFirebase = false) {
 }
 
 loadHomepageAssets();
+setReviewsLoading(true);
 
 onSnapshot(collection(db, "profiles"), (snapshot) => {
+    profilesMap.clear();
+
     snapshot.forEach(docSnap => {
         profilesMap.set(docSnap.id, docSnap.data());
     });
 
+    profilesLoaded = true;
+    renderReviews();
+}, (error) => {
+    console.log("Profile loading error:", error);
+    profilesLoaded = true;
     renderReviews();
 });
 function getIndianJourneyTime(dateTime, dateOnly) {
@@ -3113,8 +4502,23 @@ async function checkCompletedJourneyPopup(user) {
         };
 
         const bookingId = booking.bookingUid || booking.id;
-        const journeyTime = getIndianJourneyTime(booking.departureDateTime, booking.date);
-        const alreadyShown = localStorage.getItem("journeyPopup_" + bookingId);
+        const effectiveDate =
+    booking.newDate ||
+    booking.rescheduledDate ||
+    booking.rescheduleDate ||
+    booking.date;
+
+const effectiveDepartureDateTime =
+    booking.newDepartureDateTime ||
+    booking.rescheduledDepartureDateTime ||
+    booking.departureDateTime;
+
+const journeyTime = getIndianJourneyTime(
+    effectiveDepartureDateTime,
+    effectiveDate
+);
+       
+       const alreadyShown = localStorage.getItem("journeyPopup_" + bookingId);
         const alreadyReviewed = localStorage.getItem("journeyReviewed_" + bookingId) || booking.reviewed === true;
 
         if (
@@ -3130,28 +4534,37 @@ async function checkCompletedJourneyPopup(user) {
     });
 
     if (completedBooking) {
-        const bookingId = completedBooking.bookingUid || completedBooking.id;
-        pendingCompletedBooking = completedBooking;
-        localStorage.setItem("journeyPopup_" + bookingId, "shown");
+    const bookingId = completedBooking.bookingUid || completedBooking.id;
+    pendingCompletedBooking = completedBooking;
+    localStorage.setItem("journeyPopup_" + bookingId, "shown");
 
-        const routeBox = document.getElementById("journeyPopupRoute");
-        const routeText = document.getElementById("journeyPopupRouteText");
-        const dateText = document.getElementById("journeyPopupDateText");
-        const message = document.getElementById("journeyPopupMessage");
+    const routeBox = document.getElementById("journeyPopupRoute");
+    const routeText = document.getElementById("journeyPopupRouteText");
+    const dateText = document.getElementById("journeyPopupDateText");
+    const message = document.getElementById("journeyPopupMessage");
 
-        if (message) {
-            message.textContent = "Your journey is completed. Please review your journey.";
-        }
+    const effectiveDate =
+        completedBooking.newDate ||
+        completedBooking.rescheduledDate ||
+        completedBooking.rescheduleDate ||
+        completedBooking.date;
 
-        if (routeBox && routeText && dateText) {
-            routeBox.style.display = "block";
-            routeText.textContent = `${completedBooking.from || "From"} → ${completedBooking.to || "To"}`;
-            dateText.textContent = `Travel date: ${formatJourneyDate(completedBooking.date)}`;
-        }
+    completedBooking.date = effectiveDate;
 
-        setActiveJourneyReviewNote(completedBooking);
-        document.getElementById("journeyCompletePopup").style.display = "flex";
+    if (message) {
+        message.textContent = "Your journey is completed. Please review your journey.";
     }
+
+    if (routeBox && routeText && dateText) {
+        routeBox.style.display = "block";
+        routeText.textContent = `${completedBooking.from || "From"} → ${completedBooking.to || "To"}`;
+        dateText.textContent = `Travel date: ${formatJourneyDate(effectiveDate)}`;
+    }
+
+    setActiveJourneyReviewNote(completedBooking);
+
+    document.getElementById("journeyCompletePopup").style.display = "flex";
+}
 }
 
 window.closeJourneyPopup = function () {
@@ -3185,10 +4598,11 @@ window.openReviewSection = function () {
                 document.getElementById("reviewForm").style.display = "block";
                 document.getElementById("loginMsg").style.display = "none";
                 document.getElementById("userPreview").style.display = "flex";
+                setUserPreviewLoading();
         
                 await loadCurrentUserProfile();
-updateUserPreview();
-checkCompletedJourneyPopup(user);
+                updateUserPreview();
+                checkCompletedJourneyPopup(user);
         
             } else {
                 document.getElementById("reviewForm").style.display = "none";
@@ -3221,40 +4635,87 @@ checkCompletedJourneyPopup(user);
             }
         }
         
-        function updateUserPreview() {
+        function setUserPreviewLoading() {
     const nameEl = document.getElementById("previewName");
     const photoEl = document.getElementById("previewPhoto");
 
-    if (!currentUser) return;
+    if (nameEl) {
+        nameEl.innerText = "Loading profile...";
+        nameEl.classList.add("profile-loading-text");
+    }
 
-    nameEl.innerText = currentProfileName || "User";
-
-    const cleanPhoto = safeImageUrl(currentProfilePhoto);
-
-    photoEl.innerHTML = "";
-
-    if (cleanPhoto) {
-        const img = document.createElement("img");
-        img.src = cleanPhoto;
-        img.style.width = "40px";
-        img.style.height = "40px";
-        img.style.borderRadius = "50%";
-        img.style.objectFit = "cover";
-        img.style.border = "2px solid #ff7a00";
-
-        photoEl.appendChild(img);
-    } else {
+    if (photoEl) {
         photoEl.innerHTML = `
+        <div class="preview-avatar-wrap">
+            <div class="preview-avatar-loader"></div>
+        </div>`;
+    }
+}
+
+        window.handlePreviewAvatarLoad = function(img) {
+    const wrap = img.closest(".preview-avatar-wrap");
+    if (wrap) wrap.classList.add("loaded");
+};
+
+        window.handlePreviewAvatarError = function(img) {
+    const wrap = img.closest(".preview-avatar-wrap");
+    if (!wrap) return;
+
+    wrap.classList.add("loaded");
+    wrap.innerHTML = `
         <div style="
-            width:40px;
-            height:40px;
+            width:44px;
+            height:44px;
             border-radius:50%;
             background:#ff7a00;
             display:flex;
             align-items:center;
             justify-content:center;
             color:white;
-            font-weight:bold;">
+            font-weight:bold;
+            border:2px solid #ff7a00;
+            box-shadow:0 4px 10px rgba(255,122,0,0.25);
+            box-sizing:border-box;">
+            <i class="fas fa-user"></i>
+        </div>`;
+};
+
+        function updateUserPreview() {
+    const nameEl = document.getElementById("previewName");
+    const photoEl = document.getElementById("previewPhoto");
+
+    if (!currentUser || !nameEl || !photoEl) return;
+
+    nameEl.innerText = currentProfileName || "User";
+    nameEl.classList.remove("profile-loading-text");
+
+    const cleanPhoto = safeImageUrl(currentProfilePhoto);
+
+    if (cleanPhoto) {
+        photoEl.innerHTML = `
+        <div class="preview-avatar-wrap">
+            <div class="preview-avatar-loader"></div>
+            <img src="${cleanPhoto}" alt="Profile" onload="handlePreviewAvatarLoad(this)" onerror="handlePreviewAvatarError(this)">
+        </div>`;
+        const previewImg = photoEl.querySelector(".preview-avatar-wrap img");
+        if (previewImg && previewImg.complete && previewImg.naturalWidth > 0) {
+            handlePreviewAvatarLoad(previewImg);
+        }
+    } else {
+        photoEl.innerHTML = `
+        <div style="
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background:#ff7a00;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-weight:bold;
+            border:2px solid #ff7a00;
+            box-shadow:0 4px 10px rgba(255,122,0,0.25);
+            box-sizing:border-box;">
             <i class="fas fa-user"></i>
         </div>`;
     }
@@ -3349,6 +4810,38 @@ function safeImageUrl(url) {
 
     return "";
 }
+
+window.handleReviewAvatarLoad = function(img){
+    const wrap = img.closest(".review-avatar-wrap");
+    if(wrap) wrap.classList.add("loaded");
+};
+
+window.handleReviewAvatarError = function(img){
+    const wrap = img.closest(".review-avatar-wrap");
+    if(!wrap) return;
+    wrap.classList.add("loaded");
+    wrap.innerHTML = `<div style="
+        width:100%;
+        height:100%;
+        border-radius:50%;
+        background:#ff7a00;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:white;
+        font-weight:bold;">
+        <i class="fas fa-user"></i>
+    </div>`;
+};
+
+function revealAlreadyLoadedReviewAvatars(root){
+    if(!root) return;
+    root.querySelectorAll(".review-avatar-wrap img").forEach(img => {
+        if(img.complete && img.naturalWidth > 0){
+            handleReviewAvatarLoad(img);
+        }
+    });
+}
         
 function getLatestProfile(data) {
     const profile = data.uid ? profilesMap.get(data.uid) : null;
@@ -3364,11 +4857,30 @@ function getLatestProfile(data) {
         photo: photoURL
     };
 }
-        
+
+function isReviewDataReady() {
+    // Show review cards as soon as review documents load.
+    // Profile photos/names update immediately again when profiles finish loading.
+    return reviewsLoaded;
+}
+
+function setReviewsLoading(isLoading) {
+    const reviewLoader = document.getElementById("reviewLoader");
+    const reviewTrackEl = document.getElementById("reviewTrack");
+    const allReviewsLoader = document.getElementById("allReviewsLoader");
+    const allReviewsList = document.getElementById("allReviewsList");
+
+    if (reviewLoader) reviewLoader.style.display = isLoading ? "flex" : "none";
+    if (reviewTrackEl) reviewTrackEl.style.display = isLoading ? "none" : "flex";
+
+    if (allReviewsLoader) allReviewsLoader.style.display = isLoading ? "flex" : "none";
+    if (allReviewsList) allReviewsList.style.display = isLoading ? "none" : "block";
+}
+
 const q = query(
     collection(db, "reviews"),
     orderBy("createdAt", "desc"),
-    limit(30)
+    limit(100)
 );
         
         onSnapshot(q, async (snapshot) => {
@@ -3380,23 +4892,40 @@ const q = query(
                     ...reviewDoc.data()
                 });
             });
-        
+
+            reviewsLoaded = true;
             await renderReviews();
         
         }, (error) => {
             console.log("Review loading error:", error);
+            reviewsLoaded = true;
+            setReviewsLoading(false);
         });
         
         function renderReviews() {
+    const reviewTrack = document.getElementById("reviewTrack");
     if (!reviewTrack) return;
 
+    if (!isReviewDataReady()) {
+        setReviewsLoading(true);
+        return;
+    }
+
+    setReviewsLoading(false);
     reviewTrack.innerHTML = "";
 
     renderAllReviewsFromArray(latestReviews);
 
+    if (!latestReviews.length) {
+        reviewTrack.innerHTML = `<div class="review-empty">No reviews yet. Be the first traveler to share your experience.</div>`;
+        return;
+    }
+
     const fragment = document.createDocumentFragment();
 
-    latestReviews.forEach(data => {
+    const frontPageReviews = latestReviews.slice(0, HOME_REVIEW_LIMIT);
+
+    frontPageReviews.forEach(data => {
         const profile = getLatestProfile(data);
 
         const rating = Number(data.rating || 0);
@@ -3417,7 +4946,10 @@ const q = query(
             <div class="user-info">
                 ${
                     photo
-                    ? `<img src="${photo}" loading="lazy">`
+                    ? `<div class="review-avatar-wrap">
+                            <div class="review-avatar-loader"></div>
+                            <img src="${photo}" onload="handleReviewAvatarLoad(this)" onerror="handleReviewAvatarError(this)">
+                       </div>`
                     : `<div style="
                         width:38px;
                         height:38px;
@@ -3471,6 +5003,7 @@ const q = query(
     });
 
     reviewTrack.appendChild(fragment);
+    revealAlreadyLoadedReviewAvatars(reviewTrack);
 }
 
 function renderAllReviewsFromArray(reviews) {
@@ -3478,6 +5011,11 @@ function renderAllReviewsFromArray(reviews) {
     if (!list) return;
 
     list.innerHTML = "";
+
+    if (!reviews.length) {
+        list.innerHTML = `<div class="review-empty" style="min-width:auto;">No reviews available yet.</div>`;
+        return;
+    }
 
     const fragment = document.createDocumentFragment();
 
@@ -3505,7 +5043,10 @@ function renderAllReviewsFromArray(reviews) {
         <div style="display:flex; gap:10px; align-items:center;">
             ${
                 photo
-                ? `<img src="${photo}" loading="lazy" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+                ? `<div class="review-avatar-wrap big">
+                        <div class="review-avatar-loader"></div>
+                        <img src="${photo}" onload="handleReviewAvatarLoad(this)" onerror="handleReviewAvatarError(this)">
+                   </div>`
                 : `<div style="
                     width:40px;
                     height:40px;
@@ -3552,6 +5093,7 @@ function renderAllReviewsFromArray(reviews) {
     });
 
     list.appendChild(fragment);
+    revealAlreadyLoadedReviewAvatars(list);
 }
 
 function openAllReviews() {
@@ -3582,8 +5124,11 @@ function showSlide() {
         setInterval(showSlide, 3000);
         
         let currentField = "";
-        
-        let cities = [
+
+        // ===== CITIES FROM FIREBASE =====
+        // Firestore path: cities / autoId
+        // Fields: name (string), active (boolean), order (number)
+        const fallbackCities = [
             "Biswanath Charali",
             "Sootea",
             "Jamagurihat",
@@ -3594,20 +5139,89 @@ function showSlide() {
             "Jagun",
             "Games Village"
         ];
+
+        let cities = [...fallbackCities];
+        let citiesLoaded = false;
+
+        function loadCitiesFromFirebase() {
+            try {
+                const citiesQuery = query(
+                    collection(db, "cities"),
+                    orderBy("order", "asc")
+                );
+
+                onSnapshot(citiesQuery, (snapshot) => {
+                    const firebaseCities = [];
+
+                    snapshot.forEach(cityDoc => {
+                        const data = cityDoc.data();
+
+                        if (data && data.name && data.active !== false) {
+                            firebaseCities.push(String(data.name).trim());
+                        }
+                    });
+
+                    // Remove duplicate or empty city names
+                    cities = [...new Set(firebaseCities.filter(Boolean))];
+
+                    // If Firebase cities are not added yet, keep old default cities so website does not break
+                    if (!cities.length) {
+                        cities = [...fallbackCities];
+                    }
+
+                    citiesLoaded = true;
+
+                    if (document.getElementById("modal").style.display === "flex") {
+                        showList(cities);
+                    }
+                }, (error) => {
+                    console.error("City loading error:", error);
+                    cities = [...fallbackCities];
+                    citiesLoaded = true;
+                });
+
+            } catch (error) {
+                console.error("City setup error:", error);
+                cities = [...fallbackCities];
+                citiesLoaded = true;
+            }
+        }
+
+        loadCitiesFromFirebase();
         
         function openModal(field) {
             currentField = field;
             document.getElementById("modal").style.display = "flex";
+
+            if (!citiesLoaded) {
+                showCityMessage("Loading cities...");
+                return;
+            }
+
             showList(cities);
         }
         
         function closeModal() {
             document.getElementById("modal").style.display = "none";
         }
+
+        function showCityMessage(message) {
+            let list = document.getElementById("cityList");
+            list.innerHTML = `
+                <div style="color:#777; text-align:center; font-weight:600; cursor:default;">
+                    ${message}
+                </div>
+            `;
+        }
         
         function showList(data) {
             let list = document.getElementById("cityList");
             list.innerHTML = "";
+
+            if (!data.length) {
+                showCityMessage("No cities available");
+                return;
+            }
         
             data.forEach(city => {
                 let div = document.createElement("div");
@@ -3643,23 +5257,90 @@ function showSlide() {
             document.getElementById("modal").style.display = "none";
         }
         
+        function formatDateForInput(dateObj) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+        function getTodayInputDate() {
+            return formatDateForInput(new Date());
+        }
+
+        function setupJourneyDateLimit() {
+            const dateInput = document.getElementById("date");
+            if (!dateInput) return;
+
+            const today = getTodayInputDate();
+            dateInput.min = today;
+
+            if (dateInput.value && dateInput.value < today) {
+                dateInput.value = "";
+                document.getElementById("dateText").innerText = "Select Date";
+            }
+        }
+
+        function openJourneyDatePicker() {
+            setupJourneyDateLimit();
+
+            const dateInput = document.getElementById("date");
+            if (!dateInput) return;
+
+            if (typeof dateInput.showPicker === "function") {
+                dateInput.showPicker();
+            } else {
+                dateInput.focus();
+                dateInput.click();
+            }
+        }
+
+        function handleJourneyDateChange() {
+            const dateInput = document.getElementById("date");
+            const dateText = document.getElementById("dateText");
+            const today = getTodayInputDate();
+
+            if (!dateInput.value) {
+                dateText.innerText = "Select Date";
+                return;
+            }
+
+            if (dateInput.value < today) {
+                alert("Please select today or a future date.");
+                dateInput.value = "";
+                dateText.innerText = "Select Date";
+                return;
+            }
+
+            dateText.innerText = dateInput.value;
+        }
+
         function setQuickDate(offset) {
             const d = new Date();
             d.setDate(d.getDate() + offset);
         
-            const formatted = d.toISOString().split("T")[0];
+            const formatted = formatDateForInput(d);
         
             document.getElementById("date").value = formatted;
             document.getElementById("dateText").innerText = formatted;
+            setupJourneyDateLimit();
         }
         
         function searchBus() {
             let from = document.getElementById("fromText").innerText;
             let to = document.getElementById("toText").innerText;
             let date = document.getElementById("date").value;
+            const today = getTodayInputDate();
         
             if (from === "Select Boarding Point" || to === "Select Destination" || !date) {
                 alert("Please fill all details");
+                return;
+            }
+
+            if (date < today) {
+                alert("Please select today or a future date.");
+                document.getElementById("date").value = "";
+                document.getElementById("dateText").innerText = "Select Date";
                 return;
             }
         
@@ -3743,6 +5424,10 @@ function showSlide() {
         window.closeModal = closeModal;
         window.swapCities = swapCities;
         window.filterList = filterList;
+        setupJourneyDateLimit();
+
+        window.openJourneyDatePicker = openJourneyDatePicker;
+        window.handleJourneyDateChange = handleJourneyDateChange;
         window.setQuickDate = setQuickDate;
         window.searchBus = searchBus;
         window.openLoginPopup = openLoginPopup;
@@ -3753,8 +5438,20 @@ function showSlide() {
     const slider = document.getElementById(sliderId);
     if (!slider) return;
 
+    // Laptop/Desktop uses professional grid layout, so do not clone cards there.
+    // This keeps mobile auto-slider same and stops repeated coupons/features/videos on laptop.
+    if (window.matchMedia && window.matchMedia("(min-width: 1024px)").matches) {
+        slider.dataset.autoSlideStarted = "desktop-grid";
+        return;
+    }
+
+    // Stop duplicate cloning when Firebase assets reload and autoSlide is called again.
+    if (slider.dataset.autoSlideStarted === "true") return;
+
     let cards = slider.querySelectorAll(cardClass);
     if (cards.length <= 1) return;
+
+    slider.dataset.autoSlideStarted = "true";
 
     cards.forEach(card => {
         slider.appendChild(card.cloneNode(true));
@@ -3777,8 +5474,8 @@ function showSlide() {
 }
 
 
-autoSlide("offerSlider", ".coupon-img-card", 1000);
-autoSlide("featureSlider", ".feature-card", 1500);
+autoSlide("offerSlider", ".coupon-img-card", 3000);
+autoSlide("featureSlider", ".feature-card", 3000);
 autoSlide("tutorialSlider", ".tutorial-card", 3000);
         </script>
 </body>
