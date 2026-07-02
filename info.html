@@ -2043,6 +2043,28 @@ setTimeout(() => toast.remove(), 2500);
 
 
 
+
+function downloadPdfForDreamlinerApp(doc, fileName) {
+    try {
+        const dataUri = doc.output("datauristring");
+        const base64 = String(dataUri).split(",")[1];
+
+        if (window.ReactNativeWebView && base64) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: "DOWNLOAD_BASE64_PDF",
+                fileName: fileName,
+                base64: base64
+            }));
+            return;
+        }
+    } catch (error) {
+        console.log("App PDF bridge failed, using browser download:", error);
+    }
+
+    // Normal browser / laptop download
+    doc.save(fileName);
+}
+
 async function getDreamlinerPdfLogoDataUrl() {
     const fallbackLogos = ["logo-modified.png", "logo.png"];
 
@@ -2397,7 +2419,7 @@ doc.setTextColor(150);
 doc.setFontSize(8);
 doc.text("This is a computer generated e-ticket. No signature required.",105,285,{align:"center"});
 
-doc.save(`Dreamliner_Ticket_${bookingId}.pdf`);
+downloadPdfForDreamlinerApp(doc, `Dreamliner_Ticket_${bookingId}.pdf`);
 }
 </script>
 </body>
