@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Select Seats - Dreamliner</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
@@ -1476,6 +1476,75 @@ transform:translateX(24px);
 }
 
 </style>
+
+
+<!-- Dreamliner WebView Android safe-area fix -->
+<style id="dreamliner-webview-safe-area-fix">
+:root{
+    --android-nav-gap: 44px;
+    --dreamliner-safe-bottom: max(env(safe-area-inset-bottom), var(--android-nav-gap));
+}
+
+html,
+body{
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+}
+
+body{
+    padding-bottom: var(--dreamliner-safe-bottom) !important;
+}
+
+.footer-action{
+    margin-bottom: 0 !important;
+    padding-bottom: 12px !important;
+}
+
+.bottom-sheet{
+    bottom: var(--dreamliner-safe-bottom) !important;
+    height: calc(85dvh - var(--dreamliner-safe-bottom)) !important;
+    max-height: calc(100dvh - 80px - var(--dreamliner-safe-bottom)) !important;
+    transform: translateY(calc(85dvh - var(--dreamliner-safe-bottom) - 55px)) !important;
+}
+
+.bottom-sheet.active{
+    transform: translateY(0) !important;
+}
+
+.sheet-header{
+    padding-bottom: 2px !important;
+}
+
+.sheet-tabs{
+    padding-bottom: 10px !important;
+}
+
+.sheet-body{
+    padding-bottom: 18px !important;
+}
+
+#seatMapContainerID{
+    padding-bottom: calc(120px + var(--dreamliner-safe-bottom)) !important;
+}
+
+@media (display-mode: browser){
+    :root{ --android-nav-gap: 0px; }
+}
+
+@media (min-width: 768px){
+    :root{ --android-nav-gap: 0px; }
+    body{ padding-bottom: 0 !important; }
+    .bottom-sheet{
+        bottom: 0 !important;
+        height: 85vh !important;
+        max-height: none !important;
+        transform: translateY(calc(85vh - 55px)) !important;
+    }
+    .bottom-sheet.active{ transform: translateY(0) !important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -3959,28 +4028,6 @@ document.getElementById("payAmount").textContent = totalAmount;
         }
     }
 
-
-function downloadPdfForDreamlinerApp(doc, fileName) {
-    try {
-        const dataUri = doc.output("datauristring");
-        const base64 = String(dataUri).split(",")[1];
-
-        if (window.ReactNativeWebView && base64) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-                type: "DOWNLOAD_BASE64_PDF",
-                fileName: fileName,
-                base64: base64
-            }));
-            return;
-        }
-    } catch (error) {
-        console.log("App PDF bridge failed, using browser download:", error);
-    }
-
-    // Normal browser / laptop download
-    doc.save(fileName);
-}
-
 async function getDreamlinerPdfLogoDataUrl() {
     const fallbackLogos = ["logo-modified.png", "logo.png"];
 
@@ -4291,7 +4338,18 @@ doc.setFontSize(13);
     doc.setFontSize(8);
     doc.text("This is a computer-generated e-ticket. Physical signature not required.", 105, 285, { align: "center" });
 
-    downloadPdfForDreamlinerApp(doc, `Dreamliner_Ticket_${bookingId}.pdf`);
+    const pdfBlob = doc.output("blob");
+const url = URL.createObjectURL(pdfBlob);
+
+const a = document.createElement("a");
+a.href = url;
+a.download = `Dreamliner_Ticket_${bookingId}.pdf`;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+
+// cleanup
+setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
 // FIREBASE MASTER ROUTE DISPLAY LOGIC
