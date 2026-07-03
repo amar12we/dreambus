@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Dreamliner Assistant</title>
 
 <link rel="stylesheet"
@@ -94,6 +94,59 @@ display:flex;align-items:center;justify-content:center;margin-right:15px;color:w
 50%{transform:translateY(-4px);}
 }
 </style>
+
+
+<!-- Dreamliner WebView Android safe-area fix -->
+<style id="dreamliner-webview-safe-area-fix">
+:root{
+    --android-nav-gap: 44px;
+    --dreamliner-safe-bottom: max(env(safe-area-inset-bottom), var(--android-nav-gap));
+    --assistant-input-height: 64px;
+}
+
+html,
+body{
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+}
+
+.chat-container{
+    bottom: calc(var(--assistant-input-height) + var(--dreamliner-safe-bottom)) !important;
+    padding-bottom: 12px !important;
+}
+
+.input-area{
+    bottom: var(--dreamliner-safe-bottom) !important;
+    height: var(--assistant-input-height) !important;
+    padding: 8px 16px 8px 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 -4px 18px rgba(15,23,42,0.08);
+}
+
+.input-area input{
+    min-height: 48px;
+    border-radius: 14px !important;
+}
+
+.input-area button{
+    width: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px;
+    border-radius: 14px !important;
+}
+
+@media (display-mode: browser){
+    :root{ --android-nav-gap: 0px; }
+}
+
+@media (min-width: 768px){
+    :root{ --android-nav-gap: 0px; }
+    .input-area{ bottom: 0 !important; }
+    .chat-container{ bottom: var(--assistant-input-height) !important; }
+}
+</style>
+
 </head>
 
 <body>
