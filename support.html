@@ -25,7 +25,7 @@ color:#fff;font-weight:600;z-index:1000;
 .lang-box button:not(.active){background:#fff;color:#ff3d2e;}
 
 .chat-container{
-position:absolute;top:56px;bottom:64px;left:0;right:0;
+position:absolute;top:56px;bottom:calc(64px + env(safe-area-inset-bottom));left:0;right:0;
 overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;
 }
 
@@ -38,8 +38,8 @@ font-size:13px;line-height:1.5;word-break:break-word;
 .user{background:#ff6a00;color:#fff;align-self:flex-end;}
 
 .input-area{
-position:fixed;bottom:0;left:0;right:0;height:64px;
-display:flex;gap:6px;padding:8px;background:#fff;border-top:1px solid #ddd;
+position:fixed;bottom:0;left:0;right:0;height:calc(64px + env(safe-area-inset-bottom));
+display:flex;gap:6px;padding:8px;padding-bottom:max(8px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #ddd;
 }
 
 .input-area input{
@@ -94,65 +94,12 @@ display:flex;align-items:center;justify-content:center;margin-right:15px;color:w
 50%{transform:translateY(-4px);}
 }
 </style>
-
-
-<!-- Dreamliner WebView Android safe-area fix -->
-<style id="dreamliner-webview-safe-area-fix">
-:root{
-    --android-nav-gap: 44px;
-    --dreamliner-safe-bottom: max(env(safe-area-inset-bottom), var(--android-nav-gap));
-    --assistant-input-height: 64px;
-}
-
-html,
-body{
-    height: 100dvh;
-    min-height: 100dvh;
-    overflow: hidden;
-}
-
-.chat-container{
-    bottom: calc(var(--assistant-input-height) + var(--dreamliner-safe-bottom)) !important;
-    padding-bottom: 12px !important;
-}
-
-.input-area{
-    bottom: var(--dreamliner-safe-bottom) !important;
-    height: var(--assistant-input-height) !important;
-    padding: 8px 16px 8px 16px !important;
-    background: #ffffff !important;
-    box-shadow: 0 -4px 18px rgba(15,23,42,0.08);
-}
-
-.input-area input{
-    min-height: 48px;
-    border-radius: 14px !important;
-}
-
-.input-area button{
-    width: 48px !important;
-    min-width: 48px !important;
-    min-height: 48px;
-    border-radius: 14px !important;
-}
-
-@media (display-mode: browser){
-    :root{ --android-nav-gap: 0px; }
-}
-
-@media (min-width: 768px){
-    :root{ --android-nav-gap: 0px; }
-    .input-area{ bottom: 0 !important; }
-    .chat-container{ bottom: var(--assistant-input-height) !important; }
-}
-</style>
-
 </head>
 
 <body>
 
 <div class="header">
-<button class="back-btn" onclick="stopVoice(); window.history.back();">
+<button class="back-btn" onclick="appBack()">
 <i class="fas fa-chevron-left"></i>
 </button>
 
@@ -178,7 +125,6 @@ body{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* PASTE YOUR SAME FIREBASE CONFIG HERE */
 const firebaseConfig = {
   apiKey: "PASTE_HERE",
   authDomain: "PASTE_HERE",
@@ -188,8 +134,13 @@ const firebaseConfig = {
   appId: "PASTE_HERE"
 };
 
+let db = null;
+try{
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+db = getFirestore(app);
+}catch(e){
+db = null;
+}
 
 const LANG = {
 en:{
@@ -205,7 +156,6 @@ input:"Type your message...",
 whatNext:"What next?",
 chatAgain:"Chat Again",
 employee:"Chat with Employee",
-serverError:"Answer not found. Please try again later.",
 invalid:"Sorry, I can help only with the options below. Please select one from here:"
 },
 hi:{
@@ -221,12 +171,46 @@ input:"अपना संदेश लिखें...",
 whatNext:"आगे क्या?",
 chatAgain:"फिर से चैट करें",
 employee:"कर्मचारी से चैट करें",
-serverError:"उत्तर नहीं मिला। कृपया बाद में प्रयास करें।",
 invalid:"माफ़ करें, मैं केवल नीचे दिए गए विकल्पों में मदद कर सकता हूँ। कृपया यहाँ से एक विकल्प चुनें:"
 }
 };
 
+const LOCAL_ANSWERS = {
+en:{
+book:`<strong>How to book your ticket:</strong><br>Step 1: Select boarding point and destination.<br>Step 2: Select journey date and bus.<br>Step 3: Choose your seat.<br>Step 4: Add passenger details and complete payment.<br>After successful payment, your ticket will be downloaded and saved in My Trips/Profile.`,
+cancel:`<strong>How to cancel your ticket:</strong><br>Open Profile / My Trips, search your booking, then tap Cancel Ticket.<br>Cancellation is allowed according to the refund policy and journey time.`,
+refund:`<strong>Refund Policy:</strong><br>More than 48 hours before journey: 90% refund.<br>24 to 48 hours: 80% refund.<br>12 to 24 hours: 50% refund.<br>Less than 12 hours: no refund.<br>Refund processing usually takes 5–6 working days.`,
+boarding:`<strong>Boarding Information:</strong><br>Your M-ticket is valid for boarding.<br>Please reach the pickup point at least 15 minutes before departure.<br>Carry a valid government ID proof with your ticket.`,
+reschedule:`<strong>Reschedule Journey:</strong><br>You can reschedule once from Profile / My Trips.<br>Reschedule is allowed up to 12 hours before departure.<br>Select the new date, trip, and same number of seats.`,
+support:`<strong>Support:</strong><br>You can chat with our employee on WhatsApp for booking, cancellation, refund, boarding, or reschedule help.<br>Tap “Chat with Employee” below.`
+},
+hi:{
+book:`<strong>टिकट बुक करने का तरीका:</strong><br>Step 1: बोर्डिंग पॉइंट और डेस्टिनेशन चुनें।<br>Step 2: यात्रा की तारीख और बस चुनें।<br>Step 3: सीट चुनें।<br>Step 4: यात्री जानकारी भरकर पेमेंट पूरा करें।<br>पेमेंट के बाद टिकट डाउनलोड होगा और My Trips/Profile में दिखेगा।`,
+cancel:`<strong>टिकट रद्द करने का तरीका:</strong><br>Profile / My Trips खोलें, अपनी बुकिंग खोजें और Cancel Ticket पर टैप करें।<br>कैंसिलेशन रिफंड पॉलिसी और यात्रा समय के अनुसार होगा।`,
+refund:`<strong>रिफंड नीति:</strong><br>48 घंटे से अधिक पहले: 90% रिफंड।<br>24 से 48 घंटे: 80% रिफंड।<br>12 से 24 घंटे: 50% रिफंड।<br>12 घंटे से कम: कोई रिफंड नहीं।<br>रिफंड में सामान्यतः 5–6 working days लगते हैं।`,
+boarding:`<strong>बोर्डिंग जानकारी:</strong><br>M-ticket बोर्डिंग के लिए मान्य है।<br>कृपया departure से कम से कम 15 मिनट पहले pickup point पर पहुंचें।<br>टिकट के साथ सरकारी ID proof रखें।`,
+reschedule:`<strong>यात्रा Reschedule:</strong><br>आप Profile / My Trips से एक बार journey reschedule कर सकते हैं।<br>Departure से 12 घंटे पहले तक reschedule allowed है।<br>नई date, trip और same seat count चुनें।`,
+support:`<strong>सहायता:</strong><br>Booking, cancellation, refund, boarding या reschedule help के लिए WhatsApp पर employee से chat करें।<br>नीचे “कर्मचारी से चैट करें” टैप करें।`
+}
+};
+
 let currentLang = "en";
+
+function sendToApp(payload){
+try{
+if(window.ReactNativeWebView){
+window.ReactNativeWebView.postMessage(JSON.stringify(payload));
+return true;
+}
+}catch(e){}
+return false;
+}
+
+function appBack(){
+stopVoice();
+if(sendToApp({type:"APP_GO_BACK"})) return;
+if(history.length > 1){ history.back(); } else { location.href = "index.html"; }
+}
 
 function getUserQuestion(type){
 const questions = {
@@ -247,27 +231,23 @@ reschedule:"मैं अपनी यात्रा पुनः कैसे 
 support:"मैं सहायता से कैसे संपर्क कर सकता हूँ?"
 }
 };
-
 return questions[currentLang][type];
 }
 
 function detectOption(text){
 text = text.toLowerCase();
-
 if(text.includes("book") || text.includes("ticket book") || text.includes("टिकट बुक")) return "book";
 if(text.includes("cancel") || text.includes("टिकट रद्द") || text.includes("रद्द")) return "cancel";
 if(text.includes("refund") || text.includes("रिफंड")) return "refund";
 if(text.includes("boarding") || text.includes("board") || text.includes("बोर्डिंग")) return "boarding";
 if(text.includes("reschedule") || text.includes("change journey") || text.includes("यात्रा पुनः")) return "reschedule";
 if(text.includes("support") || text.includes("help") || text.includes("सहायता")) return "support";
-
 return null;
 }
 
 function loadUI(){
 document.getElementById("welcome").innerText = LANG[currentLang].welcome;
 document.getElementById("question").placeholder = LANG[currentLang].input;
-
 document.getElementById("options").innerHTML = `
 <strong>${LANG[currentLang].choose}</strong>
 <div class="options">
@@ -283,7 +263,6 @@ document.getElementById("options").innerHTML = `
 
 function showOptionsAgain(){
 const chat = document.getElementById("chat");
-
 chat.innerHTML += `
 <div class="message bot">
 <strong>${LANG[currentLang].choose}</strong>
@@ -297,17 +276,14 @@ chat.innerHTML += `
 </div>
 </div>
 `;
-
 chat.scrollTop = chat.scrollHeight;
 }
 
 function setLang(lang){
 currentLang = lang;
-
 document.getElementById("enBtn").classList.remove("active");
 document.getElementById("hiBtn").classList.remove("active");
 document.getElementById(lang + "Btn").classList.add("active");
-
 loadUI();
 }
 
@@ -316,39 +292,29 @@ await sendMessage(type);
 }
 
 async function getFirebaseAnswer(type){
+try{
+if(!db) return LOCAL_ANSWERS[currentLang][type];
 const snap = await getDoc(doc(db, "supportAnswers", type));
-
-if(!snap.exists()){
-return null;
-}
-
+if(!snap.exists()) return LOCAL_ANSWERS[currentLang][type];
 const data = snap.data();
-
-if(data.active === false){
-return null;
+if(data.active === false) return LOCAL_ANSWERS[currentLang][type];
+return data[currentLang]?.answer || data.en?.answer || LOCAL_ANSWERS[currentLang][type];
+}catch(e){
+return LOCAL_ANSWERS[currentLang][type];
 }
-
-return data[currentLang]?.answer || data.en?.answer || null;
 }
 
 async function sendMessage(type = null){
 const input = document.getElementById("question");
 const chat = document.getElementById("chat");
-
 const typedText = input.value.trim();
-
-if(!type && !typedText){
-return;
-}
+if(!type && !typedText) return;
 
 if(!type){
 const matchedType = detectOption(typedText);
-
 chat.innerHTML += `<div class="message user">${typedText}</div>`;
-
 input.value = "";
 chat.scrollTop = chat.scrollHeight;
-
 if(matchedType){
 type = matchedType;
 }else{
@@ -357,7 +323,6 @@ showOptionsAgain();
 chat.scrollTop = chat.scrollHeight;
 return;
 }
-
 }else{
 chat.innerHTML += `<div class="message user">${getUserQuestion(type)}</div>`;
 input.value = "";
@@ -365,52 +330,30 @@ chat.scrollTop = chat.scrollHeight;
 }
 
 showTyping();
-
 setTimeout(async ()=>{
-try{
 const answer = await getFirebaseAnswer(type);
-
 removeTyping();
-
-if(!answer){
-chat.innerHTML += `<div class="message bot">${LANG[currentLang].serverError}</div>`;
-chat.scrollTop = chat.scrollHeight;
-return;
-}
-
 chat.innerHTML += `
 <div class="message bot">${answer}</div>
-
 <div class="message bot end-card">
 <strong>${LANG[currentLang].whatNext}</strong>
-
 <div class="action-buttons">
 <button class="chat-again-btn" onclick="showOptionsAgain()">
 <i class="fa fa-rotate-right"></i> ${LANG[currentLang].chatAgain}
 </button>
-
 <button class="employee-btn" onclick="openWhatsApp()">
 <i class="fab fa-whatsapp"></i> ${LANG[currentLang].employee}
 </button>
 </div>
 </div>
 `;
-
 speak(answer);
-
-}catch(err){
-removeTyping();
-chat.innerHTML += `<div class="message bot">${LANG[currentLang].serverError}</div>`;
-}
-
 chat.scrollTop = chat.scrollHeight;
 },500);
 }
 
 document.getElementById("question").addEventListener("keydown", function(e){
-if(e.key === "Enter"){
-sendMessage();
-}
+if(e.key === "Enter") sendMessage();
 });
 
 function openWhatsApp(){
@@ -419,7 +362,6 @@ window.open("https://wa.me/919435818872","_blank");
 
 function showTyping(){
 const chat = document.getElementById("chat");
-
 chat.innerHTML += `
 <div class="message bot typing" id="typing">
 <div class="dot"></div>
@@ -427,7 +369,6 @@ chat.innerHTML += `
 <div class="dot"></div>
 </div>
 `;
-
 chat.scrollTop = chat.scrollHeight;
 }
 
@@ -436,22 +377,23 @@ const t = document.getElementById("typing");
 if(t) t.remove();
 }
 
-function speak(text){ 
-const cleanText = text.replace(/<[^>]*>/g," "); 
-const finalText = cleanText.replace(/\s+/g," ").trim();
-
+function speak(text){
+const cleanText = String(text || "").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();
+if(!cleanText) return;
+if(sendToApp({type:"SPEAK_TEXT", text:cleanText, lang:currentLang})) return;
+try{
 window.speechSynthesis.cancel();
-
-const msg = new SpeechSynthesisUtterance(finalText);
+const msg = new SpeechSynthesisUtterance(cleanText);
 msg.lang = currentLang === "en" ? "en-US" : "hi-IN";
 msg.rate = 1;
 msg.pitch = 1;
-
 window.speechSynthesis.speak(msg);
+}catch(e){}
 }
 
 function stopVoice(){
-window.speechSynthesis.cancel();
+sendToApp({type:"STOP_SPEAK"});
+try{ window.speechSynthesis.cancel(); }catch(e){}
 }
 
 window.setLang = setLang;
@@ -460,15 +402,13 @@ window.sendMessage = sendMessage;
 window.showOptionsAgain = showOptionsAgain;
 window.openWhatsApp = openWhatsApp;
 window.stopVoice = stopVoice;
+window.appBack = appBack;
 
+window.addEventListener("dreamlinerAppBack", stopVoice);
 window.addEventListener("beforeunload", stopVoice);
 window.addEventListener("pagehide", stopVoice);
 window.addEventListener("blur", stopVoice);
-document.addEventListener("visibilitychange", function(){
-if(document.hidden){
-stopVoice();
-}
-});
+document.addEventListener("visibilitychange", function(){ if(document.hidden) stopVoice(); });
 
 loadUI();
 </script>
