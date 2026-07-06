@@ -697,51 +697,68 @@ function getTripFromServiceId(serviceId) {
 
 // Firestore blocked service format:
 // Collection: blockedServices
-// Document ID example: 2026-06-02_DL001_PM
+// Document ID can be anything. Example: 2026-07-12_Duv001_PM
 // Fields:
-// date: "2026-06-02"
-// busId: "DL001"
-// serviceId: "DL001_PM"
+// date: "2026-07-12"
+// busId: "Duv001"
+// serviceId: "Duv001_PM"
 // active: true
 // reason: "Service is not available on this date"
+//
+// IMPORTANT:
+// This function checks by FIELD values, not by document ID.
+// So even if your document ID is different, it will still work.
 async function isServiceBlocked(journeyDate, busId, serviceId) {
     try {
-        const possibleDocIds = [
-            `${journeyDate}_${serviceId}`,
-            `${journeyDate}_${busId}`
-        ];
+        const cleanDate = String(journeyDate || "").trim();
+        const cleanBusId = String(busId || "").trim();
+        const cleanServiceId = String(serviceId || "").trim();
 
-        for (const blockId of possibleDocIds) {
-            const blockSnap = await getDoc(doc(db, "blockedServices", blockId));
-
-            if (blockSnap.exists()) {
-                const block = blockSnap.data();
-
-                if (block.active !== false) {
-                    return true;
-                }
-            }
+        if (!cleanDate || !cleanBusId || !cleanServiceId) {
+            return false;
         }
 
-        const serviceQuery = query(
+        // Read all blocked entries for selected date.
+        // This is more reliable because it does not depend on document ID.
+        const blockQuery = query(
             collection(db, "blockedServices"),
-            where("date", "==", journeyDate),
-            where("serviceId", "==", serviceId),
-            where("active", "==", true)
+            where("date", "==", cleanDate)
         );
 
-        const serviceSnap = await getDocs(serviceQuery);
-        if (!serviceSnap.empty) return true;
+        const blockSnap = await getDocs(blockQuery);
 
-        const busQuery = query(
-            collection(db, "blockedServices"),
-            where("date", "==", journeyDate),
-            where("busId", "==", busId),
-            where("active", "==", true)
-        );
+        let blocked = false;
 
-        const busSnap = await getDocs(busQuery);
-        return !busSnap.empty;
+        blockSnap.forEach((docSnap) => {
+            const block = docSnap.data();
+
+            const blockActive = block.active === true;
+            const blockBusId = String(block.busId || "").trim();
+            const blockServiceId = String(block.serviceId || "").trim();
+
+            if (!blockActive) return;
+
+            // Block exact service only, for example Duv001_PM.
+            if (blockServiceId && blockServiceId === cleanServiceId) {
+                blocked = true;
+            }
+
+            // Optional: if you store only busId and leave serviceId empty,
+            // then all services of that bus will be blocked for that date.
+            if (!blockServiceId && blockBusId && blockBusId === cleanBusId) {
+                blocked = true;
+            }
+        });
+
+        console.log("Blocked check:", {
+            selectedDate: cleanDate,
+            busId: cleanBusId,
+            serviceId: cleanServiceId,
+            foundDocs: blockSnap.size,
+            blocked
+        });
+
+        return blocked;
 
     } catch (error) {
         console.error("Blocked service check error:", error);
