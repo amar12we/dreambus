@@ -604,6 +604,7 @@ import {
     getFirestore,
     doc,
     getDoc,
+    collection,
     collectionGroup,
     getDocs,
     query,
@@ -633,19 +634,6 @@ const busList = document.getElementById("busList");
 
 document.getElementById("routeHeader").innerText = `${from} → ${to}`;
 document.getElementById("routeDate").innerText = date;
-
-const blockedDate = "2026-06-02";
-
-if (date === blockedDate) {
-    showNoBus(
-        "fas fa-calendar-times",
-        "Service Not Available",
-        "Sorry, we are not operating on this date.<br>Please book for another day.",
-        "Choose Another Date"
-    );
-
-    throw new Error("Blocked date - stop execution");
-}
 
 function showNoBus(icon, title, text, buttonText) {
     busList.innerHTML = `
@@ -705,6 +693,60 @@ function getTripFromServiceId(serviceId) {
     if (serviceId.includes("_AM")) return "AM";
 
     return "";
+}
+
+// Firestore blocked service format:
+// Collection: blockedServices
+// Document ID example: 2026-06-02_DL001_PM
+// Fields:
+// date: "2026-06-02"
+// busId: "DL001"
+// serviceId: "DL001_PM"
+// active: true
+// reason: "Service is not available on this date"
+async function isServiceBlocked(journeyDate, busId, serviceId) {
+    try {
+        const possibleDocIds = [
+            `${journeyDate}_${serviceId}`,
+            `${journeyDate}_${busId}`
+        ];
+
+        for (const blockId of possibleDocIds) {
+            const blockSnap = await getDoc(doc(db, "blockedServices", blockId));
+
+            if (blockSnap.exists()) {
+                const block = blockSnap.data();
+
+                if (block.active !== false) {
+                    return true;
+                }
+            }
+        }
+
+        const serviceQuery = query(
+            collection(db, "blockedServices"),
+            where("date", "==", journeyDate),
+            where("serviceId", "==", serviceId),
+            where("active", "==", true)
+        );
+
+        const serviceSnap = await getDocs(serviceQuery);
+        if (!serviceSnap.empty) return true;
+
+        const busQuery = query(
+            collection(db, "blockedServices"),
+            where("date", "==", journeyDate),
+            where("busId", "==", busId),
+            where("active", "==", true)
+        );
+
+        const busSnap = await getDocs(busQuery);
+        return !busSnap.empty;
+
+    } catch (error) {
+        console.error("Blocked service check error:", error);
+        return false;
+    }
 }
 
 async function loadRoutesFromFirestore() {
@@ -872,16 +914,41 @@ async function loadBuses() {
             return;
         }
 
+        let visibleBusCount = 0;
+
         for (let i = 0; i < matchedRoutes.length; i++) {
             const matched = matchedRoutes[i];
+            const serviceId = matched.serviceId || matched.busId;
+
+            const blocked = await isServiceBlocked(date, matched.busId, serviceId);
+
+            if (blocked) {
+                console.log("Blocked service skipped:", {
+                    date,
+                    busId: matched.busId,
+                    serviceId
+                });
+                continue;
+            }
 
             const layout = await loadLayout(matched.busId);
 
             if (!layout) continue;
 
-            createBusCard(matched, layout, i);
+            createBusCard(matched, layout, visibleBusCount);
 
-            await updateAvailability(matched, layout, i);
+            await updateAvailability(matched, layout, visibleBusCount);
+
+            visibleBusCount++;
+        }
+
+        if (visibleBusCount === 0) {
+            showNoBus(
+                "fas fa-calendar-times",
+                "Service Not Available",
+                "Sorry, this bus service is not operating on this date.<br>Please book another bus or choose another day.",
+                "Choose Another Date"
+            );
         }
 
     } catch (error) {
