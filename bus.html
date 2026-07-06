@@ -695,19 +695,6 @@ function getTripFromServiceId(serviceId) {
     return "";
 }
 
-// Firestore blocked service format:
-// Collection: blockedServices
-// Document ID can be anything. Example: 2026-07-12_Duv001_PM
-// Fields:
-// date: "2026-07-12"
-// busId: "Duv001"
-// serviceId: "Duv001_PM"
-// active: true
-// reason: "Service is not available on this date"
-//
-// IMPORTANT:
-// This function checks by FIELD values, not by document ID.
-// So even if your document ID is different, it will still work.
 async function isServiceBlocked(journeyDate, busId, serviceId) {
     try {
         const cleanDate = String(journeyDate || "").trim();
