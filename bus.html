@@ -604,11 +604,8 @@ import {
     getFirestore,
     doc,
     getDoc,
-    collection,
     collectionGroup,
-    getDocs,
-    query,
-    where
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -700,52 +697,88 @@ async function isServiceBlocked(journeyDate, busId, serviceId) {
         const cleanDate = String(journeyDate || "").trim();
         const cleanBusId = String(busId || "").trim();
         const cleanServiceId = String(serviceId || "").trim();
+        const trip = getTripFromServiceId(cleanServiceId);
 
-        if (!cleanDate || !cleanBusId || !cleanServiceId) {
+        if (!cleanDate || !cleanBusId || !trip) {
+            console.log("Blocked check skipped:", {
+                cleanDate,
+                cleanBusId,
+                cleanServiceId,
+                trip
+            });
             return false;
         }
 
-        // Read all blocked entries for selected date.
-        // This is more reliable because it does not depend on document ID.
-        const blockQuery = query(
-            collection(db, "blockedServices"),
-            where("date", "==", cleanDate)
+        // New Firestore structure:
+        // blockedServices/{busId}/blockedDates/{date_trip}
+        // Example:
+        // blockedServices/Duv001/blockedDates/2026-07-12_PM
+        const exactDateTripId = `${cleanDate}_${trip}`;
+
+        const exactRef = doc(
+            db,
+            "blockedServices",
+            cleanBusId,
+            "blockedDates",
+            exactDateTripId
         );
 
-        const blockSnap = await getDocs(blockQuery);
+        const exactSnap = await getDoc(exactRef);
 
-        let blocked = false;
+        if (exactSnap.exists()) {
+            const block = exactSnap.data();
+            const isActive = block.active === true;
 
-        blockSnap.forEach((docSnap) => {
-            const block = docSnap.data();
+            console.log("Blocked exact date/trip check:", {
+                path: `blockedServices/${cleanBusId}/blockedDates/${exactDateTripId}`,
+                exists: true,
+                active: block.active,
+                blocked: isActive
+            });
 
-            const blockActive = block.active === true;
-            const blockBusId = String(block.busId || "").trim();
-            const blockServiceId = String(block.serviceId || "").trim();
+            return isActive;
+        }
 
-            if (!blockActive) return;
+        // Optional fallback: block all AM/PM services for this bus on a date.
+        // Create document: blockedServices/{busId}/blockedDates/{date}
+        // Example: blockedServices/Duv001/blockedDates/2026-07-12
+        const fullDateRef = doc(
+            db,
+            "blockedServices",
+            cleanBusId,
+            "blockedDates",
+            cleanDate
+        );
 
-            // Block exact service only, for example Duv001_PM.
-            if (blockServiceId && blockServiceId === cleanServiceId) {
-                blocked = true;
-            }
+        const fullDateSnap = await getDoc(fullDateRef);
 
-            // Optional: if you store only busId and leave serviceId empty,
-            // then all services of that bus will be blocked for that date.
-            if (!blockServiceId && blockBusId && blockBusId === cleanBusId) {
-                blocked = true;
-            }
-        });
+        if (fullDateSnap.exists()) {
+            const block = fullDateSnap.data();
+            const isActive = block.active === true;
+
+            console.log("Blocked full date check:", {
+                path: `blockedServices/${cleanBusId}/blockedDates/${cleanDate}`,
+                exists: true,
+                active: block.active,
+                blocked: isActive
+            });
+
+            return isActive;
+        }
 
         console.log("Blocked check:", {
-            selectedDate: cleanDate,
             busId: cleanBusId,
             serviceId: cleanServiceId,
-            foundDocs: blockSnap.size,
-            blocked
+            date: cleanDate,
+            trip,
+            checkedPaths: [
+                `blockedServices/${cleanBusId}/blockedDates/${exactDateTripId}`,
+                `blockedServices/${cleanBusId}/blockedDates/${cleanDate}`
+            ],
+            blocked: false
         });
 
-        return blocked;
+        return false;
 
     } catch (error) {
         console.error("Blocked service check error:", error);
