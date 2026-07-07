@@ -12,6 +12,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
@@ -25,8 +26,82 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const messaging = getMessaging(app);
+
+// IMPORTANT: paste your Firebase Web Push certificate key here.
+// Firebase Console → Project Settings → Cloud Messaging → Web Push certificates → Generate key pair
+const VAPID_KEY = "BHTAAIhB0K_6ONc9Bz8GNxBDCpM5Lh3LsayyVnZ0NJJxKoYQQBaYR_Ig7QAbNGDMTwXFKCalJ5UrYAdXfM4prS8";
 
 let confirmationResult;
+
+async function saveDreamlinerNotificationToken(user) {
+    try {
+        if (!user || !user.uid) return;
+
+        if (!("Notification" in window)) {
+            console.log("This browser does not support notifications");
+            return;
+        }
+
+        if (!("serviceWorker" in navigator)) {
+            console.log("This browser does not support service workers");
+            return;
+        }
+
+        if (!VAPID_KEY || VAPID_KEY.includes("PASTE_YOUR")) {
+            console.log("VAPID key not added yet");
+            return;
+        }
+
+        const permission = await Notification.requestPermission();
+
+        if (permission !== "granted") {
+            console.log("Notification permission not granted");
+            return;
+        }
+
+        // GitHub Pages URL is https://amar12we.github.io/dreambus/
+        const registration = await navigator.serviceWorker.register("/dreambus/firebase-messaging-sw.js", {
+            scope: "/dreambus/"
+        });
+
+        const token = await getToken(messaging, {
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: registration
+        });
+
+        if (!token) {
+            console.log("No FCM token received");
+            return;
+        }
+
+        await setDoc(doc(db, "notificationTokens", user.uid), {
+            userUid: user.uid,
+            phone: user.phoneNumber || "",
+            webToken: token,
+            platform: "web-github-pages",
+            siteUrl: "https://amar12we.github.io/dreambus/",
+            updatedAt: new Date()
+        }, { merge: true });
+
+        console.log("Dreamliner notification token saved");
+
+    } catch (error) {
+        console.error("Notification setup error:", error);
+    }
+}
+
+onMessage(messaging, (payload) => {
+    const title = payload.notification?.title || "Dreamliner";
+    const body = payload.notification?.body || "You have a new notification from Dreamliner.";
+
+    if (Notification.permission === "granted") {
+        new Notification(title, {
+            body,
+            icon: "/dreambus/logo.png"
+        });
+    }
+});
 
 /* RECAPTCHA */
 window.onload = () => {
@@ -138,7 +213,10 @@ inputs.forEach(input => {
         await setDoc(userRef, {
             phone: user.phoneNumber,
             createdAt: new Date()
-        });
+        }, { merge: true });
+
+        showLoader("Setting up notifications...");
+        await saveDreamlinerNotificationToken(user);
 
         showLoader("Creating account...");
 
