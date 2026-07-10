@@ -3491,6 +3491,77 @@ body {
     }
 }
 
+
+
+/* ===== TRUE INFINITE LOOP SLIDERS FIX =====
+   Coupons, Why Dreamliner and Tutorials keep moving 1-2-3-1-2-3 on mobile,
+   laptop website and Android WebView without jumping back. */
+.coupon-scroll,
+.feature-slider,
+.tutorial-slider{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:hidden !important;
+    overflow-y:hidden !important;
+    scroll-snap-type:none !important;
+    scroll-behavior:auto !important;
+    -webkit-overflow-scrolling:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+}
+
+.coupon-scroll::-webkit-scrollbar,
+.feature-slider::-webkit-scrollbar,
+.tutorial-slider::-webkit-scrollbar{
+    display:none;
+}
+
+.coupon-img-card,
+.feature-card,
+.tutorial-card{
+    flex:0 0 auto !important;
+    scroll-snap-align:unset !important;
+}
+
+@media (min-width:1024px){
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider{
+        display:flex !important;
+        overflow-x:hidden !important;
+        gap:24px !important;
+        padding:8px 0 16px !important;
+    }
+
+    .coupon-img-card{
+        min-width:370px !important;
+        width:370px !important;
+        height:215px !important;
+    }
+
+    .feature-card{
+        min-width:275px !important;
+        width:275px !important;
+    }
+
+    .tutorial-slider{
+        margin:28px auto !important;
+    }
+
+    .tutorial-card{
+        min-width:370px !important;
+        width:370px !important;
+    }
+}
+
+@media (max-width:700px){
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider{
+        overflow-x:hidden !important;
+    }
+}
+
 </style>
 
 
@@ -3540,6 +3611,265 @@ body{
     body{ padding-bottom: 110px !important; }
     .bottom-nav{ bottom: 0 !important; }
 }
+
+
+/* ===== TRUE INFINITE LOOP SLIDERS FIX =====
+   Coupons, Why Dreamliner and Tutorials keep moving 1-2-3-1-2-3 on mobile,
+   laptop website and Android WebView without jumping back. */
+.coupon-scroll,
+.feature-slider,
+.tutorial-slider{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:hidden !important;
+    overflow-y:hidden !important;
+    scroll-snap-type:none !important;
+    scroll-behavior:auto !important;
+    -webkit-overflow-scrolling:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+}
+
+.coupon-scroll::-webkit-scrollbar,
+.feature-slider::-webkit-scrollbar,
+.tutorial-slider::-webkit-scrollbar{
+    display:none;
+}
+
+.coupon-img-card,
+.feature-card,
+.tutorial-card{
+    flex:0 0 auto !important;
+    scroll-snap-align:unset !important;
+}
+
+@media (min-width:1024px){
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider{
+        display:flex !important;
+        overflow-x:hidden !important;
+        gap:24px !important;
+        padding:8px 0 16px !important;
+    }
+
+    .coupon-img-card{
+        min-width:370px !important;
+        width:370px !important;
+        height:215px !important;
+    }
+
+    .feature-card{
+        min-width:275px !important;
+        width:275px !important;
+    }
+
+    .tutorial-slider{
+        margin:28px auto !important;
+    }
+
+    .tutorial-card{
+        min-width:370px !important;
+        width:370px !important;
+    }
+}
+
+@media (max-width:700px){
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider{
+        overflow-x:hidden !important;
+    }
+}
+
+</style>
+
+
+
+<!-- Dreamliner bottom navigation final responsive fix -->
+<style id="dreamliner-bottom-nav-final-fix">
+/* Common fix: equal button width and clean centered labels */
+.bottom-nav{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-around !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+}
+
+.bottom-nav > div{
+    flex:1 1 0 !important;
+    min-width:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:3px !important;
+    text-align:center !important;
+    line-height:1.1 !important;
+    padding:3px 4px !important;
+}
+
+.bottom-nav p{
+    margin:0 !important;
+    padding:0 !important;
+    max-width:100% !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+}
+
+.announcement-icon-wrap{
+    margin:0 auto !important;
+}
+
+/* Mobile website + Android WebView: same layout, with safe bottom distance only */
+@media (max-width: 767px){
+    :root{
+        --dreamliner-mobile-nav-height: 64px;
+        --dreamliner-device-bottom: max(env(safe-area-inset-bottom), var(--android-nav-gap, 0px));
+    }
+
+    body{
+        padding-bottom: calc(var(--dreamliner-mobile-nav-height) + var(--dreamliner-device-bottom) + 16px) !important;
+    }
+
+    .main-content{
+        padding-bottom: calc(var(--dreamliner-mobile-nav-height) + var(--dreamliner-device-bottom) + 48px) !important;
+    }
+
+    .bottom-nav{
+        left:0 !important;
+        right:0 !important;
+        bottom:var(--dreamliner-device-bottom) !important;
+        width:100% !important;
+        transform:none !important;
+        min-height:var(--dreamliner-mobile-nav-height) !important;
+        padding:8px 6px 10px !important;
+        border-radius:0 !important;
+        border-top:1px solid #eeeeee !important;
+        box-shadow:0 -6px 20px rgba(0,0,0,.12) !important;
+    }
+
+    .bottom-nav div{
+        font-size:10px !important;
+    }
+
+    .bottom-nav i{
+        font-size:17px !important;
+        margin:0 !important;
+    }
+
+    .announcement-count-badge{
+        top:-9px !important;
+        right:-14px !important;
+    }
+}
+
+/* Tablet/laptop/desktop: floating centered pill, not full-width */
+@media (min-width: 768px){
+    body{
+        padding-bottom:130px !important;
+    }
+
+    .main-content{
+        padding-bottom:150px !important;
+    }
+
+    .bottom-nav{
+        left:50% !important;
+        right:auto !important;
+        transform:translateX(-50%) !important;
+        width:min(560px, calc(100% - 34px)) !important;
+        bottom:16px !important;
+        min-height:64px !important;
+        padding:10px 10px !important;
+        border-radius:24px !important;
+        border:1px solid rgba(255,255,255,.85) !important;
+        box-shadow:0 16px 40px rgba(0,0,0,.18) !important;
+    }
+
+    .bottom-nav div{
+        font-size:11px !important;
+        cursor:pointer;
+    }
+
+    .bottom-nav i{
+        font-size:18px !important;
+        margin:0 !important;
+    }
+}
+
+
+/* ===== TRUE INFINITE LOOP SLIDERS FIX =====
+   Coupons, Why Dreamliner and Tutorials keep moving 1-2-3-1-2-3 on mobile,
+   laptop website and Android WebView without jumping back. */
+.coupon-scroll,
+.feature-slider,
+.tutorial-slider{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:hidden !important;
+    overflow-y:hidden !important;
+    scroll-snap-type:none !important;
+    scroll-behavior:auto !important;
+    -webkit-overflow-scrolling:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+}
+
+.coupon-scroll::-webkit-scrollbar,
+.feature-slider::-webkit-scrollbar,
+.tutorial-slider::-webkit-scrollbar{
+    display:none;
+}
+
+.coupon-img-card,
+.feature-card,
+.tutorial-card{
+    flex:0 0 auto !important;
+    scroll-snap-align:unset !important;
+}
+
+@media (min-width:1024px){
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider{
+        display:flex !important;
+        overflow-x:hidden !important;
+        gap:24px !important;
+        padding:8px 0 16px !important;
+    }
+
+    .coupon-img-card{
+        min-width:370px !important;
+        width:370px !important;
+        height:215px !important;
+    }
+
+    .feature-card{
+        min-width:275px !important;
+        width:275px !important;
+    }
+
+    .tutorial-slider{
+        margin:28px auto !important;
+    }
+
+    .tutorial-card{
+        min-width:370px !important;
+        width:370px !important;
+    }
+}
+
+@media (max-width:700px){
+    .coupon-scroll,
+    .feature-slider,
+    .tutorial-slider{
+        overflow-x:hidden !important;
+    }
+}
+
 </style>
 
 </head>
@@ -3548,7 +3878,7 @@ body{
 <div class="header">
     <div class="logo">
         <img id="siteLogo" src="logo.png" class="logo-img" alt="Dreamliner Logo">
-        Dreamliner
+        DREAMLINER  BUS
     </div>
     <div id="auth-section">
         <button id="login-btn" class="login-btn" onclick="openLoginPopup()">Login</button>
@@ -5488,45 +5818,76 @@ function showSlide() {
     const slider = document.getElementById(sliderId);
     if (!slider) return;
 
-    // Laptop/Desktop uses professional grid layout, so do not clone cards there.
-    // This keeps mobile auto-slider same and stops repeated coupons/features/videos on laptop.
-    if (window.matchMedia && window.matchMedia("(min-width: 1024px)").matches) {
-        slider.dataset.autoSlideStarted = "desktop-grid";
-        return;
+    // Clean previous loop timer if Firebase replaces cards.
+    if (slider.dataset.autoSlideTimer) {
+        clearInterval(Number(slider.dataset.autoSlideTimer));
+        slider.removeAttribute("data-auto-slide-timer");
     }
 
-    // Stop duplicate cloning when Firebase assets reload and autoSlide is called again.
-    if (slider.dataset.autoSlideStarted === "true") return;
+    // Remove old cloned cards before creating a fresh infinite loop.
+    slider.querySelectorAll("[data-loop-clone='true']").forEach(el => el.remove());
 
-    let cards = slider.querySelectorAll(cardClass);
-    if (cards.length <= 1) return;
+    const originalCards = Array.from(slider.querySelectorAll(cardClass));
+    if (originalCards.length <= 1) return;
 
     slider.dataset.autoSlideStarted = "true";
+    slider.scrollLeft = 0;
 
-    cards.forEach(card => {
-        slider.appendChild(card.cloneNode(true));
-    });
+    // Clone enough cards so laptop wide screens also have a continuous 1-2-3-1-2-3 flow.
+    for (let round = 0; round < 3; round++) {
+        originalCards.forEach(card => {
+            const clone = card.cloneNode(true);
+            clone.setAttribute("data-loop-clone", "true");
+            slider.appendChild(clone);
+        });
+    }
 
-    let step = cards[0].offsetWidth + 12;
+    let currentIndex = 0;
 
-    setInterval(() => {
-        slider.scrollBy({
-            left: step,
+    const getGap = () => {
+        const styles = window.getComputedStyle(slider);
+        return parseFloat(styles.columnGap || styles.gap || 0) || 0;
+    };
+
+    const getStep = () => {
+        const first = slider.querySelector(cardClass);
+        return first ? first.getBoundingClientRect().width + getGap() : 0;
+    };
+
+    const originalWidth = () => originalCards.reduce((sum, card) => {
+        return sum + card.getBoundingClientRect().width + getGap();
+    }, 0);
+
+    const moveNext = () => {
+        const step = getStep();
+        if (!step) return;
+
+        currentIndex += 1;
+        slider.scrollTo({
+            left: currentIndex * step,
             behavior: "smooth"
         });
 
-        if (slider.scrollLeft >= slider.scrollWidth / 2) {
+        // When first set is crossed, instantly shift back to the same visual position.
+        // User sees 1-2-3-1-2-3 continuously, not a reverse jump back to 1.
+        if (slider.scrollLeft + step >= originalWidth()) {
             setTimeout(() => {
-                slider.scrollLeft = 0;
-            }, 400);
+                currentIndex = 0;
+                slider.scrollTo({ left: 0, behavior: "auto" });
+            }, Math.min(650, time - 120));
         }
-    }, time);
+    };
+
+    const timer = setInterval(moveNext, time);
+    slider.dataset.autoSlideTimer = String(timer);
 }
 
 
-autoSlide("offerSlider", ".coupon-img-card", 3000);
-autoSlide("featureSlider", ".feature-card", 3000);
-autoSlide("tutorialSlider", ".tutorial-card", 3000);
+setTimeout(() => {
+    autoSlide("offerSlider", ".coupon-img-card", 3000);
+    autoSlide("featureSlider", ".feature-card", 3000);
+    autoSlide("tutorialSlider", ".tutorial-card", 3000);
+}, 350);
         </script>
 </body>
 </html> 
