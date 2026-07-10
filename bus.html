@@ -82,15 +82,19 @@ body {
 }
 
 .brand-name {
-    font-size: 20px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    padding: 5px 12px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #ff7a00, #ff512f);
-    color: white;
-    box-shadow: 0 8px 20px rgba(255,122,0,0.25);
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+    box-shadow: none;
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: 0.2px;
+    line-height: 1.15;
 }
 
 .bus-type {
@@ -306,7 +310,11 @@ body {
 
 .brand-name {
     font-size: 16px;
-    padding: 4px 10px;
+    padding: 6px 11px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+    box-shadow: none;
 }
 
 .bus-type {
@@ -443,10 +451,16 @@ body {
     }
 
     .brand-name {
-        font-size: 18px;
-        padding: 7px 14px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 20px;
+        font-weight: 850;
+        padding: 8px 16px;
         border-radius: 14px;
-        box-shadow: 0 10px 24px rgba(255,122,0,0.20);
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        color: #111827;
+        box-shadow: none;
     }
 
     .bus-type {
@@ -850,8 +864,8 @@ function createBusCard(matched, layout, index) {
 
     card.innerHTML = `
         <div class="brand-section">
-            <span class="brand-name">${matched.busName || "DREAMLINER"}</span>
-            <span class="bus-type">${matched.busType || "Bus Service"}</span>
+            <span class="brand-name">${matched.busName || "BharatBenz"}</span>
+            <span class="bus-type">${matched.busType || "BharatBenz 2×1 Premium AC Cushioned Seater"}</span>
         </div>
 
         <div class="journey-row">
