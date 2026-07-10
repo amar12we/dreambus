@@ -3872,6 +3872,847 @@ body{
 
 </style>
 
+
+<style id="dreamliner-slider-coupon-upgrade">
+/* ===== Coupon + dots + clean slider final upgrade ===== */
+.section-title-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:12px;
+}
+.section-title-row h3{ margin:0; }
+.section-title-row p{
+    margin:5px 0 0;
+    color:#6b7280;
+    font-size:12px;
+    line-height:1.35;
+}
+.view-all-btn{
+    border:none;
+    background:#fff4ea;
+    color:#ff512f;
+    padding:8px 12px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:12px;
+    white-space:nowrap;
+    box-shadow:0 5px 14px rgba(255,122,0,.12);
+}
+.coupon-scroll,
+.feature-slider,
+.tutorial-slider{
+    align-items:stretch !important;
+    padding:4px 3px 12px !important;
+    gap:14px !important;
+}
+.coupon-img-card{
+    height:auto !important;
+    min-height:0 !important;
+    background:#fff !important;
+    border:1px solid #eef0f3;
+    border-radius:18px !important;
+    box-shadow:0 8px 20px rgba(15,23,42,.08) !important;
+    display:flex;
+    flex-direction:column;
+}
+.coupon-img-card img{
+    height:128px !important;
+    border-radius:18px 18px 0 0;
+    object-fit:cover;
+    flex-shrink:0;
+}
+.coupon-info{
+    padding:10px 11px 11px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+.coupon-info h4{
+    margin:0;
+    color:#111827;
+    font-size:13px;
+    font-weight:850;
+}
+.coupon-info p{
+    margin:0;
+    color:#6b7280;
+    font-size:11px;
+    line-height:1.35;
+}
+.coupon-copy-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-top:2px;
+}
+.coupon-code-pill{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    border:1px dashed #ff9a35;
+    background:#fff7ed;
+    color:#9a3412;
+    border-radius:999px;
+    padding:7px 9px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.2px;
+}
+.copy-coupon-btn{
+    border:none;
+    border-radius:999px;
+    padding:7px 10px;
+    color:#fff;
+    background:linear-gradient(135deg,#ff7a00,#ff512f);
+    font-size:11px;
+    font-weight:850;
+    box-shadow:0 5px 12px rgba(255,81,47,.22);
+}
+.slider-dots{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    margin:4px auto 0;
+    min-height:12px;
+}
+.slider-dots .slider-dot{
+    width:7px;
+    height:7px;
+    border-radius:999px;
+    border:0;
+    padding:0;
+    background:#d1d5db;
+    transition:.25s ease;
+}
+.slider-dots .slider-dot.active{
+    width:20px;
+    background:linear-gradient(135deg,#ff7a00,#ff512f);
+}
+.feature-slider{
+    padding-left:3px !important;
+    padding-right:3px !important;
+}
+.feature-card{
+    box-sizing:border-box !important;
+    overflow:visible !important;
+}
+.coupons-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.68);
+    display:none;
+    z-index:9999;
+}
+.coupons-box{
+    width:92%;
+    max-width:520px;
+    max-height:86vh;
+    margin:7vh auto;
+    background:#fff;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 22px 55px rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+}
+.coupons-header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 16px;
+    background:#fff;
+    border-bottom:1px solid #eef0f3;
+}
+.coupons-header h3{ margin:0; font-size:16px; color:#111827; }
+.coupons-header button{
+    border:none;
+    background:linear-gradient(135deg,#ff7a00,#ff512f);
+    color:#fff;
+    padding:8px 13px;
+    border-radius:999px;
+    font-weight:800;
+}
+.coupons-list{
+    overflow-y:auto;
+    padding:14px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+}
+.coupons-list .coupon-img-card{
+    width:100% !important;
+    min-width:0 !important;
+    transform:none !important;
+}
+.coupons-list .coupon-img-card img{ height:150px !important; }
+@media(max-width:700px){
+    .coupon-section{ margin-left:15px !important; margin-right:15px !important; }
+    .coupon-img-card{ width:78vw !important; min-width:78vw !important; }
+    .feature-card{ width:calc(100vw - 82px) !important; min-width:calc(100vw - 82px) !important; }
+    .tutorial-card{ width:76vw !important; min-width:76vw !important; }
+    .coupon-img-card img{ height:128px !important; }
+}
+@media(min-width:1024px){
+    .coupon-img-card{ width:370px !important; min-width:370px !important; }
+    .coupon-img-card img{ height:170px !important; }
+    .feature-card{ width:315px !important; min-width:315px !important; }
+    .tutorial-card{ width:370px !important; min-width:370px !important; }
+    .coupons-list{ grid-template-columns:1fr 1fr; }
+    .coupons-list .coupon-img-card img{ height:145px !important; }
+}
+</style>
+
+
+
+<style id="dreamliner-coupon-video-final-polish">
+/* ===== FINAL COUPON FULL-VIEW + TUTORIAL POLISH ===== */
+.offer-section-redbus{
+    background:linear-gradient(180deg,#ffffff,#fff8f2);
+    border:1px solid #ffe2cb;
+    border-radius:22px;
+    padding:16px;
+    box-shadow:0 12px 28px rgba(255,122,0,.10);
+}
+.section-title-row{align-items:center!important;margin-bottom:14px!important;}
+.section-title-row h3{font-size:18px!important;color:#111827!important;line-height:1.15!important;}
+.section-title-row p{font-size:12px!important;color:#6b7280!important;}
+.view-all-btn{cursor:pointer;transition:.25s ease;}
+.view-all-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(255,122,0,.18);}
+.coupon-scroll{scroll-padding-left:4px;}
+.coupon-img-card{
+    overflow:hidden!important;
+    cursor:pointer;
+    position:relative;
+}
+.coupon-img-card img{
+    width:100%!important;
+    object-fit:contain!important;      /* shows the full coupon image, no cut */
+    background:linear-gradient(135deg,#fff7ed,#ffffff)!important;
+    padding:7px!important;
+    box-sizing:border-box!important;
+}
+.coupon-info{background:#fff!important;border-top:1px solid #f3f4f6;}
+.coupon-copy-row{align-items:center!important;}
+.copy-coupon-btn{cursor:pointer;min-width:60px;}
+.copy-coupon-btn.copied{background:linear-gradient(135deg,#16a34a,#22c55e)!important;}
+.coupons-modal{backdrop-filter:blur(6px);}
+.coupons-box{
+    max-width:920px!important;
+    width:min(94%,920px)!important;
+    border-radius:26px!important;
+}
+.coupons-header{
+    padding:16px 18px!important;
+    background:linear-gradient(135deg,#fff,#fff7ed)!important;
+}
+.coupons-header h3{font-size:18px!important;font-weight:900!important;}
+.coupons-header button{cursor:pointer;}
+.coupons-list{
+    padding:16px!important;
+    gap:16px!important;
+}
+.coupons-list .coupon-img-card{
+    border-radius:22px!important;
+    box-shadow:0 12px 28px rgba(15,23,42,.10)!important;
+}
+.coupons-list .coupon-img-card img{
+    height:210px!important;
+    object-fit:contain!important;
+    padding:10px!important;
+}
+.coupons-list .coupon-info{padding:13px 14px 15px!important;}
+.coupons-list .coupon-info h4{font-size:15px!important;}
+.coupons-list .coupon-info p{font-size:12px!important;}
+.tutorial-section{
+    margin:18px 15px;
+    padding:16px;
+    border-radius:22px;
+    background:linear-gradient(180deg,#ffffff,#f8fbff);
+    border:1px solid #e8eef8;
+    box-shadow:0 12px 28px rgba(15,23,42,.08);
+}
+.tutorial-heading-row{margin-bottom:14px;}
+.tutorial-heading-row h2{
+    margin:0;
+    font-size:18px;
+    color:#111827;
+    line-height:1.15;
+}
+.tutorial-heading-row p{
+    margin:5px 0 0;
+    font-size:12px;
+    color:#6b7280;
+}
+.tutorial-slider{margin:0!important;padding:4px 2px 12px!important;}
+.tutorial-card{
+    border:1px solid #eef2f7!important;
+    background:#fff!important;
+    box-shadow:0 10px 24px rgba(15,23,42,.08)!important;
+}
+.tutorial-card h3{font-weight:850;color:#111827;}
+@media(max-width:700px){
+    .offer-section-redbus,.tutorial-section{margin-left:15px!important;margin-right:15px!important;}
+    .coupon-img-card img{height:150px!important;}
+    .coupons-list .coupon-img-card{width:100%!important;min-width:0!important;}
+    .coupons-list .coupon-img-card img{height:190px!important;}
+}
+@media(min-width:1024px){
+    .offer-section-redbus,.tutorial-section{max-width:1220px;margin:34px auto!important;padding:24px!important;border-radius:30px;}
+    .section-title-row h3,.tutorial-heading-row h2{font-size:30px!important;letter-spacing:-.7px;}
+    .section-title-row p,.tutorial-heading-row p{font-size:15px!important;}
+    .coupon-img-card img{height:185px!important;}
+    .tutorial-slider{max-width:none!important;}
+    .coupons-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+</style>
+
+
+
+<style id="dreamliner-coupon-full-image-fix">
+/* ===== COUPON FULL IMAGE FIX: no white inner frame / no screen-inside-screen ===== */
+#offerSlider.coupon-scroll{
+    align-items:flex-start !important;
+}
+#offerSlider .coupon-img-card{
+    height:auto !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:0 12px 26px rgba(15,23,42,.14) !important;
+    border-radius:18px !important;
+    overflow:hidden !important;
+    padding:0 !important;
+}
+#offerSlider .coupon-img-card > img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:16/9 !important;
+    object-fit:contain !important;
+    object-position:center center !important;
+    background:transparent !important;
+    padding:0 !important;
+    margin:0 !important;
+    border-radius:18px !important;
+    box-sizing:border-box !important;
+}
+#offerSlider .coupon-img-card .coupon-info{
+    margin-top:8px !important;
+    border:1px solid #ffe3cc !important;
+    border-radius:16px !important;
+    background:#fff !important;
+    box-shadow:0 6px 16px rgba(255,122,0,.08) !important;
+}
+
+/* View-all keeps image full-width and text below, but removes the inner white image padding */
+#allCouponsList .coupon-img-card{
+    background:#fff !important;
+    border:1px solid #ffe3cc !important;
+    padding:0 !important;
+}
+#allCouponsList .coupon-img-card > img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:16/9 !important;
+    object-fit:contain !important;
+    object-position:center center !important;
+    background:transparent !important;
+    padding:0 !important;
+    margin:0 !important;
+    border-radius:22px 22px 0 0 !important;
+    box-sizing:border-box !important;
+}
+@media(max-width:700px){
+    #offerSlider .coupon-img-card > img,
+    #allCouponsList .coupon-img-card > img{
+        height:auto !important;
+        aspect-ratio:16/9 !important;
+    }
+}
+@media(min-width:1024px){
+    #offerSlider .coupon-img-card > img,
+    #allCouponsList .coupon-img-card > img{
+        height:auto !important;
+        aspect-ratio:16/9 !important;
+    }
+}
+</style>
+
+
+
+<style id="dreamliner-redbus-offer-final-fix">
+/* ===== RedBus-style offers: full image slide, text below, no inner white screen ===== */
+.offer-section-redbus{
+    background:#fff !important;
+    box-shadow:none !important;
+    border:0 !important;
+    border-radius:0 !important;
+    margin:18px 0 18px !important;
+    padding:24px 0 20px !important;
+    max-width:none !important;
+    overflow:hidden !important;
+}
+.offer-section-redbus .section-title-row{
+    padding:0 18px !important;
+    margin:0 0 14px !important;
+    align-items:flex-start !important;
+}
+.offer-section-redbus .section-title-row h3{
+    color:#111 !important;
+    font-size:30px !important;
+    line-height:1.05 !important;
+    font-weight:900 !important;
+    letter-spacing:-.7px !important;
+    margin:0 0 6px !important;
+}
+.offer-section-redbus .section-title-row p{
+    color:#6b7280 !important;
+    font-size:17px !important;
+    line-height:1.25 !important;
+    margin:0 !important;
+}
+.offer-section-redbus .view-all-btn{
+    background:transparent !important;
+    color:#1d1bc8 !important;
+    box-shadow:none !important;
+    border:0 !important;
+    border-radius:0 !important;
+    padding:4px 0 !important;
+    font-size:16px !important;
+    font-weight:900 !important;
+    text-decoration:underline !important;
+    white-space:nowrap !important;
+}
+#offerSlider.coupon-scroll{
+    display:flex !important;
+    gap:18px !important;
+    overflow-x:auto !important;
+    overflow-y:visible !important;
+    scroll-snap-type:x mandatory !important;
+    scroll-behavior:smooth !important;
+    padding:12px 18px 12px !important;
+    align-items:flex-start !important;
+    scrollbar-width:none !important;
+}
+#offerSlider.coupon-scroll::-webkit-scrollbar{display:none !important;}
+#offerSlider .coupon-img-card{
+    width:82vw !important;
+    min-width:82vw !important;
+    max-width:620px !important;
+    height:auto !important;
+    padding:0 !important;
+    margin:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    border-radius:22px !important;
+    box-shadow:none !important;
+    overflow:visible !important;
+    scroll-snap-align:start !important;
+    display:block !important;
+    transform:none !important;
+}
+#offerSlider .coupon-img-card:hover{transform:none !important;}
+#offerSlider .coupon-img-card > img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:1.55/1 !important;
+    object-fit:cover !important;
+    object-position:center center !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    border-radius:22px !important;
+    background:transparent !important;
+    box-shadow:0 8px 18px rgba(15,23,42,.16) !important;
+}
+#offerSlider .coupon-info{
+    margin:9px 2px 0 !important;
+    padding:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    display:block !important;
+}
+#offerSlider .coupon-info h4{
+    margin:0 0 3px !important;
+    color:#111827 !important;
+    font-size:15px !important;
+    font-weight:900 !important;
+    line-height:1.2 !important;
+}
+#offerSlider .coupon-info p{
+    margin:0 0 8px !important;
+    color:#6b7280 !important;
+    font-size:12px !important;
+    line-height:1.3 !important;
+}
+#offerSlider .coupon-copy-row{
+    justify-content:flex-start !important;
+    gap:8px !important;
+}
+#offerSlider .coupon-code-pill{
+    flex:0 1 auto !important;
+    max-width:58% !important;
+    background:#fff !important;
+    border:1px dashed #ff7a00 !important;
+    color:#9a3412 !important;
+    padding:7px 11px !important;
+    border-radius:999px !important;
+    font-size:11px !important;
+}
+#offerSlider .copy-coupon-btn{
+    padding:7px 13px !important;
+    font-size:11px !important;
+}
+#offerDots.slider-dots{
+    justify-content:flex-start !important;
+    padding-left:18px !important;
+    margin:0 !important;
+    gap:8px !important;
+}
+#offerDots .slider-dot{
+    width:8px !important;
+    height:8px !important;
+    background:#e5e5e5 !important;
+}
+#offerDots .slider-dot.active{
+    width:58px !important;
+    background:#df3b47 !important;
+}
+/* View all: large coupon image with text/copy below */
+#allCouponsModal.coupons-modal{
+    background:#fff !important;
+    z-index:99999 !important;
+}
+#allCouponsModal .coupons-box{
+    width:100% !important;
+    max-width:none !important;
+    height:100vh !important;
+    max-height:100vh !important;
+    margin:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+}
+#allCouponsModal .coupons-header{
+    padding:14px 18px !important;
+}
+#allCouponsModal .coupons-header h3{
+    font-size:22px !important;
+    font-weight:900 !important;
+    color:#111 !important;
+}
+#allCouponsList.coupons-list{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:22px !important;
+    padding:16px 18px 95px !important;
+    background:#fff !important;
+}
+#allCouponsList .coupon-img-card{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+    border-radius:22px !important;
+    padding:0 !important;
+    overflow:visible !important;
+}
+#allCouponsList .coupon-img-card > img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:1.55/1 !important;
+    object-fit:cover !important;
+    object-position:center center !important;
+    border-radius:22px !important;
+    box-shadow:0 8px 18px rgba(15,23,42,.16) !important;
+    background:transparent !important;
+}
+#allCouponsList .coupon-info{
+    padding:10px 2px 0 !important;
+    margin:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+}
+@media(min-width:900px){
+    .offer-section-redbus{
+        border-radius:28px !important;
+        max-width:1180px !important;
+        margin:30px auto !important;
+        padding:28px 0 24px !important;
+    }
+    .offer-section-redbus .section-title-row{padding:0 28px !important;}
+    #offerSlider.coupon-scroll{padding-left:28px !important;padding-right:28px !important;}
+    #offerSlider .coupon-img-card{width:390px !important;min-width:390px !important;}
+    #offerSlider .coupon-img-card > img{aspect-ratio:1.55/1 !important;}
+    #offerDots.slider-dots{padding-left:28px !important;}
+    #allCouponsModal .coupons-box{max-width:920px !important;height:92vh !important;max-height:92vh !important;margin:4vh auto !important;border-radius:26px !important;box-shadow:0 22px 55px rgba(0,0,0,.22) !important;}
+    #allCouponsList.coupons-list{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:24px !important;padding:20px 22px 30px !important;}
+}
+</style>
+
+
+
+<style id="dreamliner-professional-offers-beauty-final">
+/* ===== Beautiful Professional Offers / Coupons Polish ===== */
+.offer-section-redbus{
+    position:relative !important;
+    background:
+        radial-gradient(circle at 12% 0%, rgba(255,122,0,.10), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(255,81,47,.08), transparent 30%),
+        linear-gradient(180deg,#ffffff 0%,#fffaf6 100%) !important;
+    border:1px solid rgba(255,224,204,.95) !important;
+    box-shadow:0 18px 45px rgba(154,52,18,.10) !important;
+    border-radius:24px !important;
+    overflow:hidden !important;
+}
+.offer-section-redbus::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(90deg,rgba(255,122,0,.08),transparent 22%,transparent 78%,rgba(255,81,47,.06));
+}
+.offer-section-redbus .section-title-row{
+    position:relative !important;
+    z-index:1 !important;
+}
+.offer-section-redbus .section-title-row h3{
+    display:flex !important;
+    align-items:center !important;
+    gap:9px !important;
+    letter-spacing:-.9px !important;
+}
+.offer-section-redbus .section-title-row h3::before{
+    content:"%";
+    width:32px;
+    height:32px;
+    border-radius:11px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:17px;
+    font-weight:900;
+    background:linear-gradient(135deg,#ff7a00,#ff512f);
+    box-shadow:0 10px 22px rgba(255,81,47,.24);
+}
+.offer-section-redbus .section-title-row p{
+    margin-left:41px !important;
+    color:#64748b !important;
+}
+.offer-section-redbus .view-all-btn{
+    background:rgba(255,255,255,.82) !important;
+    border:1px solid rgba(255,122,0,.18) !important;
+    color:#ff512f !important;
+    text-decoration:none !important;
+    border-radius:999px !important;
+    padding:9px 14px !important;
+    box-shadow:0 8px 20px rgba(255,122,0,.13) !important;
+    backdrop-filter:blur(10px);
+}
+.offer-section-redbus .view-all-btn::after{
+    content:"  →";
+    font-weight:900;
+}
+#offerSlider.coupon-scroll{
+    position:relative !important;
+    z-index:1 !important;
+}
+#offerSlider .coupon-img-card{
+    transition:transform .28s ease, filter .28s ease !important;
+}
+#offerSlider .coupon-img-card:hover{
+    transform:translateY(-3px) !important;
+    filter:saturate(1.04) !important;
+}
+#offerSlider .coupon-img-card > img{
+    border:1px solid rgba(255,255,255,.75) !important;
+    box-shadow:
+        0 14px 30px rgba(15,23,42,.14),
+        0 3px 8px rgba(255,122,0,.12) !important;
+}
+#offerSlider .coupon-info h4{
+    font-size:16px !important;
+    letter-spacing:-.25px !important;
+}
+#offerSlider .coupon-info p{
+    color:#64748b !important;
+}
+#offerSlider .coupon-code-pill{
+    background:linear-gradient(180deg,#fff,#fff7ed) !important;
+    border:1.5px dashed #ff7a00 !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+#offerSlider .copy-coupon-btn,
+#allCouponsList .copy-coupon-btn{
+    background:linear-gradient(135deg,#ff7a00,#ff512f) !important;
+    box-shadow:0 9px 18px rgba(255,81,47,.24) !important;
+    transition:transform .22s ease, box-shadow .22s ease !important;
+}
+#offerSlider .copy-coupon-btn:hover,
+#allCouponsList .copy-coupon-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 13px 24px rgba(255,81,47,.32) !important;
+}
+#offerDots .slider-dot{
+    opacity:.95 !important;
+    box-shadow:0 2px 7px rgba(15,23,42,.10) !important;
+}
+#offerDots .slider-dot.active{
+    background:linear-gradient(135deg,#ff512f,#ff7a00) !important;
+}
+
+/* View all professional sheet */
+#allCouponsModal .coupons-header{
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255,122,0,.14), transparent 40%),
+        linear-gradient(135deg,#fff,#fff7ed) !important;
+    border-bottom:1px solid #ffe2cb !important;
+}
+#allCouponsModal .coupons-header h3{
+    letter-spacing:-.45px !important;
+}
+#allCouponsModal .coupons-header button{
+    background:#111827 !important;
+    color:#fff !important;
+    box-shadow:0 9px 20px rgba(17,24,39,.18) !important;
+}
+#allCouponsList.coupons-list{
+    background:linear-gradient(180deg,#fff,#fffaf6) !important;
+}
+#allCouponsList .coupon-img-card > img{
+    border:1px solid rgba(255,255,255,.85) !important;
+    box-shadow:0 14px 30px rgba(15,23,42,.13) !important;
+}
+#allCouponsList .coupon-info h4{
+    font-size:16px !important;
+    letter-spacing:-.25px !important;
+    color:#111827 !important;
+}
+#allCouponsList .coupon-info p{
+    color:#64748b !important;
+    line-height:1.45 !important;
+}
+#allCouponsList .coupon-copy-row{
+    margin-top:10px !important;
+}
+#allCouponsList .coupon-code-pill{
+    background:#fff !important;
+    border:1.5px dashed #ff7a00 !important;
+    color:#9a3412 !important;
+    box-shadow:0 5px 14px rgba(255,122,0,.08) !important;
+}
+
+/* Tutorial videos professional heading/card polish */
+.tutorial-section{
+    position:relative !important;
+    background:
+        radial-gradient(circle at 14% 0%, rgba(37,99,235,.09), transparent 30%),
+        radial-gradient(circle at 90% 12%, rgba(255,122,0,.08), transparent 32%),
+        linear-gradient(180deg,#ffffff,#f8fbff) !important;
+    border:1px solid #e6edf8 !important;
+    box-shadow:0 18px 45px rgba(15,23,42,.08) !important;
+    overflow:hidden !important;
+}
+.tutorial-heading-row h2{
+    display:flex !important;
+    align-items:center !important;
+    gap:9px !important;
+    letter-spacing:-.55px !important;
+}
+.tutorial-heading-row h2::before{
+    content:"▶";
+    width:32px;
+    height:32px;
+    border-radius:11px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:14px;
+    background:linear-gradient(135deg,#2563eb,#ff7a00);
+    box-shadow:0 10px 22px rgba(37,99,235,.20);
+}
+.tutorial-heading-row p{
+    margin-left:41px !important;
+    color:#64748b !important;
+}
+.tutorial-card{
+    border-radius:22px !important;
+    border:1px solid rgba(226,232,240,.95) !important;
+    box-shadow:0 13px 28px rgba(15,23,42,.09) !important;
+    transition:transform .25s ease, box-shadow .25s ease !important;
+}
+.tutorial-card:hover{
+    transform:translateY(-4px) !important;
+    box-shadow:0 20px 38px rgba(15,23,42,.13) !important;
+}
+.tutorial-card video,
+.tutorial-card img{
+    border-radius:22px 22px 0 0 !important;
+}
+.tutorial-card h3{
+    padding:13px 14px !important;
+    letter-spacing:-.2px !important;
+}
+
+@media(max-width:700px){
+    .offer-section-redbus{
+        margin:18px 12px 20px !important;
+        padding-top:20px !important;
+    }
+    .offer-section-redbus .section-title-row{
+        padding:0 14px !important;
+    }
+    .offer-section-redbus .section-title-row h3{
+        font-size:27px !important;
+    }
+    .offer-section-redbus .section-title-row p{
+        font-size:15px !important;
+    }
+    #offerSlider.coupon-scroll{
+        padding-left:14px !important;
+        padding-right:14px !important;
+    }
+    #offerDots.slider-dots{
+        padding-left:14px !important;
+    }
+    #offerSlider .coupon-info h4{
+        font-size:15px !important;
+    }
+    .tutorial-section{
+        margin:18px 12px !important;
+    }
+}
+@media(min-width:900px){
+    .offer-section-redbus,
+    .tutorial-section{
+        border-radius:32px !important;
+    }
+    #offerSlider .coupon-img-card > img{
+        border-radius:24px !important;
+    }
+    #allCouponsList .coupon-img-card > img{
+        border-radius:24px !important;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -3979,22 +4820,29 @@ body{
 </div>
 <div class="main-content">
     <div class="drag-handle"></div>
-    <div class="coupon-section">
-        <h3>Best Offers for You</h3>
+    <div class="coupon-section offer-section-redbus">
+        <div class="section-title-row">
+            <div>
+                <h3>Offers</h3>
+                <p>Get best deals with great offers</p>
+            </div>
+            <button class="view-all-btn" onclick="openAllCoupons()">View all</button>
+        </div>
     
         <div class="coupon-scroll" id="offerSlider">
-            <div class="coupon-img-card">
-                <img src="coupon1.jpg">
+            <div class="coupon-img-card" data-code="FIRST2026" data-title="First Booking Offer" data-desc="Get ₹50 off on your first Dreamliner booking.">
+                <img src="coupon1.jpg" alt="FIRST2026 coupon">
             </div>
     
-            <div class="coupon-img-card">
-                <img src="coupon2.jpg">
+            <div class="coupon-img-card" data-code="DREAMLINER26" data-title="Dreamliner Discount" data-desc="Save more on selected Dreamliner journeys.">
+                <img src="coupon2.jpg" alt="DREAMLINER26 coupon">
             </div>
     
-            <div class="coupon-img-card">
-                <img src="coupon3.jpg">
+            <div class="coupon-img-card" data-code="LOYAL26CTM" data-title="Loyalty Reward" data-desc="Special reward for return trip travelers.">
+                <img src="coupon3.jpg" alt="LOYAL26CTM coupon">
             </div>
         </div>
+        <div class="slider-dots" id="offerDots" aria-label="Offer slide indicators"></div>
     </div>
 
     <div class="feature-section">
@@ -4047,6 +4895,7 @@ body{
             </div>
     
         </div>
+        <div class="slider-dots" id="featureDots" aria-label="Why Dreamliner slide indicators"></div>
     </div>
       
     
@@ -4124,30 +4973,49 @@ body{
     </div>
 
 
-    <div class="tutorial-slider" id="tutorialSlider">
+    <section class="tutorial-section">
+        <div class="tutorial-heading-row">
+            <h2>Tutorial Videos</h2>
+            <p>Learn how to book, reschedule, cancel and use Dreamliner features easily.</p>
+        </div>
 
-        <div class="tutorial-card" onclick="openVideo('t1.mp4')">
-            <video muted autoplay loop playsinline>
-                <source src="t1.mp4" type="video/mp4">
-            </video>
-            <h3>How to Use</h3>
+        <div class="tutorial-slider" id="tutorialSlider">
+
+            <div class="tutorial-card" onclick="openVideo('t1.mp4')">
+                <video muted autoplay loop playsinline>
+                    <source src="t1.mp4" type="video/mp4">
+                </video>
+                <h3>How to Use</h3>
+            </div>
+        
+            <div class="tutorial-card" onclick="openVideo('t2.mp4')">
+                <video muted autoplay loop playsinline>
+                    <source src="t2.mp4" type="video/mp4">
+                </video>
+                <h3>How to Reschedule</h3>
+            </div>
+        
+            <div class="tutorial-card" onclick="openVideo('t3.mp4')">
+                <video muted autoplay loop playsinline>
+                    <source src="t3.mp4" type="video/mp4">
+                </video>
+                <h3>Cancel / Refund</h3>
+            </div>
+        
         </div>
-    
-        <div class="tutorial-card" onclick="openVideo('t1.mp4')">
-            <video muted autoplay loop playsinline>
-                <source src="t1.mp4" type="video/mp4">
-            </video>
-            <h3>How to Reschedule</h3>
+        <div class="slider-dots" id="tutorialDots" aria-label="Tutorial slide indicators"></div>
+    </section>
+
+<div id="allCouponsModal" class="coupons-modal">
+    <div class="coupons-box">
+        <div class="coupons-header">
+            <h3>All Coupons</h3>
+            <button onclick="closeAllCoupons()">Close</button>
         </div>
-    
-        <div class="tutorial-card" onclick="openVideo('t1.mp4')">
-            <video muted autoplay loop playsinline>
-                <source src="t1.mp4" type="video/mp4">
-            </video>
-            <h3>Cancel / Refund</h3>
-        </div>
-    
+        <div id="allCouponsList" class="coupons-list"></div>
     </div>
+</div>
+
 <!-- VIDEO POPUP -->
 <div class="video-popup" id="videoPopup">
     <div class="video-box">
@@ -4499,6 +5367,11 @@ const HOME_REVIEW_LIMIT = 6;
         logoUrl: "logo.png",
         heroImages: ["demo1.webp", "demo2.jpeg", "demo3.jpeg"],
         offerImages: ["coupon1.jpg", "coupon2.jpg", "coupon3.jpg"],
+        offerCoupons: [
+            { imageUrl: "coupon1.jpg", code: "FIRST2026", title: "First Booking Offer", desc: "Get ₹50 off on your first Dreamliner booking." },
+            { imageUrl: "coupon2.jpg", code: "DREAMLINER26", title: "Dreamliner Discount", desc: "Save more on selected Dreamliner journeys." },
+            { imageUrl: "coupon3.jpg", code: "LOYAL26CTM", title: "Loyalty Reward", desc: "Special reward for return trip travelers." }
+        ],
         tutorialVideos: [
             { title: "How to Use", videoUrl: "t1.mp4" },
             { title: "How to Reschedule", videoUrl: "t2.mp4" },
@@ -4581,6 +5454,65 @@ async function preloadImages(urls) {
 
     const results = await Promise.allSettled(
         validUrls.map(url => preloadImage(url))
+    );
+
+    return results
+        .filter(result => result.status === "fulfilled")
+        .map(result => result.value);
+}
+
+function normalizeOfferItems(data) {
+    const defaultCoupons = [
+        { imageUrl: "coupon1.jpg", code: "FIRST2026", title: "First Booking Offer", desc: "Get ₹50 off on your first Dreamliner booking." },
+        { imageUrl: "coupon2.jpg", code: "DREAMLINER26", title: "Dreamliner Discount", desc: "Save more on selected Dreamliner journeys." },
+        { imageUrl: "coupon3.jpg", code: "LOYAL26CTM", title: "Loyalty Reward", desc: "Special reward for return trip travelers." }
+    ];
+
+    const source = Array.isArray(data.offerCoupons) && data.offerCoupons.length
+        ? data.offerCoupons
+        : (Array.isArray(data.offerImages) ? data.offerImages : defaultCoupons);
+
+    return source.map((item, index) => {
+        const fallback = defaultCoupons[index % defaultCoupons.length];
+
+        if (typeof item === "string") {
+            return {
+                imageUrl: item,
+                code: fallback.code,
+                title: fallback.title,
+                desc: fallback.desc,
+                active: true
+            };
+        }
+
+        return {
+            id: item.id || ("coupon_" + index),
+            imageUrl: item.imageUrl || item.url || item.src || fallback.imageUrl,
+            code: item.code || fallback.code,
+            title: item.title || fallback.title,
+            desc: item.desc || item.description || fallback.desc,
+            active: item.active !== false,
+            order: typeof item.order === "number" ? item.order : index
+        };
+    }).filter(item => item.active !== false && safeAssetUrl(item.imageUrl))
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+
+async function preloadOfferItems(data, shouldPreload) {
+    const items = normalizeOfferItems(data);
+
+    if (!shouldPreload) {
+        return items.map(item => ({
+            ...item,
+            imageUrl: safeAssetUrl(item.imageUrl)
+        })).filter(item => item.imageUrl);
+    }
+
+    const results = await Promise.allSettled(
+        items.map(async item => ({
+            ...item,
+            imageUrl: await preloadImage(item.imageUrl)
+        }))
     );
 
     return results
@@ -4718,21 +5650,22 @@ async function renderHomepageAssets(data, isFirebase = false) {
 
     const offerSlider = document.getElementById("offerSlider");
 
-    if (offerSlider && Array.isArray(data.offerImages)) {
-        const offerImages = isFirebase
-            ? await preloadImages(data.offerImages)
-            : data.offerImages.map(safeAssetUrl).filter(Boolean);
+    if (offerSlider) {
+        const offerItems = await preloadOfferItems(data, isFirebase);
 
-        if (offerImages.length > 0) {
+        if (offerItems.length > 0) {
             const fragment = document.createDocumentFragment();
 
-            offerImages.forEach((url, index) => {
+            offerItems.forEach((offer, index) => {
                 const card = document.createElement("div");
                 card.className = "coupon-img-card";
+                card.dataset.code = offer.code || "";
+                card.dataset.title = offer.title || "Dreamliner Offer";
+                card.dataset.desc = offer.desc || "Apply this coupon while booking your Dreamliner ticket.";
 
                 const img = document.createElement("img");
-                img.src = url;
-                img.alt = "Dreamliner Offer " + (index + 1);
+                img.src = offer.imageUrl;
+                img.alt = (offer.code || "Dreamliner") + " coupon";
                 img.loading = index === 0 ? "eager" : "lazy";
 
                 card.appendChild(img);
@@ -4743,7 +5676,8 @@ async function renderHomepageAssets(data, isFirebase = false) {
             replaceChildrenSmooth(offerSlider, fragment);
 
             setTimeout(() => {
-                autoSlide("offerSlider", ".coupon-img-card", 1000);
+                decorateCoupons();
+                autoSlide("offerSlider", ".coupon-img-card", 3000);
             }, 450);
         }
     }
@@ -5814,67 +6748,166 @@ function showSlide() {
         window.closeLoginPopup = closeLoginPopup;
         window.openVideo = openVideo;
         window.closeVideo = closeVideo;
-        function autoSlide(sliderId, cardClass, time) {
+        
+function getCouponDefaults(index){
+    const defaults = [
+        { code:"FIRST2026", title:"First Booking Offer", desc:"Get ₹50 off on your first Dreamliner booking." },
+        { code:"DREAMLINER26", title:"Dreamliner Discount", desc:"Save more on selected Dreamliner journeys." },
+        { code:"LOYAL26CTM", title:"Loyalty Reward", desc:"Special reward for return trip travelers." }
+    ];
+    return defaults[index % defaults.length];
+}
+
+function copyCouponCode(code, btn){
+    if(!code) return;
+    const done = () => {
+        if(btn){
+            const old = btn.innerHTML;
+            btn.innerHTML = "Copied";
+            btn.classList.add("copied");
+            setTimeout(() => { btn.innerHTML = old; btn.classList.remove("copied"); }, 1200);
+        } else {
+            alert("Coupon copied: " + code);
+        }
+    };
+
+    if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopyCoupon(code, done));
+    } else {
+        fallbackCopyCoupon(code, done);
+    }
+}
+
+function fallbackCopyCoupon(code, done){
+    const input = document.createElement("input");
+    input.value = code;
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.focus();
+    input.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    input.remove();
+    done();
+}
+
+function decorateCoupons(){
+    const cards = Array.from(document.querySelectorAll("#offerSlider .coupon-img-card:not([data-loop-clone='true'])"));
+    cards.forEach((card, index) => {
+        const d = getCouponDefaults(index);
+        const code = card.dataset.code || d.code;
+        const title = card.dataset.title || d.title;
+        const desc = card.dataset.desc || d.desc;
+        card.dataset.code = code;
+        card.dataset.title = title;
+        card.dataset.desc = desc;
+        const old = card.querySelector(".coupon-info");
+        if(old) old.remove();
+        const info = document.createElement("div");
+        info.className = "coupon-info";
+        info.innerHTML = `
+            <h4>${title}</h4>
+            <p>${desc}</p>
+            <div class="coupon-copy-row">
+                <span class="coupon-code-pill">${code}</span>
+                <button type="button" class="copy-coupon-btn">Copy</button>
+            </div>`;
+        info.querySelector("button").onclick = (e) => {
+            e.stopPropagation();
+            copyCouponCode(code, e.currentTarget);
+        };
+        card.appendChild(info);
+    });
+}
+
+function renderSliderDots(dotsId, count){
+    const dots = document.getElementById(dotsId);
+    if(!dots) return;
+    dots.innerHTML = "";
+    for(let i = 0; i < count; i++){
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "slider-dot" + (i === 0 ? " active" : "");
+        dot.setAttribute("aria-label", "Go to slide " + (i + 1));
+        dots.appendChild(dot);
+    }
+}
+
+function updateSliderDots(dotsId, index){
+    const dots = document.getElementById(dotsId);
+    if(!dots) return;
+    const all = dots.querySelectorAll(".slider-dot");
+    all.forEach((dot, i) => dot.classList.toggle("active", i === index));
+}
+
+function dotsIdForSlider(sliderId){
+    if(sliderId === "offerSlider") return "offerDots";
+    if(sliderId === "featureSlider") return "featureDots";
+    if(sliderId === "tutorialSlider") return "tutorialDots";
+    return "";
+}
+
+function autoSlide(sliderId, cardClass, time) {
     const slider = document.getElementById(sliderId);
     if (!slider) return;
 
-    // Clean previous loop timer if Firebase replaces cards.
+    if(sliderId === "offerSlider") decorateCoupons();
+
     if (slider.dataset.autoSlideTimer) {
         clearInterval(Number(slider.dataset.autoSlideTimer));
         slider.removeAttribute("data-auto-slide-timer");
     }
 
-    // Remove old cloned cards before creating a fresh infinite loop.
     slider.querySelectorAll("[data-loop-clone='true']").forEach(el => el.remove());
 
     const originalCards = Array.from(slider.querySelectorAll(cardClass));
+    const dotsId = dotsIdForSlider(sliderId);
+    renderSliderDots(dotsId, originalCards.length);
     if (originalCards.length <= 1) return;
 
-    slider.dataset.autoSlideStarted = "true";
-    slider.scrollLeft = 0;
+    originalCards.forEach((card, index) => card.dataset.realIndex = String(index));
 
-    // Clone enough cards so laptop wide screens also have a continuous 1-2-3-1-2-3 flow.
     for (let round = 0; round < 3; round++) {
-        originalCards.forEach(card => {
+        originalCards.forEach((card, index) => {
             const clone = card.cloneNode(true);
             clone.setAttribute("data-loop-clone", "true");
+            clone.dataset.realIndex = String(index);
+            clone.querySelectorAll(".copy-coupon-btn").forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    copyCouponCode(clone.dataset.code || getCouponDefaults(index).code, e.currentTarget);
+                };
+            });
             slider.appendChild(clone);
         });
     }
 
     let currentIndex = 0;
+    slider.scrollTo({ left: 0, behavior: "auto" });
+    updateSliderDots(dotsId, 0);
 
-    const getGap = () => {
-        const styles = window.getComputedStyle(slider);
-        return parseFloat(styles.columnGap || styles.gap || 0) || 0;
+    const getCards = () => Array.from(slider.querySelectorAll(cardClass));
+
+    const moveToIndex = (idx, behavior = "smooth") => {
+        const cards = getCards();
+        const target = cards[idx];
+        if(!target) return;
+        const left = Math.max(0, target.offsetLeft - slider.offsetLeft);
+        slider.scrollTo({ left, behavior });
+        updateSliderDots(dotsId, Number(target.dataset.realIndex || 0));
     };
-
-    const getStep = () => {
-        const first = slider.querySelector(cardClass);
-        return first ? first.getBoundingClientRect().width + getGap() : 0;
-    };
-
-    const originalWidth = () => originalCards.reduce((sum, card) => {
-        return sum + card.getBoundingClientRect().width + getGap();
-    }, 0);
 
     const moveNext = () => {
-        const step = getStep();
-        if (!step) return;
-
         currentIndex += 1;
-        slider.scrollTo({
-            left: currentIndex * step,
-            behavior: "smooth"
-        });
+        moveToIndex(currentIndex, "smooth");
 
-        // When first set is crossed, instantly shift back to the same visual position.
-        // User sees 1-2-3-1-2-3 continuously, not a reverse jump back to 1.
-        if (slider.scrollLeft + step >= originalWidth()) {
+        if (currentIndex >= originalCards.length) {
             setTimeout(() => {
-                currentIndex = 0;
-                slider.scrollTo({ left: 0, behavior: "auto" });
-            }, Math.min(650, time - 120));
+                const realIndex = currentIndex % originalCards.length;
+                currentIndex = realIndex;
+                moveToIndex(realIndex, "auto");
+                updateSliderDots(dotsId, realIndex);
+            }, Math.min(700, Math.max(250, time - 350)));
         }
     };
 
@@ -5882,12 +6915,83 @@ function showSlide() {
     slider.dataset.autoSlideTimer = String(timer);
 }
 
+function escapeHtml(value){
+    return String(value || "").replace(/[&<>'"]/g, ch => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        "'":"&#39;",
+        '"':"&quot;"
+    }[ch]));
+}
 
+function openAllCoupons(){
+    decorateCoupons();
+    const modal = document.getElementById("allCouponsModal");
+    const list = document.getElementById("allCouponsList");
+    if(!modal || !list) return;
+
+    list.innerHTML = "";
+    const cards = Array.from(document.querySelectorAll("#offerSlider .coupon-img-card:not([data-loop-clone='true'])"));
+
+    cards.forEach((card, index) => {
+        const d = getCouponDefaults(index);
+        const code = card.dataset.code || d.code;
+        const title = card.dataset.title || d.title;
+        const desc = card.dataset.desc || d.desc;
+        const img = card.querySelector("img");
+        const imageUrl = img ? img.getAttribute("src") : "";
+
+        const item = document.createElement("div");
+        item.className = "coupon-img-card";
+        item.dataset.code = code;
+        item.dataset.title = title;
+        item.dataset.desc = desc;
+        item.innerHTML = `
+            <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(code)} coupon">
+            <div class="coupon-info">
+                <h4>${escapeHtml(title)}</h4>
+                <p>${escapeHtml(desc)}</p>
+                <div class="coupon-copy-row">
+                    <span class="coupon-code-pill">${escapeHtml(code)}</span>
+                    <button type="button" class="copy-coupon-btn">Copy</button>
+                </div>
+            </div>`;
+
+        item.querySelector(".copy-coupon-btn").onclick = (e) => {
+            e.stopPropagation();
+            copyCouponCode(code, e.currentTarget);
+        };
+
+        list.appendChild(item);
+    });
+
+    modal.style.display = "block";
+}
+function closeAllCoupons(){
+    const modal = document.getElementById("allCouponsModal");
+    if(modal) modal.style.display = "none";
+}
+
+
+const allCouponsModalForClose = document.getElementById("allCouponsModal");
+if(allCouponsModalForClose){
+    allCouponsModalForClose.addEventListener("click", (e) => {
+        if(e.target === allCouponsModalForClose) closeAllCoupons();
+    });
+}
+
+window.copyCouponCode = copyCouponCode;
+window.openAllCoupons = openAllCoupons;
+window.closeAllCoupons = closeAllCoupons;
+
+decorateCoupons();
 setTimeout(() => {
     autoSlide("offerSlider", ".coupon-img-card", 3000);
     autoSlide("featureSlider", ".feature-card", 3000);
     autoSlide("tutorialSlider", ".tutorial-card", 3000);
 }, 350);
+
         </script>
 </body>
 </html> 
