@@ -3562,6 +3562,18 @@ body {
     }
 }
 
+
+/* Remove arrows from View All coupon cards */
+.all-coupon-card .fa-chevron-right,
+.all-coupon-card .fa-angle-right,
+.coupon-item .fa-chevron-right,
+.coupon-item .fa-angle-right,
+.all-coupon-card::after,
+.coupon-item::after{
+display:none!important;
+content:none!important;
+}
+
 </style>
 
 
@@ -5044,7 +5056,7 @@ body{
                         <h4>Call Support</h4>
                         <p>Talk to our team instantly</p>
                     </div>
-                    <i class="fas fa-chevron-right"></i>
+                    
                 </a>
     
                 <a href="https://wa.me/919876543210" target="_blank" class="contact-card whatsapp">
@@ -5055,7 +5067,7 @@ body{
                         <h4>WhatsApp Help</h4>
                         <p>Quick replies within minutes</p>
                     </div>
-                    <i class="fas fa-chevron-right"></i>
+                    
                 </a>
     
                 <a href="mailto:support@dreamliner.com" class="contact-card email">
@@ -5066,7 +5078,7 @@ body{
                         <h4>Email Support</h4>
                         <p>Detailed assistance & queries</p>
                     </div>
-                    <i class="fas fa-chevron-right"></i>
+                    
                 </a>
     
             </div>
@@ -5147,12 +5159,12 @@ body{
                 <h3>Quick Links</h3>
 
                 <div class="footer-links">
-                    <a href="aboutus.html"><i class="fas fa-angle-right"></i> About Us</a>
-                    <a href="support.html"><i class="fas fa-angle-right"></i> Contact</a>
-                    <a href="policy.html"><i class="fas fa-angle-right"></i> Privacy Policy</a>
-                    <a href="policy.html"><i class="fas fa-angle-right"></i> Terms & Conditions</a>
-                    <a href="support.html"><i class="fas fa-angle-right"></i> FAQs</a>
-                    <a href="announcements.html"><i class="fas fa-angle-right"></i> Announcements</a>
+                    <a href="aboutus.html"> About Us</a>
+                    <a href="support.html"> Contact</a>
+                    <a href="policy.html"> Privacy Policy</a>
+                    <a href="policy.html"> Terms & Conditions</a>
+                    <a href="support.html"> FAQs</a>
+                    <a href="announcements.html"> Announcements</a>
                 </div>
             </div>
 
@@ -6995,3 +7007,169 @@ setTimeout(() => {
         </script>
 </body>
 </html> 
+<style id="dreamliner-viewall-coupon-final-fix">
+/* FINAL FIX: View all button text only, no arrow */
+.offer-section-redbus .view-all-btn::after,
+.view-all-btn::after,
+.view-all-btn::before{
+    content:none !important;
+    display:none !important;
+}
+.offer-section-redbus .view-all-btn,
+.view-all-btn{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:0 !important;
+    white-space:nowrap !important;
+}
+
+/* FINAL FIX: All Coupons page/cards show image + text + copy below every coupon */
+#allCouponsModal.coupons-modal{
+    background:linear-gradient(180deg,#fff7ef 0%,#ffffff 40%,#fffaf6 100%) !important;
+    overflow-y:auto !important;
+}
+#allCouponsModal .coupons-box{
+    background:transparent !important;
+    overflow:visible !important;
+}
+#allCouponsModal .coupons-header{
+    position:sticky !important;
+    top:0 !important;
+    z-index:20 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:14px !important;
+    padding:18px 20px !important;
+    background:rgba(255,250,246,.96) !important;
+    backdrop-filter:blur(12px) !important;
+    border-bottom:1px solid #ffe0c7 !important;
+}
+#allCouponsModal .coupons-header h3{
+    margin:0 !important;
+    font-size:24px !important;
+    line-height:1.1 !important;
+    font-weight:900 !important;
+    letter-spacing:-.6px !important;
+    color:#111827 !important;
+}
+#allCouponsModal .coupons-header button{
+    border:none !important;
+    border-radius:999px !important;
+    padding:10px 18px !important;
+    background:#111827 !important;
+    color:white !important;
+    font-size:14px !important;
+    font-weight:800 !important;
+    box-shadow:0 10px 22px rgba(17,24,39,.20) !important;
+}
+#allCouponsList.coupons-list{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:22px !important;
+    padding:18px 18px calc(120px + env(safe-area-inset-bottom)) !important;
+    background:transparent !important;
+    overflow:visible !important;
+}
+#allCouponsList .coupon-img-card{
+    width:100% !important;
+    min-width:0 !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-width:none !important;
+    display:block !important;
+    overflow:hidden !important;
+    padding:0 0 14px !important;
+    border-radius:24px !important;
+    background:#ffffff !important;
+    border:1px solid rgba(255,224,204,.95) !important;
+    box-shadow:0 15px 35px rgba(154,52,18,.12) !important;
+    transform:none !important;
+}
+#allCouponsList .coupon-img-card:hover{
+    transform:none !important;
+}
+#allCouponsList .coupon-img-card > img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:auto !important;
+    max-height:none !important;
+    object-fit:contain !important;
+    object-position:center !important;
+    border-radius:24px 24px 18px 18px !important;
+    box-shadow:none !important;
+    border:0 !important;
+    background:#fff !important;
+}
+#allCouponsList .coupon-info{
+    display:block !important;
+    padding:13px 14px 0 !important;
+    margin:0 !important;
+    background:#fff !important;
+    border:0 !important;
+    box-shadow:none !important;
+}
+#allCouponsList .coupon-info h4{
+    margin:0 0 5px !important;
+    font-size:18px !important;
+    line-height:1.18 !important;
+    font-weight:900 !important;
+    color:#111827 !important;
+    letter-spacing:-.35px !important;
+}
+#allCouponsList .coupon-info p{
+    margin:0 0 12px !important;
+    font-size:13px !important;
+    line-height:1.45 !important;
+    color:#667085 !important;
+}
+#allCouponsList .coupon-copy-row{
+    display:flex !important;
+    align-items:center !important;
+    gap:10px !important;
+    margin-top:0 !important;
+}
+#allCouponsList .coupon-code-pill{
+    flex:1 !important;
+    min-width:0 !important;
+    text-align:center !important;
+    padding:11px 12px !important;
+    border-radius:999px !important;
+    background:#fffaf4 !important;
+    border:1.6px dashed #ff7a00 !important;
+    color:#9a3412 !important;
+    font-size:13px !important;
+    font-weight:900 !important;
+    letter-spacing:.2px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+}
+#allCouponsList .copy-coupon-btn{
+    flex:0 0 auto !important;
+    min-width:92px !important;
+    border:none !important;
+    border-radius:999px !important;
+    padding:12px 18px !important;
+    background:linear-gradient(135deg,#ff7a00,#ff512f) !important;
+    color:#fff !important;
+    font-size:13px !important;
+    font-weight:900 !important;
+    box-shadow:0 10px 20px rgba(255,81,47,.25) !important;
+}
+@media(min-width:700px){
+    #allCouponsModal .coupons-box{
+        max-width:980px !important;
+        margin:24px auto !important;
+    }
+    #allCouponsModal .coupons-header{
+        border-radius:26px 26px 0 0 !important;
+    }
+    #allCouponsList.coupons-list{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        padding:22px 22px 34px !important;
+    }
+}
+</style>
