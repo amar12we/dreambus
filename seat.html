@@ -1545,6 +1545,73 @@ body{
 }
 </style>
 
+
+
+<!-- FINAL FIX: Desktop Journey Details panel position -->
+<style id="desktop-journey-panel-final-fix">
+@media (min-width: 1024px){
+    html, body{
+        height: 100vh !important;
+        min-height: 100vh !important;
+        overflow: hidden !important;
+        padding-bottom: 0 !important;
+    }
+
+    .desktop-booking-layout{
+        height: calc(100vh - 76px) !important;
+        align-items: stretch !important;
+    }
+
+    .journey-info-panel{
+        position: relative !important;
+        top: auto !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .journey-info-panel::before{
+        flex: 0 0 auto !important;
+        height: auto !important;
+        margin: 0 0 10px !important;
+        line-height: 1.1 !important;
+    }
+
+    .bottom-sheet,
+    .bottom-sheet.active{
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: 100% !important;
+        height: calc(100% - 32px) !important;
+        max-height: none !important;
+        transform: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        z-index: 1 !important;
+    }
+
+    .sheet-header{
+        flex: 0 0 auto !important;
+    }
+
+    .sheet-body{
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding-bottom: 28px !important;
+    }
+    
+}
+</style>
+
 </head>
 <body>
 
