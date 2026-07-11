@@ -2,386 +2,1425 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dreamliner Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dreamliner Login</title>
 
-<!-- ICONS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
-    authDomain: "dreamliner-421b0.firebaseapp.com",
-    projectId: "dreamliner-421b0",
-    storageBucket: "dreamliner-421b0.appspot.com",
-    messagingSenderId: "454472970770",
-    appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let confirmationResult;
-
-/* RECAPTCHA */
-window.onload = () => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible'
-    });
-};
-
-/* LOADER */
-function showLoader(text) {
-    document.getElementById("loaderText").innerText = text;
-    document.getElementById("loader").style.display = "flex";
-}
-
-function hideLoader() {
-    document.getElementById("loader").style.display = "none";
-}
-
-/* ONLY NUMBERS HANDLER (ADDED) */
-function onlyNumbers(el, max) {
-    el.value = el.value.replace(/\D/g, "").slice(0, max);
-}
-
-/* SEND OTP */
-window.sendOTP = async function() {
-    const phoneInput = document.getElementById('phone');
-    const phone = "+91" + phoneInput.value.trim();
-
-    if (phone.length < 13) {
-        alert("Enter valid mobile number");
-        return;
-    }
-
-    try {
-        showLoader("Sending OTP...");
-
-        confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-
-        hideLoader();
-
-        document.getElementById('otp-section').style.display = 'block';
-        document.getElementById('send-btn').style.display = 'none';
-
-        /* 🔒 LOCK PHONE */
-        phoneInput.disabled = true;
-        document.getElementById('edit-btn').style.display = 'block';
-
-        alert("OTP sent successfully");
-
-    } catch (err) {
-        hideLoader();
-        alert("Error: " + err.message);
-    }
-}
-/* EDIT PHONE */
-window.editPhone = function() {
-    const phoneInput = document.getElementById('phone');
-
-    /* 🔄 RESET UI */
-    phoneInput.disabled = false;
-
-    document.getElementById('otp-section').style.display = 'none';
-    document.getElementById('send-btn').style.display = 'block';
-    document.getElementById('edit-btn').style.display = 'none';
-
-    /* 🧹 CLEAR OTP BOXES */
-    document.querySelectorAll(".otp-box input").forEach(i => i.value = "");
-
-    /* 🔁 RESET RECAPTCHA (important) */
-    window.recaptchaVerifier.render().then(widgetId => {
-        grecaptcha.reset(widgetId);
-    });
-};
-
-/* OTP AUTO MOVE */
-window.moveNext = function(el, index) {
-    el.value = el.value.replace(/\D/g, "");
-    const inputs = document.querySelectorAll(".otp-box input");
-
-    if (el.value && index < inputs.length - 1) {
-        inputs[index + 1].focus();
-    }
-
-    if (!el.value && index > 0) {
-        inputs[index - 1].focus();
-    }
-};
-/* VERIFY OTP */
-window.verifyOTP = async function() {
-    const inputs = document.querySelectorAll(".otp-box input");
-let otp = "";
-
-inputs.forEach(input => {
-    otp += input.value;
-});
-
-    if (!otp) {
-        alert("Enter OTP");
-        return;
-    }
-
-    try {
-        showLoader("Verifying OTP...");
-
-        const result = await confirmationResult.confirm(otp);
-        const user = result.user;
-
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, {
-            phone: user.phoneNumber,
-            createdAt: new Date()
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCHkQ5k5wKEommWakTm09mCtcJxsRdgJIk",
+        authDomain: "dreamliner-421b0.firebaseapp.com",
+        projectId: "dreamliner-421b0",
+        storageBucket: "dreamliner-421b0.appspot.com",
+        messagingSenderId: "454472970770",
+        appId: "1:454472970770:web:cbf95c8b7523f24f2b5ecb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let confirmationResult;
+    
+    /* RECAPTCHA */
+    window.onload = () => {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+            size: "invisible"
         });
-
-        showLoader("Creating account...");
-
-        setTimeout(() => {
-            hideLoader();
-            alert("Login successfully");
-
-            window.top.postMessage("loginSuccess", "*");
-        }, 1200);
-
-    } catch (err) {
-        hideLoader();
-        alert("Invalid OTP");
+    };
+    
+    /* LOADER */
+    function showLoader(text) {
+        document.getElementById("loaderText").innerText = text;
+        document.getElementById("loader").style.display = "flex";
     }
-}
-
-</script>
+    
+    function hideLoader() {
+        document.getElementById("loader").style.display = "none";
+    }
+    
+    /* ONLY NUMBERS HANDLER */
+    function onlyNumbers(el, max) {
+        el.value = el.value.replace(/\D/g, "").slice(0, max);
+    }
+    
+    /* SEND OTP */
+    window.sendOTP = async function() {
+        const phoneInput = document.getElementById("phone");
+        const phone = "+91" + phoneInput.value.trim();
+    
+        if (phone.length < 13) {
+            alert("Enter valid mobile number");
+            phoneInput.focus();
+            return;
+        }
+    
+        try {
+            showLoader("Sending OTP...");
+    
+            confirmationResult = await signInWithPhoneNumber(
+                auth,
+                phone,
+                window.recaptchaVerifier
+            );
+    
+            hideLoader();
+    
+            document.getElementById("otp-section").style.display = "block";
+            document.getElementById("send-btn").style.display = "none";
+    
+            document.querySelector(".login-page").classList.add("otp-active");
+    
+            phoneInput.disabled = true;
+            document.getElementById("edit-btn").style.display = "flex";
+    
+            const firstOtpInput = document.querySelector(".otp-box input");
+    
+            if (firstOtpInput) {
+                firstOtpInput.focus();
+            }
+    
+            alert("OTP sent successfully");
+    
+        } catch (err) {
+            hideLoader();
+            alert("Error: " + err.message);
+        }
+    };
+    
+    /* EDIT PHONE */
+    window.editPhone = function() {
+        const phoneInput = document.getElementById("phone");
+    
+        phoneInput.disabled = false;
+    
+        document.getElementById("otp-section").style.display = "none";
+        document.getElementById("send-btn").style.display = "flex";
+        document.getElementById("edit-btn").style.display = "none";
+    
+        document.querySelector(".login-page").classList.remove("otp-active");
+    
+        document.querySelectorAll(".otp-box input").forEach(input => {
+            input.value = "";
+        });
+    
+        if (window.recaptchaVerifier) {
+            window.recaptchaVerifier.render().then(widgetId => {
+                if (window.grecaptcha) {
+                    window.grecaptcha.reset(widgetId);
+                }
+            });
+        }
+    
+        phoneInput.focus();
+    };
+    
+    /* OTP AUTO MOVE */
+    window.moveNext = function(el, index) {
+        el.value = el.value.replace(/\D/g, "");
+    
+        const inputs = document.querySelectorAll(".otp-box input");
+    
+        if (el.value && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    
+        if (!el.value && index > 0) {
+            inputs[index - 1].focus();
+        }
+    };
+    
+    /* VERIFY OTP */
+    window.verifyOTP = async function() {
+        const inputs = document.querySelectorAll(".otp-box input");
+        let otp = "";
+    
+        inputs.forEach(input => {
+            otp += input.value;
+        });
+    
+        if (otp.length !== 6) {
+            alert("Enter complete 6-digit OTP");
+            return;
+        }
+    
+        try {
+            showLoader("Verifying OTP...");
+    
+            const result = await confirmationResult.confirm(otp);
+            const user = result.user;
+    
+            const userRef = doc(db, "users", user.uid);
+    
+            await setDoc(
+                userRef,
+                {
+                    phone: user.phoneNumber,
+                    createdAt: new Date()
+                },
+                {
+                    merge: true
+                }
+            );
+    
+            showLoader("Creating account...");
+    
+            setTimeout(() => {
+                hideLoader();
+    
+                localStorage.setItem("isLoggedIn", "true");
+                sessionStorage.removeItem("dreamlinerLoginSkipped");
+    
+                alert("Login successfully");
+    
+                /*
+                 Sends a message to seat.html or any parent page
+                 so that the login popup closes.
+                */
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(
+                        {
+                            type: "dreamlinerAuth",
+                            action: "loginSuccess"
+                        },
+                        "*"
+                    );
+    
+                    window.parent.postMessage("loginSuccess", "*");
+                } else {
+                    window.location.href = "index.html";
+                }
+            }, 1200);
+    
+        } catch (err) {
+            hideLoader();
+            alert("Invalid OTP");
+        }
+    };
+    
+    /* SKIP LOGIN */
+    window.skipLogin = function(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    
+        sessionStorage.setItem("dreamlinerLoginSkipped", "true");
+    
+        /*
+         When login.html is opened inside the seat.html iframe,
+         this sends a message to seat.html to close authOverlay.
+        */
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage(
+                {
+                    type: "dreamlinerAuth",
+                    action: "skipLogin"
+                },
+                "*"
+            );
+    
+            /*
+             Also send the old string message so it works with
+             your existing seat.html listener.
+            */
+            window.parent.postMessage("skipLogin", "*");
+        } else {
+            /*
+             When login.html is opened directly, return to home.
+            */
+            window.location.href = "index.html";
+        }
+    };
+    </script>
 
 <style>
+:root {
+    --orange: #f26a21;
+    --orange-dark: #dd5010;
+    --navy: #17233c;
+    --text: #20283b;
+    --muted: #6f7685;
+    --line: #dfe3ea;
+    --surface: #ffffff;
+    --page: #f7f8fc;
+    --blue: #7898ed;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    min-height: 100%;
+    background: var(--page);
+}
+
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #f6f8fb, #eef2f7);
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-family: "Poppins", "Segoe UI", sans-serif;
+    color: var(--text);
+    background: var(--page);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+.login-page {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+    background: var(--surface);
+}
+
+.hero-panel {
+    position: relative;
+    min-height: 100vh;
+    padding: 54px clamp(38px, 6vw, 90px) 58px;
+    background:
+        radial-gradient(circle at 8% 8%, rgba(242, 106, 33, .12), transparent 30%),
+        linear-gradient(145deg, #fff 0%, #fbfcff 54%, #f3f6ff 100%);
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-/* CARD */
-.container {
-    width: 350px;
-    background: #fff;
-    padding: 35px;
-    border-radius: 18px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-    text-align: center;
-}
-
-/* HEADER */
-.title {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 5px;
-    color: #111;
-}
-
-.subtitle {
-    font-size: 13px;
-    color: #777;
-    margin-bottom: 25px;
-}
-
-/* PHONE INPUT */
-.phone-box {
-    display: flex;
-    border: 1px solid #e5e5e5;
-    border-radius: 12px;
+    flex-direction: column;
     overflow: hidden;
-    margin-bottom: 15px;
+}
+
+.hero-panel::before,
+.hero-panel::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-panel::before {
+    width: 370px;
+    height: 370px;
+    right: -180px;
+    top: -140px;
+    background: rgba(120, 152, 237, .10);
+}
+
+.hero-panel::after {
+    width: 240px;
+    height: 240px;
+    left: -120px;
+    bottom: -100px;
+    background: rgba(242, 106, 33, .08);
+}
+
+.top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.4px;
+}
+
+.brand-mark {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(145deg, var(--orange), var(--orange-dark));
+    box-shadow: 0 12px 24px rgba(242, 106, 33, .22);
+}
+
+.skip-link {
+    color: #737986;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 2px;
+    transition: color .2s ease;
+}
+
+.skip-link:hover {
+    color: var(--orange);
+}
+
+.hero-copy {
+    position: relative;
+    z-index: 2;
+    margin-top: clamp(52px, 9vh, 92px);
+    max-width: 690px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 13px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--orange-dark);
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+}
+
+.eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--orange);
+}
+
+.hero-title {
+    color: var(--orange-dark);
+    font-size: clamp(34px, 4.1vw, 58px);
+    line-height: 1.12;
+    letter-spacing: -1.5px;
+    font-weight: 800;
+}
+
+.hero-subtitle {
+    max-width: 650px;
+    margin-top: 18px;
+    color: #3e4658;
+    font-size: clamp(16px, 1.35vw, 20px);
+    line-height: 1.7;
+}
+
+.illustration-wrap {
+    flex: 1;
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    margin-top: 28px;
+}
+
+.login-illustration {
+    width: min(610px, 96%);
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 22px 24px rgba(45, 58, 99, .10));
+}
+
+.form-panel {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 48px clamp(34px, 5vw, 74px);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: -22px 0 55px rgba(44, 58, 92, .07);
+    position: relative;
+    z-index: 5;
+}
+
+.form-shell {
+    width: 100%;
+    max-width: 520px;
+}
+
+.mobile-welcome {
+    display: none;
+}
+
+.form-title {
+    color: var(--navy);
+    font-size: clamp(29px, 2.5vw, 38px);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -.8px;
+}
+
+.form-subtitle {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.form-content {
+    margin-top: 34px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #30384b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.phone-box {
+    width: 100%;
+    min-height: 68px;
+    display: flex;
+    overflow: hidden;
+    border: 1.5px solid var(--line);
+    border-radius: 17px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.phone-box:focus-within {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px rgba(242, 106, 33, .10);
 }
 
 .phone-prefix {
-    background: #f5f5f5;
-    padding: 12px;
-    font-weight: 700;
-    color: #333;
+    min-width: 102px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 17px;
+    color: var(--navy);
+    background: #fafbfe;
+    border-right: 1.5px solid var(--line);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.phone-prefix i {
+    color: var(--orange);
+    font-size: 14px;
 }
 
 .phone-box input {
-    border: none;
-    padding: 12px;
     width: 100%;
-    outline: none;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    padding: 0 20px;
+    color: var(--text);
+    background: transparent;
+    font-size: 16px;
+    font-weight: 500;
 }
 
-/* OTP SECTION */
-#otp-section{
-    margin-top: 15px;
+.phone-box input::placeholder {
+    color: #9a9fad;
+    font-weight: 400;
+}
+
+.phone-box input:disabled {
+    color: #5d6371;
+    background: #fafafa;
+    cursor: not-allowed;
+}
+
+.action-btn {
     width: 100%;
+    min-height: 58px;
+    border: 0;
+    border-radius: 15px;
+    margin-top: 18px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    box-shadow: 0 13px 25px rgba(242, 106, 33, .23);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 31px rgba(242, 106, 33, .28);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.action-btn.secondary {
+    color: #444c5e;
+    background: #f1f3f7;
+    box-shadow: none;
+}
+
+.action-btn.secondary:hover {
+    background: #e9ecf2;
+    box-shadow: none;
+}
+
+#otp-section {
+    width: 100%;
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid #edf0f4;
+}
+
+.otp-heading {
+    color: var(--navy);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.otp-note {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 13px;
 }
 
 .otp-box {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
     width: 100%;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 15px;
 }
 
 .otp-box input {
-    flex: 1;
-    max-width: 50px;
-    min-width: 35px;
-    height: 55px;
-    text-align: center;
-    font-size: 20px;
-    border-radius: 10px;
-    border: 1px solid #e5e5e5;
-    outline: none;
-}
-
-/* BUTTON */
-button {
     width: 100%;
-    padding: 13px;
-    margin-top: 15px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #ff7a00, #ff512f);
-    color: white;
+    min-width: 0;
+    height: 58px;
+    border: 1.5px solid var(--line);
+    border-radius: 13px;
+    outline: 0;
+    text-align: center;
+    color: var(--navy);
+    background: #fff;
+    font-size: 20px;
     font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
+    transition: border-color .2s ease, box-shadow .2s ease;
 }
 
-/* LOADER */
+.otp-box input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(242, 106, 33, .10);
+}
+
+.security-note {
+    margin-top: 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #858b98;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.security-note i {
+    color: var(--orange);
+    margin-top: 3px;
+}
+
+#recaptcha-container {
+    min-height: 1px;
+}
+
 .loader {
     position: fixed;
     inset: 0;
-    background: rgba(255,255,255,0.9);
     display: none;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    z-index: 999;
+    background: rgba(255, 255, 255, .92);
+    backdrop-filter: blur(7px);
+    z-index: 9999;
 }
 
 .spinner {
-    width: 55px;
-    height: 55px;
-    border: 5px solid #eee;
-    border-top: 5px solid #ff7a00;
+    width: 58px;
+    height: 58px;
+    border: 5px solid #eceff4;
+    border-top-color: var(--orange);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin .78s linear infinite;
 }
 
 @keyframes spin {
-    100% { transform: rotate(360deg); }
+    to { transform: rotate(360deg); }
 }
 
 .loader-text {
-    margin-top: 12px;
+    margin-top: 14px;
+    color: #424958;
+    font-size: 14px;
     font-weight: 600;
-    color: #444;
-}
-button#edit-btn {
-    background: #555;
 }
 
-.container {
-    width: 100%;
-    max-width: 350px;
-    margin: 15px;
-    background: #fff;
-    padding: 25px;
-    border-radius: 18px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-    text-align: center;
-}
-@media (max-width: 480px) {
+@media (max-width: 900px) {
+    .login-page {
+        display: block;
+        background: #f8f9fd;
+    }
 
-body{
-    padding: 0px;
+    .hero-panel {
+        min-height: auto;
+        padding: 26px 28px 8px;
+        background: #f8f9fd;
+    }
+
+    .brand {
+        display: none;
+    }
+
+    .top-row {
+        justify-content: flex-end;
+    }
+
+    .skip-link {
+        font-size: 16px;
+    }
+
+    .hero-copy {
+        margin-top: 37px;
+        max-width: none;
+    }
+
+    .eyebrow {
+        display: none;
+    }
+
+    .hero-title {
+        font-size: 31px;
+        line-height: 1.22;
+        letter-spacing: -.8px;
+    }
+
+    .hero-subtitle {
+        margin-top: 16px;
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .illustration-wrap {
+        min-height: auto;
+        height: 385px;
+        margin: 8px 0 0;
+    }
+
+    .login-illustration {
+        width: min(530px, 94%);
+        max-height: 370px;
+    }
+
+    .form-panel {
+        min-height: auto;
+        padding: 28px 28px calc(38px + env(safe-area-inset-bottom));
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #f8f9fd;
+        box-shadow: none;
+    }
+
+    .form-shell {
+        max-width: none;
+    }
+
+    .form-title {
+        font-size: 29px;
+    }
+
+    .form-subtitle {
+        margin-top: 18px;
+        font-size: 16px;
+        line-height: 1.72;
+    }
+
+    .form-content {
+        margin-top: 34px;
+    }
 }
 
-.container{
-    width: 100%;
-    max-width: none;
-    padding: 1px;
+@media (max-width: 520px) {
+    .hero-panel {
+        padding: 22px 20px 0;
+    }
+
+    .hero-copy {
+        margin-top: 30px;
+    }
+
+    .hero-title {
+        font-size: clamp(27px, 8.2vw, 33px);
+    }
+
+    .hero-subtitle {
+        font-size: 15px;
+    }
+
+    .illustration-wrap {
+        height: 330px;
+        margin-top: 10px;
+    }
+
+    .login-illustration {
+        width: 100%;
+        max-height: 320px;
+    }
+
+    .form-panel {
+        padding: 30px 20px calc(36px + env(safe-area-inset-bottom));
+    }
+
+    .form-title {
+        font-size: 28px;
+    }
+
+    .form-subtitle {
+        font-size: 15px;
+    }
+
+    .field-label {
+        display: none;
+    }
+
+    .phone-box {
+        min-height: 64px;
+        border-radius: 16px;
+    }
+
+    .phone-prefix {
+        min-width: 86px;
+        padding: 0 12px;
+        font-size: 16px;
+    }
+
+    .phone-prefix i {
+        display: none;
+    }
+
+    .phone-box input {
+        padding: 0 15px;
+        font-size: 15px;
+    }
+
+    .otp-box {
+        gap: 7px;
+    }
+
+    .otp-box input {
+        height: 52px;
+        border-radius: 11px;
+        font-size: 18px;
+    }
+
+    .action-btn {
+        min-height: 56px;
+        border-radius: 14px;
+    }
 }
 
-.otp-box{
-    gap: 5px;
+@media (max-width: 370px) {
+    .hero-panel,
+    .form-panel {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .illustration-wrap {
+        height: 290px;
+    }
+
+    .otp-box {
+        gap: 5px;
+    }
 }
 
-.otp-box input{
-    height: 50px;
-    font-size: 18px;
-    min-width: 32px;
+
+/* ===== MOBILE SINGLE-SCREEN FIT ===== */
+@media (max-width: 900px) {
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+    }
+
+    .login-page {
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #f8f9fd;
+    }
+
+    .hero-panel {
+        flex: 0 0 auto;
+        min-height: 0;
+        height: 59%;
+        padding: max(12px, env(safe-area-inset-top)) 20px 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #f8f9fd;
+    }
+
+    .top-row {
+        flex: 0 0 auto;
+        min-height: 34px;
+    }
+
+    .skip-link {
+        font-size: clamp(14px, 4vw, 16px);
+        padding: 2px 0;
+    }
+
+    .hero-copy {
+        flex: 0 0 auto;
+        margin-top: clamp(8px, 2vh, 18px);
+    }
+
+    .hero-title {
+        font-size: clamp(25px, 7.5vw, 31px);
+        line-height: 1.14;
+    }
+
+    .hero-subtitle {
+        margin-top: clamp(6px, 1.4vh, 12px);
+        font-size: clamp(13px, 3.7vw, 15px);
+        line-height: 1.55;
+    }
+
+    .illustration-wrap {
+        flex: 1 1 auto;
+        min-height: 0;
+        height: auto;
+        margin: 2px 0 0;
+        align-items: flex-end;
+        overflow: hidden;
+    }
+
+    .login-illustration {
+        width: min(100%, 470px);
+        height: 100%;
+        max-height: none;
+        object-fit: contain;
+        object-position: center bottom;
+    }
+
+    .form-panel {
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 41%;
+        padding: clamp(10px, 1.8vh, 16px) 20px max(10px, env(safe-area-inset-bottom));
+        overflow: hidden;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #f8f9fd;
+    }
+
+    .form-shell {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-title {
+        flex: 0 0 auto;
+        font-size: clamp(24px, 6.8vw, 29px);
+        line-height: 1.12;
+    }
+
+    .form-subtitle {
+        flex: 0 0 auto;
+        margin-top: clamp(5px, 1vh, 9px);
+        font-size: clamp(12px, 3.5vw, 15px);
+        line-height: 1.5;
+    }
+
+    .form-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        margin-top: clamp(8px, 1.5vh, 14px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .field-label {
+        display: none;
+    }
+
+    .phone-box {
+        flex: 0 0 auto;
+        min-height: clamp(50px, 7vh, 58px);
+        height: clamp(50px, 7vh, 58px);
+        border-radius: 15px;
+    }
+
+    .phone-prefix {
+        min-width: 82px;
+        padding: 0 10px;
+        font-size: 15px;
+    }
+
+    .phone-box input {
+        padding: 0 13px;
+        font-size: 14px;
+    }
+
+    .action-btn {
+        flex: 0 0 auto;
+        min-height: clamp(47px, 6.4vh, 54px);
+        margin-top: clamp(8px, 1.2vh, 12px);
+        padding: 10px 16px;
+        border-radius: 14px;
+        font-size: 14px;
+    }
+
+    .security-note {
+        display: none;
+    }
+
+    #otp-section {
+        margin-top: 10px;
+        padding-top: 10px;
+        overflow: hidden;
+    }
+
+    .otp-heading {
+        font-size: 14px;
+    }
+
+    .otp-note {
+        margin-top: 2px;
+        font-size: 11px;
+    }
+
+    .otp-box {
+        gap: 5px;
+        margin-top: 8px;
+    }
+
+    .otp-box input {
+        height: clamp(38px, 5.4vh, 46px);
+        border-radius: 10px;
+        font-size: 16px;
+    }
 }
+
+@media (max-width: 900px) and (max-height: 700px) {
+    .hero-panel { height: 56%; }
+    .form-panel { height: 44%; }
+    .hero-copy { margin-top: 4px; }
+    .hero-subtitle { margin-top: 4px; line-height: 1.42; }
+    .form-panel { padding-top: 8px; }
+    .form-content { margin-top: 7px; }
 }
+
+@media (max-width: 380px) {
+    .hero-panel,
+    .form-panel {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+
+/* ===== ENHANCED MOBILE WELCOME TITLE ===== */
+.hero-title .welcome-line,
+.hero-title .dreamliner-line {
+    display: block;
+}
+
+.hero-title .dreamliner-line {
+    margin-top: 2px;
+    font-size: 1.16em;
+    line-height: 1.04;
+    letter-spacing: -1.2px;
+    background: linear-gradient(135deg, #f26a21 0%, #dd5010 55%, #c94308 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 5px 16px rgba(221, 80, 16, .12);
+}
+
+@media (max-width: 900px) {
+    .hero-title {
+        line-height: 1.02;
+    }
+
+    .hero-title .welcome-line {
+        font-size: .92em;
+        letter-spacing: -.7px;
+    }
+
+    .hero-title .dreamliner-line {
+        margin-top: 4px;
+        font-size: 1.18em;
+        line-height: 1;
+        letter-spacing: -1.3px;
+    }
+
+    .hero-subtitle {
+        margin-top: clamp(7px, 1.3vh, 11px);
+    }
+}
+
+@media (max-width: 380px) {
+    .hero-title .dreamliner-line {
+        font-size: 1.13em;
+    }
+}
+
+
+
+/* ===== MOBILE OTP VISIBILITY FIX ===== */
+@media (max-width: 900px) {
+    .login-page.otp-active .hero-panel {
+        height: 39%;
+    }
+
+    .login-page.otp-active .form-panel {
+        height: 61%;
+        padding-top: 8px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+
+    .login-page.otp-active .hero-copy {
+        margin-top: 2px;
+    }
+
+    .login-page.otp-active .hero-title {
+        font-size: clamp(22px, 6.7vw, 28px);
+    }
+
+    .login-page.otp-active .hero-subtitle {
+        margin-top: 4px;
+        font-size: clamp(11px, 3.2vw, 14px);
+        line-height: 1.35;
+    }
+
+    .login-page.otp-active .illustration-wrap {
+        margin-top: 0;
+    }
+
+    .login-page.otp-active .form-title {
+        font-size: clamp(22px, 6vw, 27px);
+    }
+
+    .login-page.otp-active .form-subtitle {
+        margin-top: 4px;
+        font-size: clamp(11px, 3.2vw, 14px);
+        line-height: 1.35;
+    }
+
+    .login-page.otp-active .form-content {
+        margin-top: 7px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+    }
+
+    .login-page.otp-active .form-content::-webkit-scrollbar {
+        display: none;
+    }
+
+    .login-page.otp-active .phone-box {
+        min-height: 48px;
+        height: 48px;
+    }
+
+    .login-page.otp-active .action-btn {
+        min-height: 44px;
+        margin-top: 7px;
+        padding: 8px 14px;
+    }
+
+    .login-page.otp-active #otp-section {
+        margin-top: 7px;
+        padding-top: 7px;
+        overflow: visible;
+    }
+
+    .login-page.otp-active .otp-box {
+        margin-top: 6px;
+    }
+
+    .login-page.otp-active .otp-box input {
+        height: 43px;
+    }
+}
+
+@media (max-width: 900px) and (max-height: 760px) {
+    .login-page.otp-active .hero-panel {
+        height: 34%;
+    }
+
+    .login-page.otp-active .form-panel {
+        height: 66%;
+    }
+}
+
 </style>
 </head>
 
 <body>
-
-<div class="container">
-
-    <div class="title">Create Account</div>
-    <div class="subtitle">Login securely with your mobile number</div>
-
-    <!-- PHONE INPUT (ONLY 10 DIGITS) -->
-    <div class="phone-box">
-        <div class="phone-prefix">
-            <i class="fa-solid fa-phone"></i> +91
+<main class="login-page">
+    <section class="hero-panel">
+        <div class="top-row">
+            <a class="brand" href="index.html" aria-label="Dreamliner home">
+                <span class="brand-mark"><i class="fa-solid fa-bus-simple"></i></span>
+                <span>Dreamliner</span>
+            </a>
+            <a class="skip-link" href="#" onclick="skipLogin(event)">Skip</a>
         </div>
-        <input 
-            type="text" 
-            id="phone" 
-            placeholder="Enter mobile number"
-            maxlength="10"
-            oninput="this.value=this.value.replace(/\D/g,'')"
-        >
-    </div>
 
-    <button id="edit-btn" onclick="editPhone()" style="display:none; background:#555;">
-        <i class="fa-solid fa-pen"></i> Edit Number
-    </button>
+        <div class="hero-copy">
+            <div class="eyebrow">Easy and secure booking</div>
+            <h1 class="hero-title"><span class="welcome-line">Welcome to</span><span class="dreamliner-line">Dreamliner!</span></h1>
+            <p class="hero-subtitle">Travel stress-free, reserve your bus tickets before peak days.</p>
+        </div>
 
-    <button id="send-btn" onclick="sendOTP()">
-        <i class="fa-solid fa-paper-plane"></i> Send OTP
-    </button>
+        
+        
+        
+        <div class="illustration-wrap" aria-hidden="true">
+            <svg class="login-illustration" viewBox="0 0 760 500" xmlns="http://www.w3.org/2000/svg" role="img">
+                <defs>
+                    <linearGradient id="bgGlow" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#f7f9ff"/>
+                        <stop offset="1" stop-color="#e8eefc"/>
+                    </linearGradient>
+                    <linearGradient id="busMain" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#315fbd"/>
+                        <stop offset=".6" stop-color="#244f9f"/>
+                        <stop offset="1" stop-color="#17386f"/>
+                    </linearGradient>
+                    <linearGradient id="busGlassPremium" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#eef5ff"/>
+                        <stop offset=".55" stop-color="#c9daf8"/>
+                        <stop offset="1" stop-color="#8ea9df"/>
+                    </linearGradient>
+                    <linearGradient id="phonePremium" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#25324b"/>
+                        <stop offset="1" stop-color="#111827"/>
+                    </linearGradient>
+                    <linearGradient id="orangePremium" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#ff7a32"/>
+                        <stop offset="1" stop-color="#e65112"/>
+                    </linearGradient>
+                    <filter id="premiumShadow" x="-25%" y="-25%" width="160%" height="180%">
+                        <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#22335d" flood-opacity=".16"/>
+                    </filter>
+                    <filter id="smallShadow" x="-30%" y="-30%" width="170%" height="180%">
+                        <feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#2e406c" flood-opacity=".12"/>
+                    </filter>
+                </defs>
 
-    <!-- OTP INPUT (6 BOXES) -->
-<div id="otp-section" style="display:none;">
-    <div class="otp-box">
-        <input type="text" maxlength="1" oninput="moveNext(this,0)">
-        <input type="text" maxlength="1" oninput="moveNext(this,1)">
-        <input type="text" maxlength="1" oninput="moveNext(this,2)">
-        <input type="text" maxlength="1" oninput="moveNext(this,3)">
-        <input type="text" maxlength="1" oninput="moveNext(this,4)">
-        <input type="text" maxlength="1" oninput="moveNext(this,5)">
-    </div>
+                <ellipse cx="382" cy="459" rx="292" ry="18" fill="#d9e1f2" opacity=".95"/>
+                <circle cx="347" cy="258" r="188" fill="url(#bgGlow)"/>
+                <circle cx="627" cy="114" r="46" fill="#f4f6ff"/>
+                <circle cx="118" cy="134" r="17" fill="#f0f3fb"/>
 
-    <button onclick="verifyOTP()">
-        <i class="fa-solid fa-shield-halved"></i> Verify OTP
-    </button>
-</div>
+                <!-- subtle route -->
+                <path d="M105 384C198 315 252 368 335 307C415 249 493 276 641 180"
+                      stroke="#a7b9e5" stroke-width="6" stroke-linecap="round"
+                      stroke-dasharray="3 18" fill="none" opacity=".9"/>
+                <g filter="url(#smallShadow)">
+                    <circle cx="105" cy="384" r="14" fill="url(#orangePremium)"/>
+                    <circle cx="641" cy="180" r="14" fill="#6f8fe5"/>
+                    <circle cx="105" cy="384" r="5" fill="#fff"/>
+                    <circle cx="641" cy="180" r="5" fill="#fff"/>
+                </g>
 
-    <div id="recaptcha-container"></div>
-</div>
+                <!-- premium ticket card -->
+                <g filter="url(#premiumShadow)">
+                    <rect x="84" y="88" width="252" height="126" rx="24" fill="#ffffff" stroke="#dfe6f4" stroke-width="2"/>
+                    <rect x="84" y="88" width="10" height="126" rx="5" fill="url(#orangePremium)"/>
+                    <circle cx="129" cy="129" r="21" fill="#fff0e8"/>
+                    <path d="M119 129h20M129 119v20" stroke="#f26a21" stroke-width="4" stroke-linecap="round"/>
+                    <text x="163" y="123" font-family="Poppins, sans-serif" font-size="17" font-weight="700" fill="#17233c">Book your journey</text>
+                    <text x="163" y="147" font-family="Poppins, sans-serif" font-size="12" fill="#7c8494">Simple, secure and comfortable</text>
 
-<!-- LOADER -->
+                    <circle cx="124" cy="183" r="8" fill="#6f8fe5"/>
+                    <rect x="142" y="177" width="52" height="11" rx="5.5" fill="#bbc8e6"/>
+                    <path d="M201 183h49" stroke="#c9d4ea" stroke-width="3" stroke-dasharray="5 6"/>
+                    <circle cx="260" cy="183" r="8" fill="#f26a21"/>
+                    <rect x="278" y="177" width="37" height="11" rx="5.5" fill="#d7dfef"/>
+                </g>
+
+                <!-- trust chips -->
+                <g filter="url(#smallShadow)">
+                    <rect x="103" y="236" width="103" height="44" rx="14" fill="#fff" stroke="#e1e7f3"/>
+                    <circle cx="128" cy="258" r="11" fill="#e8f1ff"/>
+                    <path d="M122 258l4 4 8-10" stroke="#315fbd" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <text x="147" y="263" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#34405a">Secure login</text>
+
+                    <rect x="348" y="112" width="118" height="44" rx="14" fill="#fff" stroke="#e1e7f3"/>
+                    <circle cx="373" cy="134" r="11" fill="#fff0e8"/>
+                    <path d="M367 134h12M373 128v12" stroke="#f26a21" stroke-width="3" stroke-linecap="round"/>
+                    <text x="393" y="139" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#34405a">Fast booking</text>
+                </g>
+
+                <!-- premium bus -->
+                <g filter="url(#premiumShadow)">
+                    <path d="M131 273c0-27 21-48 48-48h236c34 0 61 27 61 61v117H131z" fill="url(#busMain)"/>
+                    <path d="M158 248h224c22 0 40 18 40 40v51H158z" fill="url(#busGlassPremium)"/>
+
+                    <rect x="173" y="262" width="52" height="58" rx="10" fill="#f8fbff" opacity=".93"/>
+                    <rect x="236" y="262" width="52" height="58" rx="10" fill="#f8fbff" opacity=".93"/>
+                    <rect x="299" y="262" width="52" height="58" rx="10" fill="#f8fbff" opacity=".93"/>
+                    <rect x="362" y="262" width="40" height="58" rx="10" fill="#f8fbff" opacity=".93"/>
+
+                    <path d="M157 338h267" stroke="#ffffff" stroke-width="3" opacity=".28"/>
+                    <rect x="158" y="350" width="267" height="14" rx="7" fill="url(#orangePremium)"/>
+                    <text x="291" y="344" text-anchor="middle" font-family="Poppins, sans-serif" font-size="16" font-weight="700" fill="#ffffff" letter-spacing=".7">DREAMLINER</text>
+
+                    <rect x="160" y="379" width="79" height="12" rx="6" fill="#dfe8fb"/>
+                    <rect x="365" y="379" width="46" height="12" rx="6" fill="#dfe8fb"/>
+
+                    <circle cx="197" cy="412" r="30" fill="#17233c"/>
+                    <circle cx="197" cy="412" r="14" fill="#8f9bad"/>
+                    <circle cx="405" cy="412" r="30" fill="#17233c"/>
+                    <circle cx="405" cy="412" r="14" fill="#8f9bad"/>
+
+                    <circle cx="151" cy="340" r="8" fill="#ffd98a"/>
+                    <circle cx="456" cy="340" r="8" fill="#ffd98a"/>
+
+                    <rect x="131" y="356" width="18" height="57" rx="9" fill="#102855"/>
+                    <rect x="458" y="356" width="18" height="57" rx="9" fill="#102855"/>
+
+                    <path d="M146 289c0-25 20-45 45-45h11v94h-56z" fill="#244d98" opacity=".55"/>
+                    <path d="M430 283c0-17 13-30 30-30h7v86h-37z" fill="#152f65" opacity=".32"/>
+                </g>
+
+                <!-- phone -->
+                <g filter="url(#premiumShadow)">
+                    <rect x="500" y="67" width="176" height="348" rx="37" fill="url(#phonePremium)"/>
+                    <rect x="509" y="76" width="158" height="330" rx="30" fill="#ffffff"/>
+                    <rect x="557" y="88" width="62" height="10" rx="5" fill="#1d2432"/>
+
+                    <circle cx="588" cy="145" r="33" fill="#6f8fe5"/>
+                    <path d="M570 145h36M588 127v36" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+
+                    <text x="588" y="203" text-anchor="middle" font-family="Poppins, sans-serif" font-size="22" font-weight="700" fill="#17233c">Book Now</text>
+                    <text x="588" y="224" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10.5" fill="#8a91a0">Your trip starts here</text>
+
+                    <rect x="534" y="247" width="108" height="36" rx="18" fill="#f2f5fa"/>
+                    <circle cx="552" cy="265" r="6" fill="#6f8fe5"/>
+                    <rect x="564" y="260" width="50" height="9" rx="4.5" fill="#b9c2d0"/>
+
+                    <rect x="534" y="298" width="108" height="36" rx="18" fill="#f2f5fa"/>
+                    <circle cx="552" cy="316" r="6" fill="#f26a21"/>
+                    <rect x="564" y="311" width="50" height="9" rx="4.5" fill="#b9c2d0"/>
+
+                    <rect x="534" y="352" width="108" height="40" rx="20" fill="url(#orangePremium)"/>
+                    <text x="588" y="377" text-anchor="middle" font-family="Poppins, sans-serif" font-size="12" font-weight="700" fill="#ffffff">Continue</text>
+                </g>
+
+                <!-- soft decorative shapes -->
+                <path d="M664 412c16-57 41-91 72-111-8 38-21 74-42 108 17-23 35-39 52-49-9 29-24 52-47 70z" fill="#dfe7fa"/>
+                <path d="M690 420c-3-46 4-84 22-118" stroke="#94abe3" stroke-width="4" stroke-linecap="round" fill="none"/>
+            </svg>
+        </div>
+
+
+
+    </section>
+
+    <section class="form-panel">
+        <div class="form-shell">
+            <h2 class="form-title">Login In</h2>
+            <p class="form-subtitle">Please enter your mobile number below to login or sign up.</p>
+
+            <div class="form-content">
+                <label class="field-label" for="phone">Mobile number</label>
+                <div class="phone-box">
+                    <div class="phone-prefix">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>+91</span>
+                    </div>
+                    <input
+                        type="tel"
+                        id="phone"
+                        inputmode="numeric"
+                        autocomplete="tel-national"
+                        placeholder="Enter Your Mobile Number"
+                        maxlength="10"
+                        oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
+                    >
+                </div>
+
+                <button class="action-btn secondary" id="edit-btn" onclick="editPhone()" style="display:none;">
+                    <i class="fa-solid fa-pen"></i>
+                    Edit Number
+                </button>
+
+                <button class="action-btn" id="send-btn" onclick="sendOTP()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send OTP
+                </button>
+
+                <div id="otp-section" style="display:none;">
+                    <div class="otp-heading">Enter verification code</div>
+                    <div class="otp-note">We sent a 6-digit OTP to your mobile number.</div>
+
+                    <div class="otp-box">
+                        <input type="text" inputmode="numeric" maxlength="1" aria-label="OTP digit 1" oninput="moveNext(this,0)">
+                        <input type="text" inputmode="numeric" maxlength="1" aria-label="OTP digit 2" oninput="moveNext(this,1)">
+                        <input type="text" inputmode="numeric" maxlength="1" aria-label="OTP digit 3" oninput="moveNext(this,2)">
+                        <input type="text" inputmode="numeric" maxlength="1" aria-label="OTP digit 4" oninput="moveNext(this,3)">
+                        <input type="text" inputmode="numeric" maxlength="1" aria-label="OTP digit 5" oninput="moveNext(this,4)">
+                        <input type="text" inputmode="numeric" maxlength="1" aria-label="OTP digit 6" oninput="moveNext(this,5)">
+                    </div>
+
+                    <button class="action-btn" onclick="verifyOTP()">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Verify OTP
+                    </button>
+                </div>
+
+                <div class="security-note">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Your mobile number is protected and used only for secure login and booking updates.</span>
+                </div>
+
+                <div id="recaptcha-container"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
 <div class="loader" id="loader">
     <div class="spinner"></div>
     <div class="loader-text" id="loaderText">Processing...</div>
+    
 </div>
-
 </body>
 </html>
