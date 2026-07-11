@@ -807,7 +807,7 @@ body {
     padding: 20px;
 
     /* KEEP IMAGE */
-    background: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    background: url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
 
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
@@ -838,10 +838,11 @@ body {
 
 /* TITLE */
 .contact-content h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color:#222;
+    margin:0;
+    font-size:22px;
+    font-weight:800;
+    color:#fff;
+    text-shadow:0 2px 10px rgba(0,0,0,.35);
 }
 
 /* TAGLINE */
@@ -859,6 +860,62 @@ body {
 }
 
 /* CARD (GLASS STYLE LIKE YOUR APP THEME) */
+.contact-card {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px;
+    border-radius:18px;
+    text-decoration:none;
+    color:#fff;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.28);
+    backdrop-filter:blur(14px);
+    box-shadow:0 10px 25px rgba(0,0,0,.18);
+    transition:.3s;
+}
+.contact-card:hover{
+    transform:translateY(-4px);
+    background:rgba(255,255,255,.24);
+}
+.contact-card h4{
+    margin:0;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+}
+.contact-card p{
+    margin:4px 0 0;
+    font-size:12px;
+    color:rgba(255,255,255,.92);
+}
+.icon{
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    color:#ff6b00;
+    font-size:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+.contact-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+}
+.contact-footer-text{
+    margin-top:18px;
+    text-align:center;
+    color:#fff;
+    font-weight:600;
+    letter-spacing:.3px;
+}
+
+/* legacy */ 
 .contact-card {
     display: flex;
     align-items: center;
@@ -899,11 +956,12 @@ body {
     color: white;
 }
 
-/* TEXT */
 .contact-card h4 {
     margin: 0;
     font-size: 14px;
-    color:#ff7a00;
+    color:#ffffff;
+    font-weight:700;
+    text-shadow:0 1px 3px rgba(0,0,0,.25);
 }
 
 .contact-card p {
@@ -4743,7 +4801,6 @@ body{
 
 <div id="login-popup" class="login-popup-overlay">
     <div class="login-popup-content">
-        <button class="close-popup" onclick="closeLoginPopup()">&times;</button>
         <iframe src="login.html" id="login-iframe"></iframe>
     </div>
 </div>
@@ -5921,6 +5978,9 @@ window.openReviewSection = function () {
             currentUser = user;
         
             if (user) {
+                localStorage.setItem("isLoggedIn", "true");
+                showProfileIcon();
+                closeLoginPopup();
                 document.getElementById("reviewForm").style.display = "block";
                 document.getElementById("loginMsg").style.display = "none";
                 document.getElementById("userPreview").style.display = "flex";
@@ -5931,6 +5991,22 @@ window.openReviewSection = function () {
                 checkCompletedJourneyPopup(user);
         
             } else {
+                const wasLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+                localStorage.removeItem("isLoggedIn");
+                hideProfileIcon();
+
+                // If a logged-in user has just logged out, show login again now.
+                if (wasLoggedIn) {
+                    sessionStorage.removeItem("dreamlinerLoginSkipped");
+                    openLoginPopup();
+                } else if (sessionStorage.getItem("dreamlinerLoginSkipped") === "true") {
+                    // Skip keeps it closed only until this tab/WebView session ends.
+                    closeLoginPopup();
+                } else {
+                    openLoginPopup();
+                }
+
                 document.getElementById("reviewForm").style.display = "none";
                 document.getElementById("loginMsg").style.display = "block";
                 document.getElementById("userPreview").style.display = "none";
@@ -6699,20 +6775,39 @@ function showSlide() {
         }
         
         function checkLoginStatus() {
-            if (localStorage.getItem("isLoggedIn") === "true") {
+            const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+            const skippedThisSession = sessionStorage.getItem("dreamlinerLoginSkipped") === "true";
+
+            if (loggedIn) {
                 showProfileIcon();
+                closeLoginPopup();
             } else {
                 hideProfileIcon();
+
+                if (skippedThisSession) {
+                    closeLoginPopup();
+                } else {
+                    openLoginPopup();
+                }
             }
         }
-        
-        window.onload = checkLoginStatus;
-        setInterval(checkLoginStatus, 1000);
-        
+
+        // Open the login inside the popup every time the website/WebView starts
+        // until the user has successfully logged in.
+        window.addEventListener("DOMContentLoaded", checkLoginStatus);
+
         window.addEventListener("message", function(event) {
             if (event.data === "loginSuccess") {
                 localStorage.setItem("isLoggedIn", "true");
+                sessionStorage.removeItem("dreamlinerLoginSkipped");
                 showProfileIcon();
+                closeLoginPopup();
+            }
+
+            // Skip closes login for this tab/WebView session only.
+            // It appears again after the website/app is opened newly.
+            if (event.data === "skipLogin") {
+                sessionStorage.setItem("dreamlinerLoginSkipped", "true");
                 closeLoginPopup();
             }
         }, false);
@@ -6720,9 +6815,13 @@ function showSlide() {
         window.addEventListener("storage", (event) => {
             if (event.key === "isLoggedIn") {
                 if (event.newValue === "true") {
+                    sessionStorage.removeItem("dreamlinerLoginSkipped");
                     showProfileIcon();
+                    closeLoginPopup();
                 } else {
+                    sessionStorage.removeItem("dreamlinerLoginSkipped");
                     hideProfileIcon();
+                    openLoginPopup();
                 }
             }
         });
@@ -7171,5 +7270,42 @@ setTimeout(() => {
         grid-template-columns:repeat(2,minmax(0,1fr)) !important;
         padding:22px 22px 34px !important;
     }
+}
+
+/* ===== LOGIN POPUP: AUTO OPEN + SINGLE SCREEN ===== */
+.login-popup-overlay{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    padding:12px;
+    box-sizing:border-box;
+    background:rgba(10,16,28,.68);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    z-index:100000;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+.login-popup-content{
+    width:min(430px,100%);
+    max-width:430px;
+    height:min(760px,calc(100dvh - 24px));
+    max-height:calc(100dvh - 24px);
+    border-radius:22px;
+    overflow:hidden;
+    background:#f8f9fd;
+    box-shadow:0 24px 70px rgba(0,0,0,.34);
+}
+#login-iframe{display:block;width:100%;height:100%;border:0;overflow:hidden;background:#f8f9fd;}
+.close-popup{display:none!important;}
+@media (min-width:901px){
+  .login-popup-content{height:min(720px,calc(100dvh - 40px));max-height:calc(100dvh - 40px);}
+}
+@media (max-width:480px){
+  .login-popup-overlay{padding:8px;}
+  .login-popup-content{width:100%;height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);border-radius:18px;}
 }
 </style>
