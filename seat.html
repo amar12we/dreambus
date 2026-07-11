@@ -113,7 +113,6 @@ button#bookBtn { padding:12px 30px; background:#ff3b30; color:white; border:none
 
 #authOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:3000; }
 .auth-container { background:white; width:90%; max-width:400px; height:550px; border-radius:15px; overflow:hidden; position:relative; box-shadow:0 15px 35px rgba(0,0,0,0.4); }
-.close-overlay { position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer; color:#333; z-index:3001; font-weight:bold; }
 iframe#authFrame { width:100%; height:100%; border:none; }
 
 #toastContainer { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:4000; }
@@ -2067,7 +2066,7 @@ body{
 <!-- REST REMAINS EXACT SAME -->
 <div id="authOverlay">
     <div class="auth-container">
-        <span class="close-overlay" onclick="document.getElementById('authOverlay').style.display='none'">&times;</span>
+        
         <iframe src="login.html" id="authFrame"></iframe>
     </div>
 </div>
@@ -2338,17 +2337,46 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
     const docRef = doc(db,"buses",busDocId);
     
     // --- LOGIN SYNC LISTENER ---
-    window.addEventListener("message", (event) => {
-        if (event.data === "loginSuccess") {
-            localStorage.setItem("isLoggedIn", "true");
-            document.getElementById('authOverlay').style.display = 'none';
-            showToast("Logged in successfully!", "success");
-            if(selectedSeats.length > 0) {
-                renderLocationPicker();
-                document.getElementById('detailsOverlay').style.display = 'flex';
-            }
-        }
-    }, false);
+window.addEventListener("message", (event) => {
+
+// Login successful
+if (
+    event.data === "loginSuccess" ||
+    (event.data &&
+     event.data.type === "dreamlinerAuth" &&
+     event.data.action === "loginSuccess")
+) {
+
+    localStorage.setItem("isLoggedIn", "true");
+
+    const authOverlay = document.getElementById("authOverlay");
+    if (authOverlay) authOverlay.style.display = "none";
+
+    if (selectedSeats.length > 0) {
+        renderLocationPicker();
+        document.getElementById("detailsOverlay").style.display = "flex";
+    }
+
+    return;
+}
+
+// Skip login
+if (
+    event.data === "skipLogin" ||
+    (event.data &&
+     event.data.type === "dreamlinerAuth" &&
+     event.data.action === "skipLogin")
+) {
+
+    sessionStorage.setItem("dreamlinerLoginSkipped", "true");
+
+    const authOverlay = document.getElementById("authOverlay");
+    if (authOverlay) authOverlay.style.display = "none";
+
+    return;
+}
+
+}, false);
     
     onAuthStateChanged(auth, (user) => { 
         currentUser = user; 
@@ -4615,9 +4643,9 @@ headerArea.addEventListener('touchend', (e) => {
     sheet.style.transform = ''; 
 });
 
-// 4. SMART CLICK LOGIC
+
 headerArea.addEventListener('click', (e) => {
-    // Check if the clicked element is a tab button or inside a tab button
+    
     const isTabButton = e.target.closest('.tab-btn');
     
     if (isTabButton) {
