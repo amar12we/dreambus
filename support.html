@@ -99,7 +99,7 @@ display:flex;align-items:center;justify-content:center;margin-right:15px;color:w
 <body>
 
 <div class="header">
-<button class="back-btn" onclick="appBack()">
+<button class="back-btn" type="button" onclick="goBack()">
 <i class="fas fa-chevron-left"></i>
 </button>
 
@@ -174,6 +174,7 @@ invalid:"माफ़ करें, मैं केवल नीचे दि�
 };
 
 let currentLang = "en";
+let requestInProgress = false;
 
 function getUserQuestion(type){
 const questions = {
@@ -282,6 +283,10 @@ async function sendMessage(type = null){
 const input = document.getElementById("question");
 const chat = document.getElementById("chat");
 
+if(requestInProgress){
+return;
+}
+
 const typedText = input.value.trim();
 
 if(!type && !typedText){
@@ -291,7 +296,8 @@ return;
 if(!type){
 const matchedType = detectOption(typedText);
 
-chat.innerHTML += `<div class="message user">${typedText}</div>`;
+chat.insertAdjacentHTML("beforeend", `<div class="message user"></div>`);
+chat.lastElementChild.textContent = typedText;
 
 input.value = "";
 chat.scrollTop = chat.scrollHeight;
@@ -299,59 +305,80 @@ chat.scrollTop = chat.scrollHeight;
 if(matchedType){
 type = matchedType;
 }else{
-chat.innerHTML += `<div class="message bot">${LANG[currentLang].invalid}</div>`;
+const invalidMessage = document.createElement("div");
+invalidMessage.className = "message bot";
+invalidMessage.textContent = LANG[currentLang].invalid;
+chat.appendChild(invalidMessage);
 showOptionsAgain();
 chat.scrollTop = chat.scrollHeight;
 return;
 }
 
 }else{
-chat.innerHTML += `<div class="message user">${getUserQuestion(type)}</div>`;
+const userMessage = document.createElement("div");
+userMessage.className = "message user";
+userMessage.textContent = getUserQuestion(type);
+chat.appendChild(userMessage);
 input.value = "";
 chat.scrollTop = chat.scrollHeight;
 }
 
+requestInProgress = true;
 showTyping();
 
-setTimeout(async ()=>{
 try{
 const answer = await getFirebaseAnswer(type);
-
 removeTyping();
 
 if(!answer){
-chat.innerHTML += `<div class="message bot">${LANG[currentLang].serverError}</div>`;
+const errorMessage = document.createElement("div");
+errorMessage.className = "message bot";
+errorMessage.textContent = LANG[currentLang].serverError;
+chat.appendChild(errorMessage);
 chat.scrollTop = chat.scrollHeight;
 return;
 }
 
-chat.innerHTML += `
-<div class="message bot">${answer}</div>
+const answerMessage = document.createElement("div");
+answerMessage.className = "message bot";
+answerMessage.innerHTML = answer;
+chat.appendChild(answerMessage);
 
+chat.insertAdjacentHTML("beforeend", `
 <div class="message bot end-card">
 <strong>${LANG[currentLang].whatNext}</strong>
 
 <div class="action-buttons">
-<button class="chat-again-btn" onclick="showOptionsAgain()">
+<button class="chat-again-btn" type="button" onclick="showOptionsAgain()">
 <i class="fa fa-rotate-right"></i> ${LANG[currentLang].chatAgain}
 </button>
 
-<button class="employee-btn" onclick="openWhatsApp()">
+<button class="employee-btn" type="button" onclick="openWhatsApp()">
 <i class="fab fa-whatsapp"></i> ${LANG[currentLang].employee}
 </button>
 </div>
 </div>
-`;
+`);
 
+/* Voice failure must never be treated as a Firebase answer failure. */
+try{
 speak(answer);
+}catch(voiceError){
+console.warn("Voice playback failed:", voiceError);
+}
 
 }catch(err){
 removeTyping();
-chat.innerHTML += `<div class="message bot">${LANG[currentLang].serverError}</div>`;
-}
+console.error("Support answer error:", err);
 
+const errorMessage = document.createElement("div");
+errorMessage.className = "message bot";
+errorMessage.textContent = LANG[currentLang].serverError;
+chat.appendChild(errorMessage);
+}finally{
+requestInProgress = false;
 chat.scrollTop = chat.scrollHeight;
-},500);
+}
 }
 
 document.getElementById("question").addEventListener("keydown", function(e){
@@ -360,30 +387,8 @@ sendMessage();
 }
 });
 
-function appBack(){
-  try{
-    stopVoice();
-  }catch(e){}
-
-  try{
-    if(window.ReactNativeWebView){
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: "APP_GO_BACK" }));
-      return;
-    }
-  }catch(e){}
-
-  try{
-    if(document.referrer && window.history.length > 1){
-      window.history.back();
-      return;
-    }
-  }catch(e){}
-
-  window.location.href = "index.html";
-}
-
 function openWhatsApp(){
-window.open("https://wa.me/919435818872","_blank");
+window.open("https://wa.me/917002530811","_blank");
 }
 
 function showTyping(){
@@ -405,22 +410,67 @@ const t = document.getElementById("typing");
 if(t) t.remove();
 }
 
-function speak(text){ 
-const cleanText = text.replace(/<[^>]*>/g," "); 
-const finalText = cleanText.replace(/\s+/g," ").trim();
+function postToNative(payload){
+try{
+if(window.ReactNativeWebView && window.ReactNativeWebView.postMessage){
+window.ReactNativeWebView.postMessage(JSON.stringify(payload));
+return true;
+}
+}catch(error){
+console.warn("Native bridge unavailable:", error);
+}
+return false;
+}
 
+function htmlToPlainText(value){
+const temp = document.createElement("div");
+temp.innerHTML = String(value || "");
+return (temp.textContent || temp.innerText || "").replace(/\s+/g," ").trim();
+}
+
+function speak(text){
+const finalText = htmlToPlainText(text);
+if(!finalText) return;
+
+const lang = currentLang === "en" ? "en-US" : "hi-IN";
+
+/* Expo native speech is reliable inside the mobile WebView app. */
+if(postToNative({ type:"SPEAK_TEXT", text:finalText, lang })){ 
+return;
+}
+
+/* Normal browser fallback. */
+if("speechSynthesis" in window && "SpeechSynthesisUtterance" in window){
 window.speechSynthesis.cancel();
-
 const msg = new SpeechSynthesisUtterance(finalText);
-msg.lang = currentLang === "en" ? "en-US" : "hi-IN";
-msg.rate = 1;
+msg.lang = lang;
+msg.rate = 0.95;
 msg.pitch = 1;
-
 window.speechSynthesis.speak(msg);
+}
 }
 
 function stopVoice(){
+postToNative({ type:"STOP_SPEECH" });
+try{
+if("speechSynthesis" in window){
 window.speechSynthesis.cancel();
+}
+}catch(error){}
+}
+
+function goBack(){
+stopVoice();
+
+if(postToNative({ type:"APP_BACK" })){
+return;
+}
+
+if(window.history.length > 1){
+window.history.back();
+}else{
+window.location.href = "index.html";
+}
 }
 
 window.setLang = setLang;
@@ -428,8 +478,8 @@ window.ask = ask;
 window.sendMessage = sendMessage;
 window.showOptionsAgain = showOptionsAgain;
 window.openWhatsApp = openWhatsApp;
-window.appBack = appBack;
 window.stopVoice = stopVoice;
+window.goBack = goBack;
 
 window.addEventListener("beforeunload", stopVoice);
 window.addEventListener("pagehide", stopVoice);
