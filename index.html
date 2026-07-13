@@ -7148,7 +7148,261 @@ function openDreamlinerLink(rawUrl) {
 }
 </script>
 
-<style>.dreamliner-alert-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;justify-content:center;align-items:center;z-index:2147483647}.dreamliner-alert-box{background:#fff;padding:22px;border-radius:18px;max-width:330px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}.dreamliner-alert-box button{margin-top:18px;width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#ff7a00,#ff512f);color:#fff;font-weight:700}</style><div id='dreamlinerAlertOverlay' class='dreamliner-alert-overlay'><div class='dreamliner-alert-box'><div id='dreamlinerAlertMessage'></div><button onclick="document.getElementById('dreamlinerAlertOverlay').style.display='none'">OK</button></div></div><script>window.alert=function(message){document.getElementById('dreamlinerAlertMessage').innerText=String(message??'');document.getElementById('dreamlinerAlertOverlay').style.display='flex';};</script>
+<!-- ===== PROFESSIONAL DREAMLINER ALERT ===== -->
+<style id="dreamliner-professional-alert-style">
+.dreamliner-alert-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background: rgba(17, 24, 39, 0.56);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.dreamliner-alert-overlay.is-open {
+    display: flex;
+}
+
+.dreamliner-alert-dialog {
+    width: 100%;
+    max-width: 360px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    border-radius: 12px;
+    box-shadow:
+        0 24px 60px rgba(17, 24, 39, 0.24),
+        0 4px 12px rgba(17, 24, 39, 0.10);
+    animation: dreamlinerAlertIn 180ms cubic-bezier(.2,.8,.2,1);
+}
+
+.dreamliner-alert-accent {
+    height: 4px;
+    background: #d84e55;
+}
+
+.dreamliner-alert-content {
+    padding: 22px 22px 18px;
+}
+
+.dreamliner-alert-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dreamliner-alert-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff1f2;
+    color: #d84e55;
+    font-size: 14px;
+}
+
+.dreamliner-alert-title {
+    margin: 0;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.dreamliner-alert-message {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.dreamliner-alert-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 22px 20px;
+}
+
+.dreamliner-alert-ok {
+    min-width: 92px;
+    height: 40px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 6px;
+    background: #d84e55;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: none;
+    transition:
+        background 160ms ease,
+        transform 120ms ease;
+}
+
+.dreamliner-alert-ok:hover {
+    background: #c9434a;
+}
+
+.dreamliner-alert-ok:active {
+    transform: scale(.98);
+}
+
+.dreamliner-alert-ok:focus-visible {
+    outline: 3px solid rgba(216, 78, 85, .22);
+    outline-offset: 2px;
+}
+
+@keyframes dreamlinerAlertIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .dreamliner-alert-overlay {
+        padding: 18px;
+    }
+
+    .dreamliner-alert-dialog {
+        max-width: 340px;
+    }
+
+    .dreamliner-alert-content {
+        padding: 20px 20px 16px;
+    }
+
+    .dreamliner-alert-actions {
+        padding: 0 20px 18px;
+    }
+
+    .dreamliner-alert-ok {
+        min-width: 88px;
+    }
+}
+</style>
+
+<div
+    id="dreamlinerAlertOverlay"
+    class="dreamliner-alert-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dreamlinerAlertTitle"
+    aria-describedby="dreamlinerAlertMessage"
+    aria-hidden="true"
+>
+    <div class="dreamliner-alert-dialog">
+        <div class="dreamliner-alert-accent"></div>
+
+        <div class="dreamliner-alert-content">
+            <div class="dreamliner-alert-heading">
+                <div class="dreamliner-alert-icon" aria-hidden="true">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+
+                <h3 id="dreamlinerAlertTitle" class="dreamliner-alert-title">
+                    Dreamliner Bus
+                </h3>
+            </div>
+
+            <p id="dreamlinerAlertMessage" class="dreamliner-alert-message"></p>
+        </div>
+
+        <div class="dreamliner-alert-actions">
+            <button
+                id="dreamlinerAlertOk"
+                class="dreamliner-alert-ok"
+                type="button"
+            >
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const queue = [];
+    let isShowing = false;
+
+    function getAlertElements() {
+        return {
+            overlay: document.getElementById("dreamlinerAlertOverlay"),
+            message: document.getElementById("dreamlinerAlertMessage"),
+            okButton: document.getElementById("dreamlinerAlertOk")
+        };
+    }
+
+    function showNextAlert() {
+        if (isShowing || queue.length === 0) return;
+
+        const elements = getAlertElements();
+        if (!elements.overlay || !elements.message || !elements.okButton) return;
+
+        isShowing = true;
+        elements.message.textContent = queue.shift();
+        elements.overlay.classList.add("is-open");
+        elements.overlay.setAttribute("aria-hidden", "false");
+
+        window.setTimeout(function () {
+            elements.okButton.focus();
+        }, 30);
+    }
+
+    function closeDreamlinerAlert() {
+        const elements = getAlertElements();
+        if (!elements.overlay) return;
+
+        elements.overlay.classList.remove("is-open");
+        elements.overlay.setAttribute("aria-hidden", "true");
+        isShowing = false;
+
+        window.setTimeout(showNextAlert, 80);
+    }
+
+    window.alert = function (message) {
+        queue.push(String(message == null ? "" : message));
+        showNextAlert();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const elements = getAlertElements();
+
+        if (elements.okButton) {
+            elements.okButton.addEventListener("click", closeDreamlinerAlert);
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (
+                (event.key === "Enter" || event.key === "Escape") &&
+                isShowing
+            ) {
+                event.preventDefault();
+                closeDreamlinerAlert();
+            }
+        });
+
+        showNextAlert();
+    });
+})();
+</script>
 </body>
 </html> 
 <style id="dreamliner-viewall-coupon-final-fix">
