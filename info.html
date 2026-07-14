@@ -1976,15 +1976,49 @@ document.getElementById("confirmRescheduleBtn").onclick = () => {
 
     document.getElementById("rescheduleBox").remove();
 
-    window.location.href = `seat.html?bookingId=${encodeURIComponent(bookingId)}
-&reschedule=true
-&newDate=${encodeURIComponent(newDate)}
-&seatCount=${encodeURIComponent(seats)}
-&from=${encodeURIComponent(booking.from)}
-&to=${encodeURIComponent(booking.to)}
-&trip=${encodeURIComponent(booking.trip || "AM")}
-&busId=${encodeURIComponent(booking.busId || booking.trip || "AM")}
-&fare=${Math.floor((booking.totalFare || 250) / seats)}`;
+    // Preserve the exact physical bus, service and Firebase seat layout.
+    // Do not fall back to AM/PM as the bus ID because that causes seat.html
+    // to load its default 2x2 arrangement during rescheduling.
+    const resolvedBusId =
+        booking.busId ||
+        booking.physicalBusId ||
+        booking.vehicleId ||
+        "";
+
+    const resolvedServiceId =
+        booking.serviceId ||
+        booking.busServiceId ||
+        booking.routeServiceId ||
+        booking.tripId ||
+        resolvedBusId;
+
+    const resolvedLayoutId =
+        booking.layoutId ||
+        booking.seatLayoutId ||
+        booking.busLayoutId ||
+        resolvedBusId ||
+        resolvedServiceId;
+
+    if (!resolvedBusId && !resolvedServiceId) {
+        showMiniToast("Bus/service information is missing for this booking", "error");
+        return;
+    }
+
+    const rescheduleParams = new URLSearchParams({
+        bookingId: bookingId,
+        reschedule: "true",
+        newDate: newDate,
+        seatCount: String(seats),
+        from: booking.from || "",
+        to: booking.to || "",
+        trip: booking.trip || "AM",
+        busId: resolvedBusId || resolvedServiceId,
+        serviceId: resolvedServiceId || resolvedBusId,
+        layoutId: resolvedLayoutId,
+        fare: String(Math.floor((booking.totalFare || 250) / seats))
+    });
+
+    window.location.href = `seat.html?${rescheduleParams.toString()}`;
 };
 };
 function showMiniToast(message, type = "info") {
