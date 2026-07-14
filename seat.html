@@ -2266,8 +2266,9 @@ body{
 const date = rawDate;
     const trip = (params.get("trip") || "AM").toUpperCase();
     let farePerSeat = Number(params.get("fare")) || 250;
-    const busId = params.get("busId") || trip;
-    const serviceId = params.get("serviceId") || busId;
+    let busId = params.get("busId") || trip;
+    let serviceId = params.get("serviceId") || busId;
+    let layoutId = params.get("layoutId") || "";
     
     
     
@@ -2448,13 +2449,12 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
     
         showToast(`Rescheduling ${maxSelect} seat(s)`, "info");
     }
-    loadOldBooking(); // 🔥 IMPORTANT FIX
     loadBusGallery();
-    
-    /* ================= BUS DOC ID (FIXED) ================= */
-    const busDocId = `${date}_${serviceId}`;
-    
-    const docRef = doc(db,"buses",busDocId);
+
+    // Seat document and layout are initialized only after the booking and
+    // Firebase service configuration have been resolved. This prevents
+    // rescheduling from briefly or permanently falling back to a 2x2 layout.
+    let seatSnapshotUnsubscribe = null;
     
     // --- LOGIN SYNC LISTENER ---
 window.addEventListener("message", (event) => {
@@ -3158,12 +3158,7 @@ document.getElementById("couponInput").addEventListener("focus", () => {
     showToast("Proceed to payment");
     };
     
-    /* ================= BUS SNAPSHOT ================= */
-    onSnapshot(docRef,(docSnap)=>{
-    const bookedSeats = docSnap.exists()? docSnap.data().seats : {};
-    window.lastBusData = bookedSeats; 
-    renderSeats(bookedSeats || {});
-    });
+
     
     function updateFareInfo(){
 
@@ -3311,15 +3306,144 @@ document.getElementById("gstToggle").onclick = () => {
     
    
 
-const capacity = parseInt(params.get("capacity")) || 45;
-
-const layoutConfig = {
-    capacity: capacity,
-    // Default layout stays 2 + 2 horizontally, but numbering is now row-wise:
-    // Row A = A1 A2 A3 A4, Row B = B1 B2 B3 B4, and so on.
-    leftSeats: parseInt(params.get("leftSeats")) || 2,
-    rightSeats: parseInt(params.get("rightSeats")) || 2
+let layoutConfig = {
+    // URL values are only temporary hints. Firebase busLayouts remains the
+    // source of truth and overwrites these before seats are rendered.
+    capacity: parseInt(params.get("capacity")) || 0,
+    leftSeats: parseInt(params.get("leftSeats")) || 0,
+    rightSeats: parseInt(params.get("rightSeats")) || 0,
+    lastRow: parseInt(params.get("lastRow")) || 0
 };
+
+function applyLayoutData(data = {}) {
+    const type = String(data.layoutType || data.type || "").toLowerCase().replace(/\s/g, "");
+    const capacity = Number(data.seatCount || data.capacity || data.totalSeats);
+
+    let left = Number(data.leftSeats || data.left);
+    let right = Number(data.rightSeats || data.right);
+
+    if (!left || !right) {
+        if (type.includes("2x1") || type.includes("2×1")) { left = 2; right = 1; }
+        else if (type.includes("1x2") || type.includes("1×2")) { left = 1; right = 2; }
+        else if (type.includes("2x2") || type.includes("2×2")) { left = 2; right = 2; }
+    }
+
+    if (capacity > 0) layoutConfig.capacity = capacity;
+    if (left > 0) layoutConfig.leftSeats = left;
+    if (right > 0) layoutConfig.rightSeats = right;
+    if (Number(data.lastRow) > 0) layoutConfig.lastRow = Number(data.lastRow);
+}
+
+async function resolveServiceAndLayout() {
+    if (isReschedule) {
+        await loadOldBooking();
+
+        if (oldBooking) {
+            busId = oldBooking.busId || oldBooking.physicalBusId || busId;
+            serviceId = oldBooking.serviceId || oldBooking.busServiceId || serviceId || busId;
+            layoutId = oldBooking.layoutId || oldBooking.seatLayoutId || layoutId;
+            applyLayoutData(oldBooking);
+        }
+    }
+
+    // The canonical route configuration is busRoutes/{busId}/routes/{serviceId}.
+    // Try the resolved physical bus first, then the service id for older data.
+    const routeCandidates = [
+        [busId, serviceId],
+        [busId, busId],
+        [serviceId, serviceId]
+    ].filter(([b, s], index, arr) => b && s && arr.findIndex(x => x[0] === b && x[1] === s) === index);
+
+    for (const [routeBusId, routeServiceId] of routeCandidates) {
+        try {
+            const routeSnap = await getDoc(doc(db, "busRoutes", routeBusId, "routes", routeServiceId));
+            if (!routeSnap.exists()) continue;
+
+            const routeData = routeSnap.data();
+            busId = routeData.busId || routeData.physicalBusId || routeBusId;
+            serviceId = routeData.serviceId || routeServiceId;
+            layoutId = routeData.layoutId || routeData.seatLayoutId || layoutId;
+            applyLayoutData(routeData);
+            break;
+        } catch (error) {
+            console.warn("Route configuration lookup failed:", routeBusId, routeServiceId, error);
+        }
+    }
+
+    // Resolve the layout from Firebase using every valid identifier.
+    // In your database some layout documents are named with the physical busId
+    // (for example Duv001), while others can be named with the serviceId.
+    const layoutCandidates = [
+        layoutId,
+        busId,
+        serviceId,
+        oldBooking?.layoutId,
+        oldBooking?.seatLayoutId,
+        oldBooking?.busLayoutId,
+        oldBooking?.busId,
+        oldBooking?.serviceId
+    ].filter((value, index, array) =>
+        value && array.indexOf(value) === index
+    );
+
+    let loadedLayoutId = "";
+
+    for (const candidateId of layoutCandidates) {
+        try {
+            const layoutSnap = await getDoc(doc(db, "busLayouts", candidateId));
+            if (!layoutSnap.exists()) continue;
+
+            layoutId = candidateId;
+            loadedLayoutId = candidateId;
+            applyLayoutData(layoutSnap.data());
+            break;
+        } catch (error) {
+            console.warn("Seat layout lookup failed:", candidateId, error);
+        }
+    }
+
+    if (!loadedLayoutId) {
+        throw new Error(
+            `Seat layout was not found for bus ${busId || "N/A"} / service ${serviceId || "N/A"}`
+        );
+    }
+
+    if (!layoutConfig.capacity || !layoutConfig.leftSeats || !layoutConfig.rightSeats) {
+        throw new Error(`Invalid seat layout configuration in busLayouts/${loadedLayoutId}`);
+    }
+
+    console.log("Resolved reschedule bus layout", {
+        busId,
+        serviceId,
+        layoutId: loadedLayoutId,
+        layoutConfig
+    });
+}
+
+async function initializeSeatAvailability() {
+    try {
+        await resolveServiceAndLayout();
+
+        const busDocId = `${date}_${serviceId}`;
+        const resolvedDocRef = doc(db, "buses", busDocId);
+
+        if (seatSnapshotUnsubscribe) seatSnapshotUnsubscribe();
+        seatSnapshotUnsubscribe = onSnapshot(resolvedDocRef, (docSnap) => {
+            const bookedSeats = docSnap.exists() ? (docSnap.data().seats || {}) : {};
+            window.lastBusData = bookedSeats;
+            renderSeats(bookedSeats);
+        }, (error) => {
+            console.error("Seat availability listener failed:", error);
+            showToast("Could not load seat availability", "error");
+        });
+    } catch (error) {
+        console.error("Seat layout initialization failed:", error);
+        seatContainer.innerHTML = `<div style="padding:24px;color:#b91c1c;font-weight:700;">${error.message || "Could not load the bus seat layout"}</div>`;
+        showToast(error.message || "Could not load the bus seat layout", "error");
+    }
+}
+
+initializeSeatAvailability();
 
 let seatMatrix = [];
 
@@ -3340,7 +3464,9 @@ function renderSeats(bookedSeats) {
     seatMatrix = [];
 
     const seatsPerNormalRow = layoutConfig.leftSeats + layoutConfig.rightSeats;
-    const lastRowSeats = seatsPerNormalRow + 1; // keeps the earlier 5-seat last row layout
+    const lastRowSeats = layoutConfig.lastRow > 0
+        ? layoutConfig.lastRow
+        : seatsPerNormalRow + 1;
 
     let normalRows = Math.floor(layoutConfig.capacity / seatsPerNormalRow);
     let remainingSeats = layoutConfig.capacity % seatsPerNormalRow;
