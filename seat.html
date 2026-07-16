@@ -4668,7 +4668,6 @@ document.getElementById('payBtn').style.display = 'none';
 
                     <button type="button"
                         class="clean-point-tab ${pickupStep ? "" : "active"}"
-                        ${pickupStep ? "disabled" : ""}
                         onclick="showDroppingTab()">
                         <span class="clean-tab-check"><i class="fas fa-check"></i></span>
                         <span>Dropping Points</span>
@@ -4711,7 +4710,7 @@ document.getElementById('payBtn').style.display = 'none';
     };
 
     window.showDroppingTab = () => {
-        if (selectedPickup) {
+        if (locationSelectionStage !== "drop") {
             locationSelectionStage = "drop";
             renderLocationPicker("forward");
         }
