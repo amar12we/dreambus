@@ -2555,6 +2555,93 @@ body{
 }
 </style>
 
+
+
+<!-- PASSENGER DETAILS SPACIOUS CLEAN LAYOUT -->
+<style id="passenger-details-spacious-clean">
+#step2 .details-header{
+    padding:18px 20px !important;
+}
+#step2 .details-header h4{
+    font-size:18px !important;
+    letter-spacing:-0.2px;
+}
+#step2 .step2-scroll-area{
+    padding:20px !important;
+    background:#f5f7f9;
+}
+#passengerInputs{
+    padding:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+}
+#passengerInputs .passenger-card{
+    padding:20px !important;
+    margin-bottom:18px !important;
+    border:1px solid #e4e8ed !important;
+    border-radius:16px !important;
+    box-shadow:0 8px 24px rgba(25,35,50,.06) !important;
+}
+#passengerInputs .passenger-card:last-child{margin-bottom:0 !important;}
+#passengerInputs .passenger-card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    padding-bottom:14px;
+    border-bottom:1px solid #edf0f3;
+}
+#passengerInputs .passenger-fields{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px 16px;
+}
+#passengerInputs .passenger-field.full-width{grid-column:1 / -1;}
+#passengerInputs .passenger-field label{
+    display:block;
+    margin-bottom:7px;
+    color:#596270;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.45px;
+    text-transform:uppercase;
+}
+#passengerInputs input,
+#passengerInputs .gender-readonly{
+    min-height:48px;
+    padding:13px 14px !important;
+    border:1px solid #d9dee5 !important;
+    border-radius:10px !important;
+    background:#fff;
+    font-size:14px !important;
+}
+#passengerInputs input:focus{
+    border-color:#ff7a00 !important;
+    box-shadow:0 0 0 3px rgba(255,122,0,.10);
+}
+#passengerInputs .gender-readonly{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f7f8fa;
+    color:#48515d;
+    font-weight:700;
+}
+#step2 .step2-scroll-area > div[style*="Total Ticket Fare"]{
+    margin:18px 0 !important;
+    padding:15px 16px;
+    border:1px solid #e4e8ed;
+    border-radius:12px;
+    background:#fff;
+}
+@media(max-width:600px){
+    #step2 .step2-scroll-area{padding:16px 14px 24px !important;}
+    #passengerInputs .passenger-card{padding:17px !important;border-radius:14px !important;}
+    #passengerInputs .passenger-fields{grid-template-columns:1fr;gap:15px;}
+    #passengerInputs .passenger-field.full-width{grid-column:auto;}
+}
+</style>
 </head>
 <body>
 
@@ -4982,61 +5069,38 @@ setTimeout(() => {
         const card = document.createElement("div");
         card.className = "passenger-card";
 
-        // Keeping your exact data and validation, just improving the visual wrapper
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
-                <span style="font-weight: 800; color: #1a2b49; font-size: 13px; letter-spacing: 0.5px;">PASSENGER ${index + 1}</span>
-                <span style="background: #fff3e0; color: #ff7a00; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; border: 1px solid #ffe0b2;">
+            <div class="passenger-card-header">
+                <span style="font-weight:800;color:#1a2b49;font-size:13px;letter-spacing:.5px;">PASSENGER ${index + 1}</span>
+                <span style="background:#fff3e0;color:#ff7a00;padding:5px 11px;border-radius:7px;font-weight:800;font-size:12px;border:1px solid #ffe0b2;">
                     SEAT ${s.seat}
                 </span>
             </div>
 
-            <div class="details-row" style="display: flex; flex-direction: column; gap: 12px;">
-                <!-- Full Name Input -->
-                <div>
-                    <label style="font-size: 11px; font-weight: 700; color: #777; margin-bottom: 5px; display: block; text-transform: uppercase;">Full Name</label>
-                    <input 
-                        type="text" 
-                        class="p-name" 
-                        placeholder="Enter name as per ID"
-                        pattern="[A-Za-z ]+"
-                        title="Only letters allowed"
-                        oninput="this.value=this.value.replace(/[^A-Za-z ]/g,'')"
-                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;"
-                    >
+            <div class="passenger-fields">
+                <div class="passenger-field full-width">
+                    <label>Full Name</label>
+                    <input type="text" class="p-name" placeholder="Enter name as per ID" pattern="[A-Za-z ]+" title="Only letters allowed" oninput="this.value=this.value.replace(/[^A-Za-z ]/g,'')">
                 </div>
 
-                <div style="display: flex; gap: 12px;">
-                    <!-- Age Input -->
-                    <div style="flex: 1;">
-                        <label style="font-size: 11px; font-weight: 700; color: #777; margin-bottom: 5px; display: block; text-transform: uppercase;">Age</label>
-                        <input 
-                            type="number" 
-                            class="p-age" 
-                            placeholder="Age"
-                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;"
-                        >
-                    </div>
-                    <!-- Gender Display (Read Only) -->
-                    <div style="flex: 1;">
-                        <label style="font-size: 11px; font-weight: 700; color: #777; margin-bottom: 5px; display: block; text-transform: uppercase;">Gender</label>
-                        <div style="padding: 12px; background: #f4f7f9; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #555; text-align: center; font-weight: 600;">
-                            ${s.gender.toUpperCase()}
-                        </div>
-                    </div>
+                <div class="passenger-field">
+                    <label>Age (Optional)</label>
+                    <input type="number" class="p-age" placeholder="Enter age" min="1" max="120">
                 </div>
 
-                <!-- Phone Input -->
-                <div>
-                    <label style="font-size: 11px; font-weight: 700; color: #777; margin-bottom: 5px; display: block; text-transform: uppercase;">Mobile Number</label>
-                    <input 
-                        type="tel" 
-                        class="p-phone" 
-                        placeholder="10-digit mobile number"
-                        maxlength="10"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;"
-                    >
+                <div class="passenger-field">
+                    <label>Gender</label>
+                    <div class="gender-readonly">${s.gender.toUpperCase()}</div>
+                </div>
+
+                <div class="passenger-field full-width">
+                    <label>Mobile Number</label>
+                    <input type="tel" class="p-phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                </div>
+
+                <div class="passenger-field full-width">
+                    <label>Gmail / Email (Optional)</label>
+                    <input type="email" class="p-email" placeholder="example@gmail.com" inputmode="email" autocomplete="email">
                 </div>
             </div>
         `;
@@ -5044,7 +5108,7 @@ setTimeout(() => {
         container.appendChild(card);
     });
 }
-    
+
     let razorpayInstance = null;
     let bookingInProgress = false;
 
@@ -5104,12 +5168,14 @@ setTimeout(() => {
         const names = document.querySelectorAll(".p-name");
         const phones = document.querySelectorAll(".p-phone");
         const ages = document.querySelectorAll(".p-age");
+        const emails = document.querySelectorAll(".p-email");
         const remarks = document.getElementById("bookingRemarks").value || "N/A";
     
         let valid = true;
     
         const nameRegex = /^[A-Za-z ]+$/;
         const phoneRegex = /^[0-9]{10}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
         passengerData = selectedSeats.map((s, i) => {
     
@@ -5124,13 +5190,20 @@ setTimeout(() => {
                 showToast("Enter valid 10-digit mobile number", "error");
                 valid = false;
             }
+
+            const emailValue = emails[i] ? emails[i].value.trim() : "";
+            if (emailValue && !emailRegex.test(emailValue)) {
+                showToast("Enter a valid email address", "error");
+                valid = false;
+            }
     
             return {
                 seat: s.seat,
                 gender: s.gender,
                 name: names[i].value,
                 phone: phones[i].value,
-                age: ages[i].value || "N/A"
+                age: ages[i].value || "N/A",
+                email: emails[i] ? (emails[i].value.trim() || "N/A") : "N/A"
             };
         });
     
