@@ -5587,6 +5587,131 @@ document.getElementById("payAmount").textContent = totalAmount;
         razorpayInstance = rzp; // ✅ correct
         rzp.open();
     };
+    // Ensure an optional passenger Gmail is also stored inside the booked seat
+    // record (buses/{date_serviceId}.seats.{seat}) and in bookings/{bookingId}.
+    // This runs only after the backend confirms a successful booking.
+    async function syncPassengerGmailToFirebase(bookingId) {
+        const passengersWithGmail = (passengerData || []).filter(passenger =>
+            passenger && passenger.seat && (passenger.gmail || passenger.email)
+        );
+
+        if (!passengersWithGmail.length) return;
+
+        // Save Gmail with the same seat information shown in the Firebase buses document.
+        try {
+            const busDocumentId = `${date}_${serviceId}`;
+            const busRef = doc(db, "buses", busDocumentId);
+            const busUpdates = {};
+
+            passengersWithGmail.forEach(passenger => {
+                const gmail = String(passenger.gmail || passenger.email || "").trim();
+                if (!gmail) return;
+
+                busUpdates[`seats.${passenger.seat}.gmail`] = gmail;
+                busUpdates[`seats.${passenger.seat}.email`] = gmail;
+            });
+
+            if (Object.keys(busUpdates).length) {
+                const busBatch = writeBatch(db);
+                busBatch.update(busRef, busUpdates);
+                await busBatch.commit();
+            }
+        } catch (error) {
+            // Booking is already confirmed by the backend, so never interrupt success.
+            console.warn("Could not copy Gmail to booked seat record:", error);
+        }
+
+        // Also ensure the passenger array in the main booking document contains Gmail.
+        try {
+            if (!bookingId) return;
+
+            const bookingRef = doc(db, "bookings", bookingId);
+            const bookingSnap = await getDoc(bookingRef);
+            if (!bookingSnap.exists()) return;
+
+            const storedPassengers = Array.isArray(bookingSnap.data().passengers)
+                ? bookingSnap.data().passengers
+                : [];
+
+            const gmailBySeat = new Map(
+                passengersWithGmail.map(passenger => [
+                    String(passenger.seat),
+                    String(passenger.gmail || passenger.email || "").trim()
+                ])
+            );
+
+            const mergedPassengers = storedPassengers.map(passenger => {
+                const gmail = gmailBySeat.get(String(passenger?.seat || passenger?.seatNumber || ""));
+                return gmail ? { ...passenger, gmail, email: gmail } : passenger;
+            });
+
+            const bookingBatch = writeBatch(db);
+            bookingBatch.update(bookingRef, { passengers: mergedPassengers });
+            await bookingBatch.commit();
+        } catch (error) {
+            console.warn("Could not copy Gmail to booking passenger record:", error);
+        }
+    }
+
+    // Ensure optional booking remarks are stored in the same Firebase records
+    // as the rest of the confirmed passenger and seat information.
+    async function syncBookingRemarksToFirebase(bookingId) {
+        const remarksValue = String(
+            document.getElementById("bookingRemarks")?.value || ""
+        ).trim();
+
+        // Remarks are optional. Do not create an empty field when nothing was entered.
+        if (!remarksValue) return;
+
+        // Store remarks inside every booked seat record in the buses document.
+        try {
+            const busDocumentId = `${date}_${serviceId}`;
+            const busRef = doc(db, "buses", busDocumentId);
+            const busUpdates = {};
+
+            (passengerData || []).forEach(passenger => {
+                if (!passenger?.seat) return;
+                busUpdates[`seats.${passenger.seat}.remarks`] = remarksValue;
+            });
+
+            if (Object.keys(busUpdates).length) {
+                const busBatch = writeBatch(db);
+                busBatch.update(busRef, busUpdates);
+                await busBatch.commit();
+            }
+        } catch (error) {
+            // The backend has already confirmed the booking, so do not interrupt success.
+            console.warn("Could not copy remarks to booked seat records:", error);
+        }
+
+        // Store remarks in the main booking document and passenger entries too.
+        try {
+            if (!bookingId) return;
+
+            const bookingRef = doc(db, "bookings", bookingId);
+            const bookingSnap = await getDoc(bookingRef);
+            if (!bookingSnap.exists()) return;
+
+            const storedPassengers = Array.isArray(bookingSnap.data().passengers)
+                ? bookingSnap.data().passengers
+                : [];
+
+            const passengersWithRemarks = storedPassengers.map(passenger => ({
+                ...passenger,
+                remarks: remarksValue
+            }));
+
+            const bookingBatch = writeBatch(db);
+            bookingBatch.update(bookingRef, {
+                remarks: remarksValue,
+                passengers: passengersWithRemarks
+            });
+            await bookingBatch.commit();
+        } catch (error) {
+            console.warn("Could not copy remarks to booking record:", error);
+        }
+    }
+
     /* FINALIZE BOOKING AFTER PAYMENT
        SECURITY FIX:
        Backend /verify-payment now saves seats + booking in one Firestore transaction.
@@ -5596,6 +5721,11 @@ document.getElementById("payAmount").textContent = totalAmount;
             const processingOverlay = document.getElementById("processingOverlay");
             processingOverlay.style.display = "flex";
             document.getElementById("processingText").innerText = "Booking Confirmed...";
+
+            // The backend has confirmed the booking. Copy optional Gmail into
+            // the Firebase seat record and booking passenger record as well.
+            await syncPassengerGmailToFirebase(bookingId);
+            await syncBookingRemarksToFirebase(bookingId);
 
             processingOverlay.style.display = "none";
 
