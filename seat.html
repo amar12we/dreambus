@@ -5217,24 +5217,24 @@ setTimeout(() => {
                     <input type="text" class="p-name" placeholder="Enter name as per ID" pattern="[A-Za-z ]+" title="Only letters allowed" oninput="this.value=this.value.replace(/[^A-Za-z ]/g,'')">
                 </div>
 
+                <div class="passenger-field full-width">
+                    <label>Mobile Number</label>
+                    <input type="tel" class="p-phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                </div>
+
                 <div class="passenger-field">
                     <label>Age (Optional)</label>
                     <input type="number" class="p-age" placeholder="Enter age" min="1" max="120">
                 </div>
 
                 <div class="passenger-field">
+                    <label>Gmail (Optional)</label>
+                    <input type="email" class="p-email" placeholder="example@gmail.com" inputmode="email" autocomplete="email">
+                </div>
+
+                <div class="passenger-field full-width">
                     <label>Gender</label>
                     <div class="gender-readonly">${s.gender.toUpperCase()}</div>
-                </div>
-
-                <div class="passenger-field full-width">
-                    <label>Mobile Number</label>
-                    <input type="tel" class="p-phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                </div>
-
-                <div class="passenger-field full-width">
-                    <label>Gmail / Email (Optional)</label>
-                    <input type="email" class="p-email" placeholder="example@gmail.com" inputmode="email" autocomplete="email">
                 </div>
             </div>
         `;
@@ -5331,14 +5331,21 @@ setTimeout(() => {
                 valid = false;
             }
     
-            return {
+            const passenger = {
                 seat: s.seat,
                 gender: s.gender,
-                name: names[i].value,
+                name: names[i].value.trim(),
                 phone: phones[i].value,
-                age: ages[i].value || "N/A",
-                email: emails[i] ? (emails[i].value.trim() || "N/A") : "N/A"
+                age: ages[i].value || "N/A"
             };
+
+            // Save Gmail in Firebase only when the passenger enters it.
+            if (emailValue) {
+                passenger.gmail = emailValue;
+                passenger.email = emailValue;
+            }
+
+            return passenger;
         });
     
         if (!valid) {
