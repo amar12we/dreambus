@@ -347,6 +347,41 @@ body {
     font-size: 12px;
 }
 
+/* DEPARTED BUS STATE */
+.bus-card.departed {
+    opacity: 0.82;
+    border: 1px solid #fecaca;
+    background: linear-gradient(180deg, #ffffff, #fff7f7);
+}
+
+.bus-card.departed .status-box {
+    background: #fef2f2;
+}
+
+.bus-card.departed .status-dot {
+    background: #dc2626;
+}
+
+.bus-card.departed .status-text {
+    color: #dc2626;
+}
+
+.departed-note {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.4;
+    font-weight: 700;
+    color: #b91c1c;
+}
+
+.book-btn.departed-btn,
+.book-btn.departed-btn:disabled {
+    opacity: 1;
+    background: #9ca3af;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
 /* LOADING SPINNER */
 .loading-wrapper {
     height: 220px;
@@ -676,6 +711,75 @@ function showLoading() {
     `;
 }
 
+function parseTimeTo24Hour(timeText) {
+    const value = String(timeText || "").trim().toUpperCase();
+    const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
+
+    if (!match) return null;
+
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+    const meridiem = match[3] || "";
+
+    if (minute < 0 || minute > 59) return null;
+
+    if (meridiem) {
+        if (hour < 1 || hour > 12) return null;
+        if (hour === 12) hour = 0;
+        if (meridiem === "PM") hour += 12;
+    } else if (hour < 0 || hour > 23) {
+        return null;
+    }
+
+    return { hour, minute };
+}
+
+function getIstNowParts() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+    }).formatToParts(new Date());
+
+    const values = {};
+    parts.forEach(part => {
+        if (part.type !== "literal") values[part.type] = part.value;
+    });
+
+    return {
+        date: `${values.year}-${values.month}-${values.day}`,
+        minutes: Number(values.hour) * 60 + Number(values.minute),
+        seconds: Number(values.second)
+    };
+}
+
+function hasBusDepartedIst(journeyDate, departureTime) {
+    const cleanDate = String(journeyDate || "").trim();
+    const parsedTime = parseTimeTo24Hour(departureTime);
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate) || !parsedTime) {
+        console.warn("Departure check skipped because date/time is invalid:", {
+            journeyDate,
+            departureTime
+        });
+        return false;
+    }
+
+    const nowIst = getIstNowParts();
+
+    if (cleanDate < nowIst.date) return true;
+    if (cleanDate > nowIst.date) return false;
+
+    const departureMinutes = parsedTime.hour * 60 + parsedTime.minute;
+    return nowIst.minutes > departureMinutes ||
+        (nowIst.minutes === departureMinutes && nowIst.seconds >= 0);
+}
+
 function calculateDuration(start, end) {
     const parse = (t) => {
         let [time, mod] = t.split(" ");
@@ -854,13 +958,13 @@ async function getSeatAvailability(date, serviceId, capacity) {
     return capacity - booked;
 }
 
-function createBusCard(matched, layout, index) {
+function createBusCard(matched, layout, index, departed = false) {
     const busId = matched.busId;
     const serviceId = matched.serviceId || busId;
     const trip = getTripFromServiceId(serviceId);
 
     const card = document.createElement("div");
-    card.className = "bus-card";
+    card.className = departed ? "bus-card departed" : "bus-card";
 
     card.innerHTML = `
         <div class="brand-section">
@@ -887,21 +991,33 @@ function createBusCard(matched, layout, index) {
         </div>
 
         <div class="footer-row">
-            <div class="status-box">
-                <div class="status-dot"></div>
-                <span class="status-text">On Time</span>
+            <div>
+                <div class="status-box">
+                    <div class="status-dot"></div>
+                    <span class="status-text">${departed ? "Departed" : "On Time"}</span>
+                </div>
+                ${departed ? `<div class="departed-note">Sorry, this bus has already departed at ${matched.dept} IST.</div>` : ""}
             </div>
 
             <div>
                 <div class="fare-amount">₹${matched.fare}</div>
-                <button class="book-btn" id="btn-${index}">View Seats</button>
+                <button class="book-btn ${departed ? "departed-btn" : ""}" id="btn-${index}" ${departed ? "disabled" : ""}>${departed ? "Already Departed" : "View Seats"}</button>
             </div>
         </div>
     `;
 
     busList.appendChild(card);
 
-    document.getElementById(`btn-${index}`).onclick = () => {
+    const bookButton = document.getElementById(`btn-${index}`);
+
+    if (departed) {
+        bookButton.onclick = () => {
+            alert(`Sorry, this bus has already departed at ${matched.dept} IST.`);
+        };
+        return;
+    }
+
+    bookButton.onclick = () => {
         window.location.href =
         `seat.html?from=${encodeURIComponent(from)}` +
         `&to=${encodeURIComponent(to)}` +
@@ -920,12 +1036,20 @@ function createBusCard(matched, layout, index) {
     };
 }
 
-async function updateAvailability(matched, layout, index) {
+async function updateAvailability(matched, layout, index, departed = false) {
     const serviceId = matched.serviceId || matched.busId;
     const txt = document.getElementById(`avail-${index}`);
     const btn = document.getElementById(`btn-${index}`);
 
     try {
+        if (departed) {
+            if (txt) {
+                txt.innerText = "Booking Closed";
+                txt.style.color = "#dc2626";
+            }
+            return;
+        }
+
         const avail = await getSeatAvailability(date, serviceId, layout.capacity);
 
         if (txt) {
@@ -986,9 +1110,11 @@ async function loadBuses() {
 
             if (!layout) continue;
 
-            createBusCard(matched, layout, visibleBusCount);
+            const departed = hasBusDepartedIst(date, matched.dept);
 
-            await updateAvailability(matched, layout, visibleBusCount);
+            createBusCard(matched, layout, visibleBusCount, departed);
+
+            await updateAvailability(matched, layout, visibleBusCount, departed);
 
             visibleBusCount++;
         }
