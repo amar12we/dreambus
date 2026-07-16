@@ -4859,6 +4859,21 @@ body{
 }
 </style>
 
+
+<style id="dreamliner-bottom-nav-viewport-lock">
+/* Keep Home, Announcements and Support permanently attached to the viewport bottom. */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    z-index: 10000 !important;
+}
+
+@media (max-width: 767px) {
+    .bottom-nav {
+        padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    }
+}
+</style>
 </head>
 <body>
 
@@ -4946,8 +4961,8 @@ body{
     </div>
 
     <div class="quick-date">
-        <div class="quick-btn" onclick="setQuickDate(0)">Today</div>
-        <div class="quick-btn" onclick="setQuickDate(1)">Tomorrow</div>
+        <div class="quick-btn" onclick="setQuickDate(0, this)">Today</div>
+        <div class="quick-btn" onclick="setQuickDate(1, this)">Tomorrow</div>
     </div>
 
     <button class="search-btn" onclick="searchBus()">Search Buses</button>
@@ -6808,17 +6823,32 @@ function showSlide() {
             }
 
             dateText.innerText = dateInput.value;
+
+            // A manually selected date requires the user to press Search Buses.
+            document.querySelectorAll(".quick-btn").forEach(button => {
+                button.classList.remove("active");
+            });
         }
 
-        function setQuickDate(offset) {
+        function setQuickDate(offset, clickedButton) {
             const d = new Date();
             d.setDate(d.getDate() + offset);
-        
+
             const formatted = formatDateForInput(d);
-        
-            document.getElementById("date").value = formatted;
-            document.getElementById("dateText").innerText = formatted;
+            const dateInput = document.getElementById("date");
+            const dateText = document.getElementById("dateText");
+
+            dateInput.value = formatted;
+            dateText.innerText = formatted;
             setupJourneyDateLimit();
+
+            document.querySelectorAll(".quick-btn").forEach(button => {
+                button.classList.remove("active");
+            });
+            if (clickedButton) clickedButton.classList.add("active");
+
+            // Today/Tomorrow are quick-search options: search immediately.
+            searchBus();
         }
         
         function searchBus() {
