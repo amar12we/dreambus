@@ -1698,7 +1698,7 @@ body{
 .seat.booked,
 .seat.booked.male,
 .seat.booked.female{
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Crect x='12' y='5' width='28' height='29' rx='8' fill='%23d5d9de' stroke='%23aeb5bd' stroke-width='2.2'/%3E%3Crect x='14.5' y='8' width='23' height='18' rx='6' fill='%23e2e5e9'/%3E%3Cpath d='M10 27v10c0 4 3 7 7 7h18c4 0 7-3 7-7V27' fill='%23c6cbd1' stroke='%23aeb5bd' stroke-width='2.2'/%3E%3Cpath d='M8 25v13M44 25v13' stroke='%239da5ae' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M17 44v3M35 44v3' stroke='%238b949e' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='m19 16 14 14M33 16 19 30' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' opacity='.9'/%3E%3C/svg%3E") !important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Crect x='12' y='5' width='28' height='29' rx='8' fill='%23d5d9de' stroke='%23aeb5bd' stroke-width='2.2'/%3E%3Crect x='14.5' y='8' width='23' height='18' rx='6' fill='%23e2e5e9'/%3E%3Cpath d='M10 27v10c0 4 3 7 7 7h18c4 0 7-3 7-7V27' fill='%23c6cbd1' stroke='%23aeb5bd' stroke-width='2.2'/%3E%3Cpath d='M8 25v13M44 25v13' stroke='%239da5ae' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M17 44v3M35 44v3' stroke='%238b949e' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") !important;
     color:#737b85 !important;
     opacity:1 !important;
     cursor:not-allowed !important;
@@ -2024,6 +2024,446 @@ body{
 }
 </style>
 
+
+<style id="simple-clean-location-overrides">
+/* Simple, clean pickup/drop redesign */
+#detailsOverlay{
+    background:rgba(17,24,39,.55) !important;
+    backdrop-filter:blur(5px) !important;
+}
+
+#detailsOverlay > .details-container:not(.full-screen){
+    background:#ffffff !important;
+    box-shadow:0 18px 55px rgba(0,0,0,.22) !important;
+    border-radius:18px !important;
+}
+
+#detailsOverlay .details-header{
+    padding:16px 18px !important;
+    background:#ffffff !important;
+    border-bottom:1px solid #eceff2 !important;
+}
+
+#detailsOverlay .details-body{
+    background:#ffffff !important;
+    padding:16px 18px 18px !important;
+}
+
+.location-heading{
+    padding:0 0 14px !important;
+    border:0 !important;
+    border-radius:0 !important;
+    background:transparent !important;
+    gap:10px !important;
+    align-items:flex-start !important;
+}
+
+.location-heading-icon{
+    width:36px !important;
+    height:36px !important;
+    flex:0 0 36px !important;
+    border-radius:10px !important;
+    background:#fff3e8 !important;
+    color:#ff7a00 !important;
+    font-size:15px !important;
+}
+
+.location-heading span{
+    font-size:9px !important;
+    letter-spacing:.8px !important;
+    color:#ff7a00 !important;
+}
+
+.location-heading h2{
+    margin-top:2px !important;
+    font-size:19px !important;
+    color:#222 !important;
+}
+
+.location-heading p{
+    margin-top:4px !important;
+    font-size:11px !important;
+    color:#777 !important;
+}
+
+.location-list-header{
+    margin:8px 0 8px !important;
+    padding-top:10px !important;
+    border-top:1px solid #f0f1f3;
+}
+
+.location-list-header strong{
+    font-size:12px !important;
+    color:#333 !important;
+}
+
+.location-list-header span{
+    font-size:10px !important;
+    color:#999 !important;
+}
+
+.location-option-list{
+    gap:8px !important;
+}
+
+.location-option{
+    min-height:58px !important;
+    grid-template-columns:minmax(0,1fr) 24px !important;
+    gap:10px !important;
+    padding:11px 13px !important;
+    border:1px solid #e2e5e8 !important;
+    border-radius:10px !important;
+    background:#fff !important;
+    box-shadow:none !important;
+}
+
+.location-option-number{
+    display:none !important;
+}
+
+.location-option-text strong{
+    font-size:13px !important;
+    color:#222 !important;
+}
+
+.location-option-text small{
+    margin-top:3px !important;
+    font-size:9px !important;
+    color:#999 !important;
+}
+
+.location-option-check{
+    width:20px !important;
+    height:20px !important;
+    border-width:1.5px !important;
+    font-size:8px !important;
+}
+
+.location-option:hover{
+    border-color:#ffb36b !important;
+    background:#fff !important;
+}
+
+.location-option.active{
+    border-color:#ff7a00 !important;
+    background:#fff8f1 !important;
+    box-shadow:none !important;
+}
+
+.location-option.active .location-option-check{
+    border-color:#ff7a00 !important;
+    background:#ff7a00 !important;
+}
+
+.selected-pickup-card{
+    margin-top:4px !important;
+    grid-template-columns:minmax(0,1fr) 22px !important;
+    gap:8px !important;
+    padding:10px 12px !important;
+    border:1px solid #e2e5e8 !important;
+    border-radius:10px !important;
+    background:#fafafa !important;
+    box-shadow:none !important;
+}
+
+.selected-pickup-check{
+    display:none !important;
+}
+
+.selected-pickup-copy small{
+    font-size:8px !important;
+    color:#888 !important;
+}
+
+.selected-pickup-copy strong{
+    margin-top:2px !important;
+    font-size:11px !important;
+    color:#333 !important;
+}
+
+.selected-pickup-edit{
+    color:#777 !important;
+}
+
+#nextStepBtn{
+    min-height:50px !important;
+    margin-top:14px !important;
+    border-radius:10px !important;
+    background:#ff7a00 !important;
+    box-shadow:none !important;
+    font-size:14px !important;
+}
+
+@media(max-width:600px){
+    #detailsOverlay > .details-container:not(.full-screen){
+        border-radius:18px 18px 0 0 !important;
+    }
+
+    #detailsOverlay .details-header{
+        padding:14px 15px !important;
+    }
+
+    #detailsOverlay .details-body{
+        padding:14px 14px calc(16px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .location-option{
+        min-height:60px !important;
+        padding:11px 12px !important;
+    }
+}
+</style>
+
+
+<style id="clean-reference-boarding-dropping-final">
+/* Final boarding / dropping design based on the supplied reference */
+#detailsOverlay{
+    padding:0 !important;
+    background:rgba(16,20,27,.48) !important;
+    backdrop-filter:blur(4px) !important;
+    align-items:center !important;
+}
+
+#detailsOverlay > .details-container:not(.full-screen){
+    width:min(96%,760px) !important;
+    max-width:760px !important;
+    max-height:94dvh !important;
+    margin:0 !important;
+    border-radius:18px !important;
+    background:#f1f2f4 !important;
+    box-shadow:0 22px 70px rgba(0,0,0,.25) !important;
+    overflow:hidden !important;
+}
+
+#detailsOverlay .details-header{
+    display:none !important;
+}
+
+#detailsOverlay .details-body{
+    min-height:620px !important;
+    max-height:94dvh !important;
+    padding:0 0 18px !important;
+    background:#f1f2f4 !important;
+    overflow-y:auto !important;
+}
+
+.clean-point-screen{
+    width:100%;
+    min-height:620px;
+    text-align:left;
+}
+
+.clean-point-tabs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    background:#fff;
+    border-bottom:1px solid #d9dde2;
+}
+
+.clean-point-tab{
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:0 20px;
+    border:0;
+    border-bottom:3px solid transparent;
+    background:#fff;
+    color:#24272b;
+    font-size:14px;
+    font-weight:600;
+    text-align:left;
+    cursor:pointer;
+}
+
+.clean-point-tab.active{
+    background:#fff0ee;
+    border-bottom-color:#ef5b50;
+}
+
+.clean-point-tab:disabled{
+    cursor:default;
+}
+
+.clean-tab-check{
+    width:18px;
+    height:18px;
+    flex:0 0 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#edf0f2;
+    color:#b9bec4;
+    font-size:8px;
+}
+
+.clean-point-tab.active .clean-tab-check,
+.clean-point-tab.done .clean-tab-check{
+    background:#fff;
+    color:#ef5b50;
+    border:1px solid #ffd0cc;
+}
+
+.clean-point-card{
+    min-height:500px;
+    margin:16px 18px 0;
+    background:#fff;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+
+.clean-point-card-title{
+    padding:18px 20px;
+    border-bottom:1px solid #e2e5e8;
+    color:#202328;
+    font-size:18px;
+    font-weight:700;
+}
+
+.clean-point-list{
+    width:100%;
+}
+
+.clean-point-row{
+    width:100%;
+    min-height:64px;
+    display:grid;
+    grid-template-columns:26px minmax(0,1fr) auto;
+    align-items:center;
+    gap:12px;
+    padding:0 22px;
+    border:0;
+    border-bottom:1px solid #e2e5e8;
+    background:#fff;
+    color:#25282d;
+    text-align:left;
+    cursor:pointer;
+}
+
+.clean-point-row:last-child{
+    border-bottom:0;
+}
+
+.clean-point-row:hover{
+    background:#fcfcfd;
+}
+
+.clean-radio{
+    width:20px;
+    height:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1.7px solid #6c7480;
+    border-radius:50%;
+}
+
+.clean-radio span{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:transparent;
+}
+
+.clean-point-row.selected .clean-radio{
+    border-color:#ef5b50;
+}
+
+.clean-point-row.selected .clean-radio span{
+    background:#ef5b50;
+}
+
+.clean-point-name{
+    min-width:0;
+    color:#292c31;
+    font-size:13px;
+    font-weight:500;
+    line-height:1.4;
+    overflow-wrap:anywhere;
+}
+
+.clean-point-time{
+    color:#25282d;
+    font-size:13px;
+    font-weight:500;
+    white-space:nowrap;
+}
+
+#nextStepBtn{
+    width:calc(100% - 36px) !important;
+    min-height:50px !important;
+    margin:14px 18px 0 !important;
+    border-radius:9px !important;
+    background:#ff7a00 !important;
+    box-shadow:none !important;
+    font-size:14px !important;
+}
+
+.clean-point-empty{
+    min-height:500px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:30px;
+    color:#777;
+    text-align:center;
+}
+
+.clean-point-empty strong{
+    color:#333;
+}
+
+@media(max-width:600px){
+    #detailsOverlay{
+        align-items:flex-end !important;
+    }
+
+    #detailsOverlay > .details-container:not(.full-screen){
+        width:100% !important;
+        max-width:none !important;
+        max-height:95dvh !important;
+        border-radius:18px 18px 0 0 !important;
+    }
+
+    #detailsOverlay .details-body{
+        min-height:calc(95dvh - env(safe-area-inset-bottom)) !important;
+        max-height:95dvh !important;
+        padding-bottom:calc(14px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .clean-point-tab{
+        min-height:54px;
+        padding:0 14px;
+        font-size:13px;
+    }
+
+    .clean-point-card{
+        min-height:calc(95dvh - 150px);
+        margin:14px 12px 0;
+        border-radius:15px;
+    }
+
+    .clean-point-card-title{
+        padding:17px 18px;
+        font-size:17px;
+    }
+
+    .clean-point-row{
+        min-height:62px;
+        padding:0 18px;
+    }
+
+    #nextStepBtn{
+        width:calc(100% - 24px) !important;
+        margin:12px 12px 0 !important;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -2106,10 +2546,9 @@ body{
         <div class="content-section section-grey" id="amenities">
             <div class="section-title"><i class="fas fa-star"></i> Premium Amenities</div>
             <div class="amenities-grid">
-                <div class="amenity-item"><i class="fas fa-shield-alt"></i> AIS-153 Safety</div>
                 <div class="amenity-item"><i class="fas fa-door-open"></i> Emergency Exit</div>
                 <div class="amenity-item"><i class="fas fa-couch"></i> Semi-Sleeper</div>
-                <div class="amenity-item"><i class="fas fa-plug"></i> USB-C Charging</div>
+                <div class="amenity-item"><i class="fas fa-plug"></i> Charging Socket</div>
                 <div class="amenity-item"><i class="fas fa-video"></i> CCTV Security</div>
                 <div class="amenity-item">
                     <img src="waterbottle.png" class="amenity-img"> Water Bottle
@@ -2117,7 +2556,7 @@ body{
                 <div class="amenity-item"><i class="fas fa-cookie"></i> Snacks</div>
                 <div class="amenity-item"><i class="fas fa-user-tie"></i> Trained Staff</div>
                 <div class="amenity-item"><i class="fas fa-female"></i> Woman Safety</div>
-                <div class="amenity-item"><i class="fas fa-snowflake"></i> AC Cooling</div>
+                <div class="amenity-item"><i class="fas fa-snowflake"></i> Air Conditioning</div>
             </div>
         </div>
 
@@ -2184,7 +2623,6 @@ body{
                 <div class="policy-text">
                     • Digital or M-Ticket is valid for boarding.<br>
                     • Reporting time: <strong>15 minutes</strong> prior.<br>
-                    • Valid Govt. Photo ID required.<br>
                     • Please follow Dreamliner policies for a safe journey.
                     
                     <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px;">
@@ -2232,13 +2670,8 @@ body{
                     </div>
             
                     <div class="policy-text">
-                        <i class="fas fa-ticket-alt" style="color:var(--orange); margin-right:8px;"></i> 
-                        <strong style="color:var(--text-dark);">Partial Cancellation:</strong> Passengers may cancel specific seats from a multi-seat booking. The standard slab-based deduction applies to each cancelled seat.
-                    </div>
-            
-                    <div class="policy-text">
                         <i class="fas fa-tools" style="color:var(--orange); margin-right:8px;"></i> 
-                        <strong style="color:var(--text-dark);">Trip Cancellation:</strong> In the event of mechanical issues, we offer a 100% full refund or immediate re-booking. Notifications are sent 4-6 hours in advance.
+                        <strong style="color:var(--text-dark);">Trip Cancellation:</strong> In the event of mechanical issues, we offer a 100% full refund or immediate re-booking. Notifications are sent 2-3 hours in advance.
                     </div>
             
                     <div class="policy-text">
@@ -4179,6 +4612,23 @@ document.getElementById('payBtn').style.display = 'none';
         }
     }
 
+    function splitPointDisplay(rawPoint) {
+        const value = String(rawPoint || "").trim();
+        const match = value.match(/(?:^|\s)(\d{1,2}[:.]\d{2}\s*(?:AM|PM)?)$/i);
+
+        if (!match) {
+            return { name: value, time: "" };
+        }
+
+        return {
+            name: value
+                .slice(0, match.index)
+                .replace(/[-–—,|]\s*$/, "")
+                .trim() || value,
+            time: match[1].replace(".", ":").toUpperCase()
+        };
+    }
+
     function renderLocationPicker(direction = "forward") {
         const container = document.getElementById("locationPicker");
         const pickupOpts = getPoints(from, "pickup") || [];
@@ -4186,8 +4636,7 @@ document.getElementById('payBtn').style.display = 'none';
 
         if (!pickupOpts.length || !dropOpts.length) {
             container.innerHTML = `
-                <div class="location-empty-state">
-                    <div class="location-empty-icon"><i class="fas fa-location-dot"></i></div>
+                <div class="clean-point-empty">
                     <strong>Pickup or drop points are unavailable</strong>
                     <span>Please choose another service.</span>
                 </div>
@@ -4195,70 +4644,85 @@ document.getElementById('payBtn').style.display = 'none';
             return;
         }
 
-        if (!selectedPickup || !pickupOpts.includes(selectedPickup)) selectedPickup = pickupOpts[0];
-        if (!selectedDrop || !dropOpts.includes(selectedDrop)) selectedDrop = dropOpts[0];
+        if (!selectedPickup || !pickupOpts.includes(selectedPickup)) {
+            selectedPickup = pickupOpts[0];
+        }
+
+        if (!selectedDrop || !dropOpts.includes(selectedDrop)) {
+            selectedDrop = dropOpts[0];
+        }
 
         const pickupStep = locationSelectionStage === "pickup";
         const options = pickupStep ? pickupOpts : dropOpts;
         const selectedPoint = pickupStep ? selectedPickup : selectedDrop;
-        const cityName = pickupStep ? from : to;
 
         container.innerHTML = `
-            <div class="location-step ${direction === "back" ? "location-back" : "location-forward"}">
-                <div class="location-heading">
-                    <div class="location-heading-icon">
-                        <i class="fas ${pickupStep ? "fa-bus-simple" : "fa-location-dot"}"></i>
-                    </div>
-                    <div>
-                        <span>${pickupStep ? "BOARDING POINT" : "DROPPING POINT"}</span>
-                        <h2>${cityName}</h2>
-                        <p>${pickupStep ? "Select where you will board the bus." : "Select where you want to get down."}</p>
-                    </div>
-                </div>
-
-                ${pickupStep ? "" : `
-                    <button type="button" class="selected-pickup-card" onclick="editPickupPoint()">
-                        <span class="selected-pickup-check"><i class="fas fa-check"></i></span>
-                        <span class="selected-pickup-copy">
-                            <small>Selected pickup</small>
-                            <strong>${selectedPickup}</strong>
-                        </span>
-                        <i class="fas fa-pen selected-pickup-edit"></i>
+            <section class="clean-point-screen ${direction === "back" ? "slide-back" : ""}">
+                <div class="clean-point-tabs">
+                    <button type="button"
+                        class="clean-point-tab ${pickupStep ? "active" : "done"}"
+                        onclick="showBoardingTab()">
+                        <span class="clean-tab-check"><i class="fas fa-check"></i></span>
+                        <span>Boarding Points</span>
                     </button>
-                `}
 
-                <div class="location-list-header">
-                    <strong>${pickupStep ? "Available pickup points" : "Available drop points"}</strong>
-                    <span>${options.length} option${options.length === 1 ? "" : "s"}</span>
+                    <button type="button"
+                        class="clean-point-tab ${pickupStep ? "" : "active"}"
+                        ${pickupStep ? "disabled" : ""}
+                        onclick="showDroppingTab()">
+                        <span class="clean-tab-check"><i class="fas fa-check"></i></span>
+                        <span>Dropping Points</span>
+                    </button>
                 </div>
 
-                <div class="location-option-list">
-                    ${options.map((point, index) => `
-                        <button type="button"
-                            class="location-option ${point === selectedPoint ? "active" : ""}"
-                            data-location="${encodeURIComponent(point)}"
-                            onclick="selectLocationOption(this, '${pickupStep ? "pickup" : "drop"}')">
-                            <span class="location-option-number">${String(index + 1).padStart(2, "0")}</span>
-                            <span class="location-option-text">
-                                <strong>${point}</strong>
-                                <small>${pickupStep ? "Board from this point" : "Drop at this point"}</small>
-                            </span>
-                            <span class="location-option-check"><i class="fas fa-check"></i></span>
-                        </button>
-                    `).join("")}
+                <div class="clean-point-card">
+                    <div class="clean-point-card-title">
+                        Select your ${pickupStep ? "Boarding" : "Dropping"} Point
+                    </div>
+
+                    <div class="clean-point-list">
+                        ${options.map(point => {
+                            const display = splitPointDisplay(point);
+
+                            return `
+                                <button type="button"
+                                    class="clean-point-row ${point === selectedPoint ? "selected" : ""}"
+                                    data-location="${encodeURIComponent(point)}"
+                                    onclick="selectLocationOption(this, '${pickupStep ? "pickup" : "drop"}')">
+                                    <span class="clean-radio"><span></span></span>
+                                    <span class="clean-point-name">${display.name}</span>
+                                    ${display.time ? `<span class="clean-point-time">${display.time}</span>` : ""}
+                                </button>
+                            `;
+                        }).join("")}
+                    </div>
                 </div>
-            </div>
+            </section>
         `;
 
         updateLocationStepUI();
     }
 
-    window.selectLocationOption = (button, type) => {
-        const list = button.closest(".location-option-list");
-        if (list) {
-            list.querySelectorAll(".location-option").forEach(item => item.classList.remove("active"));
+    window.showBoardingTab = () => {
+        if (locationSelectionStage !== "pickup") {
+            locationSelectionStage = "pickup";
+            renderLocationPicker("back");
         }
-        button.classList.add("active");
+    };
+
+    window.showDroppingTab = () => {
+        if (selectedPickup) {
+            locationSelectionStage = "drop";
+            renderLocationPicker("forward");
+        }
+    };
+
+    window.selectLocationOption = (button, type) => {
+        const list = button.closest(".clean-point-list") || button.closest(".location-option-list");
+        if (list) {
+            list.querySelectorAll(".clean-point-row, .location-option").forEach(item => item.classList.remove("selected", "active"));
+        }
+        button.classList.add("selected");
 
         const value = decodeURIComponent(button.dataset.location || "");
         if (type === "pickup") selectedPickup = value;
