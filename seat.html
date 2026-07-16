@@ -2464,6 +2464,97 @@ body{
 }
 </style>
 
+
+<style id="mobile-location-buttons-visible-fix">
+@media (max-width:600px){
+    #detailsOverlay .details-body{
+        overflow:hidden !important;
+        display:flex !important;
+        flex-direction:column !important;
+        min-height:0 !important;
+        height:calc(95dvh - 70px) !important;
+        max-height:calc(95dvh - 70px) !important;
+        padding:0 0 calc(env(safe-area-inset-bottom) + 8px) !important;
+    }
+
+    #step1{
+        position:relative !important;
+        display:flex !important;
+        flex-direction:column !important;
+        flex:1 1 auto !important;
+        min-height:0 !important;
+        height:100% !important;
+        padding-bottom:74px !important;
+        overflow:hidden !important;
+    }
+
+    #locationPicker{
+        display:flex !important;
+        flex-direction:column !important;
+        flex:1 1 auto !important;
+        min-height:0 !important;
+        overflow:hidden !important;
+    }
+
+    .clean-point-screen{
+        display:flex !important;
+        flex-direction:column !important;
+        flex:1 1 auto !important;
+        min-height:0 !important;
+        overflow:hidden !important;
+    }
+
+    .clean-point-tabs{
+        flex:0 0 auto !important;
+    }
+
+    .clean-point-card{
+        display:flex !important;
+        flex-direction:column !important;
+        flex:1 1 auto !important;
+        min-height:0 !important;
+        height:auto !important;
+        margin:10px 12px 4px !important;
+        overflow:hidden !important;
+    }
+
+    .clean-point-card-title{
+        flex:0 0 auto !important;
+        padding:13px 18px !important;
+        font-size:16px !important;
+    }
+
+    .clean-point-list{
+        flex:1 1 auto !important;
+        min-height:0 !important;
+        overflow-y:auto !important;
+        -webkit-overflow-scrolling:touch;
+        overscroll-behavior:contain;
+        padding-bottom:6px !important;
+    }
+
+    .clean-point-row{
+        min-height:56px !important;
+        padding:0 16px !important;
+    }
+
+    #nextStepBtn{
+        position:absolute !important;
+        left:12px !important;
+        right:12px !important;
+        bottom:8px !important;
+        width:auto !important;
+        min-height:52px !important;
+        margin:0 !important;
+        z-index:50 !important;
+        display:flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        box-shadow:0 8px 22px rgba(255,122,0,.28) !important;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -4724,8 +4815,26 @@ document.getElementById('payBtn').style.display = 'none';
         button.classList.add("selected");
 
         const value = decodeURIComponent(button.dataset.location || "");
-        if (type === "pickup") selectedPickup = value;
-        else selectedDrop = value;
+        if (type === "pickup") {
+            selectedPickup = value;
+        } else {
+            selectedDrop = value;
+
+            // Keep the Continue to Passenger Details button visible,
+            // but also open Step 3 automatically after selecting a drop point.
+            const nextBtn = document.getElementById("nextStepBtn");
+            if (nextBtn) {
+                nextBtn.style.display = "flex";
+                nextBtn.style.opacity = "1";
+                nextBtn.style.pointerEvents = "auto";
+            }
+
+            setTimeout(() => {
+                if (locationSelectionStage === "drop" && selectedDrop) {
+                    showPassengerDetailsStep();
+                }
+            }, 180);
+        }
     };
 
     window.editPickupPoint = () => {
@@ -4754,6 +4863,21 @@ document.getElementById('payBtn').style.display = 'none';
 
             renderPassengerInputs();
             updateFareInfo();
+            // Scroll Passenger Details to the top immediately
+requestAnimationFrame(() => {
+    const scrollArea = document.querySelector(".step2-scroll-area");
+    if (scrollArea) {
+        scrollArea.scrollTop = 0;
+    }
+
+    const passengerBox = document.getElementById("passengerInputs");
+    if (passengerBox) {
+        passengerBox.scrollIntoView({
+            behavior: "instant",
+            block: "start"
+        });
+    }
+});
 
             requestAnimationFrame(() => {
                 step2.style.opacity = "1";
@@ -4801,11 +4925,22 @@ document.getElementById('payBtn').style.display = 'none';
         }
 
         if (!selectedDrop) {
-            showToast("Please select a drop point.", "error");
-            return;
-        }
+    showToast("Please select a drop point.", "error");
+    return;
+}
 
-        showPassengerDetailsStep();
+// Keep the Continue button in the code.
+// Reuse the nextBtn variable already declared at the start of this handler.
+if (nextBtn) {
+    nextBtn.style.display = "flex";
+    nextBtn.style.opacity = "1";
+    nextBtn.style.pointerEvents = "auto";
+}
+
+// Automatically move to Passenger Details after selecting Drop Point
+setTimeout(() => {
+    showPassengerDetailsStep();
+}, 150);
     };
 
     document.getElementById("backStepBtn").onclick = function() {
@@ -5832,10 +5967,10 @@ headerArea.addEventListener('click', (e) => {
     const isTabButton = e.target.closest('.tab-btn');
     
     if (isTabButton) {
-        // If it's a tab button, ensure the sheet STAYS OPEN
+      
         sheet.classList.add('active');
     } else {
-        // If it's the handle or empty space, then toggle (Open/Close)
+     
         sheet.classList.toggle('active');
         if (sheet.classList.contains('active')) {
             sheetBody.scrollTop = 0;
