@@ -1731,6 +1731,299 @@ body{
 }
 </style>
 
+
+<style id="large-professional-location-flow">
+#detailsOverlay{
+    padding:0 !important;
+    align-items:center !important;
+    background:rgba(17,24,39,.64) !important;
+    backdrop-filter:blur(8px);
+}
+#detailsOverlay > .details-container:not(.full-screen){
+    width:min(94%,640px) !important;
+    max-width:640px !important;
+    max-height:92dvh;
+    margin:0 !important;
+    border-radius:24px !important;
+    background:#f5f6f7 !important;
+    overflow:hidden !important;
+    box-shadow:0 30px 90px rgba(0,0,0,.30) !important;
+}
+#detailsOverlay .details-header{
+    padding:18px 20px !important;
+    background:#fff !important;
+    border-bottom:1px solid #e7e9ec !important;
+}
+#detailsOverlay .details-body{
+    min-height:570px !important;
+    max-height:calc(92dvh - 76px);
+    padding:18px 20px 20px !important;
+    overflow-y:auto !important;
+    background:#f5f6f7;
+}
+#step1{
+    width:100%;
+    opacity:1;
+}
+.location-step{
+    width:100%;
+    text-align:left;
+    animation:locationForward .28s ease;
+}
+.location-step.location-back{
+    animation-name:locationBack;
+}
+@keyframes locationForward{
+    from{opacity:0;transform:translateX(28px)}
+    to{opacity:1;transform:translateX(0)}
+}
+@keyframes locationBack{
+    from{opacity:0;transform:translateX(-28px)}
+    to{opacity:1;transform:translateX(0)}
+}
+.location-heading{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:20px;
+    border:1px solid #e1e4e8;
+    border-radius:18px;
+    background:#fff;
+}
+.location-heading-icon{
+    width:52px;
+    height:52px;
+    flex:0 0 52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:15px;
+    background:#fff1e5;
+    color:#f07800;
+    font-size:20px;
+}
+.location-heading span{
+    display:block;
+    color:#e56f00;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:1.1px;
+}
+.location-heading h2{
+    margin:3px 0 0;
+    color:#20252b;
+    font-size:24px;
+    line-height:1.15;
+}
+.location-heading p{
+    margin:6px 0 0;
+    color:#747b84;
+    font-size:12px;
+}
+.location-list-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:20px 3px 10px;
+}
+.location-list-header strong{
+    color:#30363d;
+    font-size:14px;
+}
+.location-list-header span{
+    color:#8a929b;
+    font-size:11px;
+}
+.location-option-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.location-option{
+    width:100%;
+    min-height:76px;
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr) 28px;
+    align-items:center;
+    gap:13px;
+    padding:13px 15px;
+    border:1px solid #dfe3e7;
+    border-radius:16px;
+    background:#fff;
+    text-align:left;
+    cursor:pointer;
+    transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+.location-option:hover{
+    border-color:#eab27d;
+}
+.location-option-number{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    background:#f1f3f5;
+    color:#68717b;
+    font-size:11px;
+    font-weight:800;
+}
+.location-option-text{
+    min-width:0;
+}
+.location-option-text strong{
+    display:block;
+    color:#22282f;
+    font-size:14px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+}
+.location-option-text small{
+    display:block;
+    margin-top:5px;
+    color:#9198a0;
+    font-size:10px;
+}
+.location-option-check{
+    width:25px;
+    height:25px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px solid #d4d9de;
+    border-radius:50%;
+    color:transparent;
+    font-size:10px;
+}
+.location-option.active{
+    border-color:#ff7a00;
+    background:#fffaf5;
+    box-shadow:0 8px 20px rgba(255,122,0,.10);
+}
+.location-option.active .location-option-number{
+    background:#ff7a00;
+    color:#fff;
+}
+.location-option.active .location-option-check{
+    border-color:#ff7a00;
+    background:#ff7a00;
+    color:#fff;
+}
+.selected-pickup-card{
+    width:100%;
+    margin-top:12px;
+    display:grid;
+    grid-template-columns:36px minmax(0,1fr) 28px;
+    align-items:center;
+    gap:12px;
+    padding:13px 15px;
+    border:1px solid #dfe4e1;
+    border-radius:15px;
+    background:#fff;
+    text-align:left;
+    cursor:pointer;
+}
+.selected-pickup-check{
+    width:34px;
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#16875f;
+    color:#fff;
+    font-size:12px;
+}
+.selected-pickup-copy small{
+    display:block;
+    color:#7e8883;
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+.selected-pickup-copy strong{
+    display:block;
+    margin-top:3px;
+    color:#28322d;
+    font-size:12px;
+    line-height:1.35;
+}
+.selected-pickup-edit{
+    color:#68736d;
+    font-size:11px;
+}
+#nextStepBtn{
+    min-height:56px !important;
+    margin-top:16px !important;
+    border-radius:14px !important;
+    background:#ff7a00 !important;
+    box-shadow:none !important;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+.location-empty-state{
+    min-height:420px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-align:center;
+    color:#747b84;
+}
+.location-empty-icon{
+    width:60px;
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:18px;
+    background:#fff0e3;
+    color:#ff7a00;
+    font-size:24px;
+}
+.location-empty-state strong{
+    color:#28303a;
+    font-size:16px;
+}
+.location-empty-state span{
+    font-size:12px;
+}
+@media(max-width:600px){
+    #detailsOverlay{
+        align-items:flex-end !important;
+    }
+    #detailsOverlay > .details-container:not(.full-screen){
+        width:100% !important;
+        max-width:none !important;
+        max-height:95dvh !important;
+        border-radius:24px 24px 0 0 !important;
+    }
+    #detailsOverlay .details-header{
+        padding:16px !important;
+    }
+    #detailsOverlay .details-body{
+        min-height:620px !important;
+        max-height:calc(95dvh - 70px) !important;
+        padding:16px 15px calc(18px + env(safe-area-inset-bottom)) !important;
+    }
+    .location-heading{
+        padding:18px 16px;
+    }
+    .location-heading h2{
+        font-size:22px;
+    }
+    .location-option{
+        min-height:78px;
+        padding:13px;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -1977,8 +2270,8 @@ body{
 
         <div class="details-header">
             <div>
-                <h3 id="modalTitle" style="color:#ff7a00; margin: 0; font-size: 18px;">Select Points</h3>
-                <p id="stepIndicator" style="font-size: 10px; color: #999; margin: 2px 0 0 0; font-weight: bold; text-transform: uppercase;">Step 1 of 2</p>
+                <h3 id="modalTitle" style="color:#1f2937; margin:0; font-size:19px;">Select pickup point</h3>
+                <p id="stepIndicator" style="font-size: 10px; color: #999; margin: 2px 0 0 0; font-weight: bold; text-transform: uppercase;">Step 1 of 3</p>
             </div>
             <span onclick="closeBookingModal()" style="font-size:28px; cursor:pointer; color: #999;">&times;</span>
         </div>
@@ -1989,7 +2282,7 @@ body{
             <div id="step1" style="transition: transform 0.4s ease; width: 100%;">
                 <div id="locationPicker"></div>
                 <button id="nextStepBtn" style="margin-top:20px; padding:15px; background:#ff7a00; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; box-shadow: 0 4px 10px rgba(255,122,0,0.2);">
-                    Next: Passenger Details
+                    Continue to drop point <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
 <!-- STEP 2 -->
@@ -2059,7 +2352,7 @@ body{
             font-weight:600;
             font-size:12px;
         ">
-            <i class="fas fa-arrow-left"></i> Change Pickup/Drop Points
+            <i class="fas fa-arrow-left"></i> Back to drop point
         </button>
 
     </div>
@@ -2235,7 +2528,18 @@ body{
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, onSnapshot, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+        getFirestore,
+        doc,
+        getDoc,
+        onSnapshot,
+        collection,
+        getDocs,
+        query,
+        where,
+        writeBatch,
+        deleteField
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, RecaptchaVerifier, signInWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     
     
@@ -2282,6 +2586,7 @@ const date = rawDate;
     let passengerData = []; 
     let selectedPickup = "";
     let selectedDrop = "";
+    let locationSelectionStage = "pickup";
     let oldBooking = null;
     
     /* 🔥 FIXED (was const → let) */
@@ -3099,6 +3404,101 @@ document.getElementById("couponInput").addEventListener("focus", () => {
         list.classList.add("show");
     }
 });
+    async function releaseOldSeatsAfterReschedule() {
+        if (!oldBooking || !bookingId) {
+            throw new Error("Old booking details are unavailable");
+        }
+
+        const oldDate = oldBooking.date || oldBooking.originalDate;
+        const oldServiceId =
+            oldBooking.serviceId ||
+            oldBooking.busServiceId ||
+            oldBooking.routeServiceId ||
+            oldBooking.tripId ||
+            oldBooking.busId ||
+            oldBooking.trip;
+
+        const oldBusId =
+            oldBooking.busId ||
+            oldBooking.physicalBusId ||
+            oldBooking.vehicleId ||
+            "";
+
+        const oldSeatNames = (oldBooking.passengers || [])
+            .map(passenger => passenger && (passenger.seat || passenger.seatNumber))
+            .filter(Boolean);
+
+        if (!oldDate || !oldSeatNames.length) {
+            throw new Error("Old journey date or seats are missing");
+        }
+
+        // Support the current buses/{date_serviceId} format and older documents.
+        const documentCandidates = [
+            oldBooking.busDocumentId,
+            oldBooking.seatDocumentId,
+            oldServiceId ? `${oldDate}_${oldServiceId}` : "",
+            oldBusId ? `${oldDate}_${oldBusId}` : "",
+            oldBooking.trip ? `${oldDate}_${oldBooking.trip}` : ""
+        ].filter((value, index, list) => value && list.indexOf(value) === index);
+
+        let matchedDocument = "";
+        let fieldsToDelete = [];
+
+        for (const documentId of documentCandidates) {
+            const oldBusRef = doc(db, "buses", documentId);
+            const oldBusSnap = await getDoc(oldBusRef);
+            if (!oldBusSnap.exists()) continue;
+
+            const seats = oldBusSnap.data().seats || {};
+            const matchedSeats = oldSeatNames.filter(seatName => {
+                const seatData = seats[seatName];
+                if (!seatData) return false;
+
+                const storedBookingId =
+                    seatData.bookingUid ||
+                    seatData.bookingId ||
+                    seatData.bookingGUID ||
+                    "";
+
+                // Never remove another passenger's seat.
+                return storedBookingId === bookingId;
+            });
+
+            if (matchedSeats.length) {
+                matchedDocument = documentId;
+                fieldsToDelete = matchedSeats;
+                break;
+            }
+        }
+
+        if (!matchedDocument) {
+            // The backend may already have removed them. Treat that as clean.
+            console.info("No matching old seats remained to release", {
+                bookingId,
+                documentCandidates,
+                oldSeatNames
+            });
+            return;
+        }
+
+        const batch = writeBatch(db);
+        const oldBusRef = doc(db, "buses", matchedDocument);
+        const updates = {};
+
+        fieldsToDelete.forEach(seatName => {
+            updates[`seats.${seatName}`] = deleteField();
+        });
+
+        batch.update(oldBusRef, updates);
+        await batch.commit();
+
+        console.info("Released old seats after reschedule", {
+            documentId: matchedDocument,
+            seats: fieldsToDelete,
+            bookingId
+        });
+    }
+
     async function handleReschedule() {
     
     if (!oldBooking) {
@@ -3136,7 +3536,19 @@ document.getElementById("couponInput").addEventListener("focus", () => {
     document.getElementById("processingOverlay").style.display = "none";
     
     if (data.success) {
-        showToast("Rescheduled Successfully!", "success");
+        try {
+            // Only after the server confirms the new journey, release the old
+            // seats whose bookingUid belongs to this exact booking.
+            await releaseOldSeatsAfterReschedule();
+            showToast("Rescheduled Successfully! Old seats released.", "success");
+        } catch (cleanupError) {
+            console.error("Old seat cleanup failed:", cleanupError);
+            showToast(
+                "Journey rescheduled, but old seat cleanup failed. Please contact support.",
+                "error"
+            );
+            return;
+        }
     
         setTimeout(() => {
             window.location.href = "info.html";
@@ -3733,6 +4145,7 @@ if (!currentJourneyData) {
     return;
 }
 
+locationSelectionStage = "pickup";
 renderLocationPicker();
 
 document.getElementById('detailsOverlay').style.display = 'flex';
@@ -3750,158 +4163,219 @@ document.getElementById('payBtn').style.display = 'none';
     
     
     
-    function renderLocationPicker() {
-    const container = document.getElementById("locationPicker");
+    function updateLocationStepUI() {
+        const title = document.getElementById("modalTitle");
+        const indicator = document.getElementById("stepIndicator");
+        const nextBtn = document.getElementById("nextStepBtn");
 
-    const pickupOpts = getPoints(from, "pickup") || [];
-    const dropOpts = getPoints(to, "drop") || [];
-
-    // ✅ Prevent blank UI
-    if (pickupOpts.length === 0 || dropOpts.length === 0) {
-        container.innerHTML = `
-            <div style="padding:20px; text-align:center; color:#888;">
-                No pickup/drop points available
-            </div>
-        `;
-        return;
+        if (locationSelectionStage === "pickup") {
+            if (title) title.innerText = "Select pickup point";
+            if (indicator) indicator.innerText = "Step 1 of 3";
+            if (nextBtn) nextBtn.innerHTML = `Continue to drop point <i class="fas fa-arrow-right"></i>`;
+        } else {
+            if (title) title.innerText = "Select drop point";
+            if (indicator) indicator.innerText = "Step 2 of 3";
+            if (nextBtn) nextBtn.innerHTML = `Continue to passenger details <i class="fas fa-arrow-right"></i>`;
+        }
     }
 
-    selectedPickup = pickupOpts[0];
-    selectedDrop = dropOpts[0];
+    function renderLocationPicker(direction = "forward") {
+        const container = document.getElementById("locationPicker");
+        const pickupOpts = getPoints(from, "pickup") || [];
+        const dropOpts = getPoints(to, "drop") || [];
 
-    container.innerHTML = `
-        <div class="points-grid">
-            <div class="point-box pickup">
-                <span class="point-label">Pickup</span>
-                <div class="point-city-name">${from}</div>
-                <div class="point-list">
-                    ${pickupOpts.map((opt, i) => `
-                        <div class="point-item ${i===0?'selected':''}" onclick="selectPoint(this, 'pickup')">${opt}</div>
-                    `).join('')}
+        if (!pickupOpts.length || !dropOpts.length) {
+            container.innerHTML = `
+                <div class="location-empty-state">
+                    <div class="location-empty-icon"><i class="fas fa-location-dot"></i></div>
+                    <strong>Pickup or drop points are unavailable</strong>
+                    <span>Please choose another service.</span>
                 </div>
-            </div>
-            <div class="point-box drop">
-                <span class="point-label">Drop</span>
-                <div class="point-city-name">${to}</div>
-                <div class="point-list">
-                    ${dropOpts.map((opt, i) => `
-                        <div class="point-item ${i===0?'selected-drop':''}" onclick="selectPoint(this, 'drop')">${opt}</div>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-    window.selectPoint = (el, type) => {
-        const parent = el.parentElement;
-        parent.querySelectorAll('.point-item').forEach(item => item.classList.remove('selected', 'selected-drop'));
-        if(type === 'pickup') { el.classList.add('selected'); selectedPickup = el.innerText; }
-        else { el.classList.add('selected-drop'); selectedDrop = el.innerText; }
-    };
-    
-    document.getElementById("nextStepBtn").onclick = () => {
-    const container = document.querySelector('.details-container');
-    const s1 = document.getElementById('step1');
-    const s2 = document.getElementById('step2');
-    const nextBtn = document.getElementById('nextStepBtn');
-
-    // 1. Initiate Full Screen & Start Step 1 Exit Animation
-    // Ensure your CSS has: .details-container { transition: all 0.4s ease; }
-    container.classList.add('full-screen');
-    
-    s1.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-    s1.style.transform = 'translateX(-30px)'; // Subtle slide instead of total exit
-    s1.style.opacity = '0';
-    
-    // Hide the "Next" button immediately to prevent double-clicks
-    nextBtn.style.opacity = '0';
-    nextBtn.style.pointerEvents = 'none';
-
-    setTimeout(() => {
-        // 2. Switch Displays
-        s1.style.display = 'none';
-        s2.style.display = 'flex'; 
-        
-        // Prepare Step 2 for entry (starting slightly to the right)
-        s2.style.opacity = '0';
-        s2.style.transform = 'translateX(30px)';
-        s2.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-
-        // Ensure the scrollable passenger area is at the top
-        const scrollArea = s2.querySelector('.step2-body-wrapper');
-        if (scrollArea) scrollArea.scrollTop = 0;
-
-        // 3. Load dynamic data while Step 2 is invisible (prevents layout jump)
-        renderPassengerInputs();
-        updateFareInfo();
-
-        // 4. Trigger Step 2 Entry Animation
-        setTimeout(() => {
-            s2.style.opacity = '1';
-            s2.style.transform = 'translateX(0)';
-            
-            // UI Label updates
-            document.getElementById('modalTitle').innerText = "Passenger Details";
-            document.getElementById('stepIndicator').innerText = "Step 2 of 2";
-            
-            // Hide Step 1 button and show Pay button
-            nextBtn.style.display = 'none';
-            const payBtn = document.getElementById('payBtn');
-            if (payBtn) {
-                payBtn.style.display = 'block';
-                payBtn.style.opacity = '1';
-            }
-        }, 50);
-
-    }, 400); // Matches the exit duration of Step 1
-};
-document.getElementById("backStepBtn").onclick = function() {
-    const container = document.querySelector('.details-container');
-    const s1 = document.getElementById('step1');
-    const s2 = document.getElementById('step2');
-    const nextBtn = document.getElementById("nextStepBtn");
-
-    // 1. Slide Step 2 out to the right
-    s2.style.transform = "translateX(100%)";
-    
-    // 2. Prepare Step 1
-    s1.style.transform = "translateX(0)";
-    
-    setTimeout(() => {
-        s2.style.display = 'none';
-        s1.style.display = 'block';
-
-        // ✅ Small delay ensures proper render
-        setTimeout(() => {
-            renderLocationPicker();
-        }, 50);
-
-        // Reset container
-        container.classList.remove('full-screen');
-        container.style.position = 'relative'; 
-        container.style.height = 'auto';
-        container.style.width = '100%';
-        container.style.top = 'unset';
-        container.style.left = 'unset';
-        container.style.zIndex = 'auto';
-
-        // UI updates
-        if(nextBtn) {
-            nextBtn.style.display = 'block';
-            nextBtn.style.opacity = '1';
-            nextBtn.style.pointerEvents = 'auto';
+            `;
+            return;
         }
 
-        document.getElementById('modalTitle').innerText = "Select Pickup & Drop";
-        
-        const indicator = document.getElementById('stepIndicator');
-        if (indicator) indicator.innerText = "Step 1 of 2";
+        if (!selectedPickup || !pickupOpts.includes(selectedPickup)) selectedPickup = pickupOpts[0];
+        if (!selectedDrop || !dropOpts.includes(selectedDrop)) selectedDrop = dropOpts[0];
 
-        // ✅ Better scroll fix (important)
-        container.scrollTop = 0;
+        const pickupStep = locationSelectionStage === "pickup";
+        const options = pickupStep ? pickupOpts : dropOpts;
+        const selectedPoint = pickupStep ? selectedPickup : selectedDrop;
+        const cityName = pickupStep ? from : to;
 
-    }, 300);
-};
+        container.innerHTML = `
+            <div class="location-step ${direction === "back" ? "location-back" : "location-forward"}">
+                <div class="location-heading">
+                    <div class="location-heading-icon">
+                        <i class="fas ${pickupStep ? "fa-bus-simple" : "fa-location-dot"}"></i>
+                    </div>
+                    <div>
+                        <span>${pickupStep ? "BOARDING POINT" : "DROPPING POINT"}</span>
+                        <h2>${cityName}</h2>
+                        <p>${pickupStep ? "Select where you will board the bus." : "Select where you want to get down."}</p>
+                    </div>
+                </div>
+
+                ${pickupStep ? "" : `
+                    <button type="button" class="selected-pickup-card" onclick="editPickupPoint()">
+                        <span class="selected-pickup-check"><i class="fas fa-check"></i></span>
+                        <span class="selected-pickup-copy">
+                            <small>Selected pickup</small>
+                            <strong>${selectedPickup}</strong>
+                        </span>
+                        <i class="fas fa-pen selected-pickup-edit"></i>
+                    </button>
+                `}
+
+                <div class="location-list-header">
+                    <strong>${pickupStep ? "Available pickup points" : "Available drop points"}</strong>
+                    <span>${options.length} option${options.length === 1 ? "" : "s"}</span>
+                </div>
+
+                <div class="location-option-list">
+                    ${options.map((point, index) => `
+                        <button type="button"
+                            class="location-option ${point === selectedPoint ? "active" : ""}"
+                            data-location="${encodeURIComponent(point)}"
+                            onclick="selectLocationOption(this, '${pickupStep ? "pickup" : "drop"}')">
+                            <span class="location-option-number">${String(index + 1).padStart(2, "0")}</span>
+                            <span class="location-option-text">
+                                <strong>${point}</strong>
+                                <small>${pickupStep ? "Board from this point" : "Drop at this point"}</small>
+                            </span>
+                            <span class="location-option-check"><i class="fas fa-check"></i></span>
+                        </button>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+
+        updateLocationStepUI();
+    }
+
+    window.selectLocationOption = (button, type) => {
+        const list = button.closest(".location-option-list");
+        if (list) {
+            list.querySelectorAll(".location-option").forEach(item => item.classList.remove("active"));
+        }
+        button.classList.add("active");
+
+        const value = decodeURIComponent(button.dataset.location || "");
+        if (type === "pickup") selectedPickup = value;
+        else selectedDrop = value;
+    };
+
+    window.editPickupPoint = () => {
+        locationSelectionStage = "pickup";
+        renderLocationPicker("back");
+    };
+
+    function showPassengerDetailsStep() {
+        const detailsContainer = document.querySelector("#detailsOverlay > .details-container");
+        const step1 = document.getElementById("step1");
+        const step2 = document.getElementById("step2");
+        const nextBtn = document.getElementById("nextStepBtn");
+
+        detailsContainer.classList.add("full-screen");
+        step1.style.transition = "transform .28s ease, opacity .28s ease";
+        step1.style.transform = "translateX(-36px)";
+        step1.style.opacity = "0";
+        nextBtn.style.pointerEvents = "none";
+
+        setTimeout(() => {
+            step1.style.display = "none";
+            step2.style.display = "flex";
+            step2.style.opacity = "0";
+            step2.style.transform = "translateX(36px)";
+            step2.style.transition = "transform .3s ease, opacity .3s ease";
+
+            renderPassengerInputs();
+            updateFareInfo();
+
+            requestAnimationFrame(() => {
+                step2.style.opacity = "1";
+                step2.style.transform = "translateX(0)";
+                document.getElementById("modalTitle").innerText = "Passenger details";
+                document.getElementById("stepIndicator").innerText = "Step 3 of 3";
+                nextBtn.style.display = "none";
+
+                const payBtn = document.getElementById("payBtn");
+                if (payBtn) {
+                    payBtn.style.display = "block";
+                    payBtn.style.opacity = "1";
+                }
+            });
+        }, 280);
+    }
+
+    document.getElementById("nextStepBtn").onclick = () => {
+        const step1 = document.getElementById("step1");
+        const nextBtn = document.getElementById("nextStepBtn");
+
+        if (locationSelectionStage === "pickup") {
+            if (!selectedPickup) {
+                showToast("Please select a pickup point.", "error");
+                return;
+            }
+
+            step1.style.transition = "transform .24s ease, opacity .24s ease";
+            step1.style.transform = "translateX(-32px)";
+            step1.style.opacity = "0";
+            nextBtn.style.pointerEvents = "none";
+
+            setTimeout(() => {
+                locationSelectionStage = "drop";
+                renderLocationPicker("forward");
+                step1.style.transform = "translateX(32px)";
+
+                requestAnimationFrame(() => {
+                    step1.style.opacity = "1";
+                    step1.style.transform = "translateX(0)";
+                    nextBtn.style.pointerEvents = "auto";
+                });
+            }, 240);
+            return;
+        }
+
+        if (!selectedDrop) {
+            showToast("Please select a drop point.", "error");
+            return;
+        }
+
+        showPassengerDetailsStep();
+    };
+
+    document.getElementById("backStepBtn").onclick = function() {
+        const detailsContainer = document.querySelector("#detailsOverlay > .details-container");
+        const step1 = document.getElementById("step1");
+        const step2 = document.getElementById("step2");
+        const nextBtn = document.getElementById("nextStepBtn");
+
+        step2.style.transform = "translateX(100%)";
+
+        setTimeout(() => {
+            step2.style.display = "none";
+            step1.style.display = "block";
+            step1.style.opacity = "1";
+            step1.style.transform = "translateX(0)";
+
+            detailsContainer.classList.remove("full-screen");
+            detailsContainer.removeAttribute("style");
+
+            locationSelectionStage = "drop";
+            renderLocationPicker("back");
+
+            if (nextBtn) {
+                nextBtn.style.display = "flex";
+                nextBtn.style.opacity = "1";
+                nextBtn.style.pointerEvents = "auto";
+            }
+
+            const payBtn = document.getElementById("payBtn");
+            if (payBtn) payBtn.style.display = "none";
+        }, 280);
+    };
+
     function renderPassengerInputs() {
     const container = document.getElementById("passengerInputs");
     container.innerHTML = "";
