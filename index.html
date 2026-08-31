@@ -5928,19 +5928,89 @@ onSnapshot(collection(db, "profiles"), (snapshot) => {
     profilesLoaded = true;
     renderReviews();
 });
-function getIndianJourneyTime(dateTime, dateOnly) {
+function getIndianJourneyTime(dateTime, dateOnly, timeOnly) {
     if (dateTime) {
-        if (String(dateTime).includes("+05:30") || String(dateTime).endsWith("Z")) {
-            return new Date(dateTime);
+        // Firestore Timestamp support
+        if (typeof dateTime?.toDate === "function") return dateTime.toDate();
+        if (typeof dateTime?.seconds === "number") return new Date(dateTime.seconds * 1000);
+        if (dateTime instanceof Date) return dateTime;
+
+        const value = String(dateTime).trim();
+        if (!value) return null;
+
+        // Explicit timezone already present
+        if (/([zZ]|[+-]\d{2}:?\d{2})$/.test(value)) return new Date(value);
+
+        // A datetime saved without timezone is treated as Indian Standard Time.
+        if (value.includes("T") || /\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/.test(value)) {
+            return new Date(value.replace(" ", "T") + "+05:30");
         }
-        return new Date(dateTime + "+05:30");
     }
 
-    if (dateOnly) {
-        return new Date(dateOnly + "T23:59:59+05:30");
+    if (dateOnly && timeOnly) {
+        const cleanTime = String(timeOnly).trim();
+        const normalizedTime = /^\d{1,2}:\d{2}$/.test(cleanTime)
+            ? cleanTime + ":00"
+            : cleanTime;
+        return new Date(`${dateOnly}T${normalizedTime}+05:30`);
     }
 
+    if (dateOnly) return new Date(dateOnly + "T23:59:59+05:30");
     return null;
+}
+
+function getJourneyCompletionTime(booking) {
+    const effectiveDate =
+        booking.newDate ||
+        booking.rescheduledDate ||
+        booking.rescheduleDate ||
+        booking.date;
+
+    // Prefer the real journey-end value saved in Firestore.
+    const completionDateTime =
+        booking.journeyCompletedAt ||
+        booking.completedAt ||
+        booking.newArrivalDateTime ||
+        booking.rescheduledArrivalDateTime ||
+        booking.arrivalDateTime ||
+        booking.dropDateTime;
+
+    const arrivalTime =
+        booking.newArrivalTime ||
+        booking.rescheduledArrivalTime ||
+        booking.arrivalTime ||
+        booking.dropTime ||
+        booking.arr;
+
+    let completion = getIndianJourneyTime(completionDateTime, effectiveDate, arrivalTime);
+    if (completion) return completion;
+
+    const departureDateTime =
+        booking.newDepartureDateTime ||
+        booking.rescheduledDepartureDateTime ||
+        booking.departureDateTime;
+
+    const departureTime =
+        booking.newDepartureTime ||
+        booking.rescheduledDepartureTime ||
+        booking.departureTime ||
+        booking.dept;
+
+    const departure = getIndianJourneyTime(departureDateTime, effectiveDate, departureTime);
+    const durationMinutes = Number(
+        booking.durationMinutes ||
+        booking.journeyDurationMinutes ||
+        booking.travelDurationMinutes ||
+        0
+    );
+
+    if (departure && durationMinutes > 0) {
+        return new Date(departure.getTime() + durationMinutes * 60 * 1000);
+    }
+
+    // Never call a journey completed merely at departure time. When the database
+    // has no arrival/duration value, wait until the end of that Indian travel date.
+    return effectiveDate ? new Date(effectiveDate + "T23:59:59+05:30") : null;
 }
 
 function formatJourneyDate(dateValue) {
@@ -5982,52 +6052,46 @@ async function checkCompletedJourneyPopup(user) {
     );
 
     const snap = await getDocs(q);
-
     const now = new Date();
-    let completedBooking = null;
+    const recentWindowMs = 7 * 24 * 60 * 60 * 1000;
+    const eligible = [];
 
     snap.forEach(docItem => {
-        const booking = {
-            id: docItem.id,
-            ...docItem.data()
-        };
-
+        const booking = { id: docItem.id, ...docItem.data() };
         const bookingId = booking.bookingUid || booking.id;
-        const effectiveDate =
-    booking.newDate ||
-    booking.rescheduledDate ||
-    booking.rescheduleDate ||
-    booking.date;
+        const completionTime = getJourneyCompletionTime(booking);
+        const popupKey = `journeyPopup_${user.uid}_${bookingId}`;
 
-const effectiveDepartureDateTime =
-    booking.newDepartureDateTime ||
-    booking.rescheduledDepartureDateTime ||
-    booking.departureDateTime;
-
-const journeyTime = getIndianJourneyTime(
-    effectiveDepartureDateTime,
-    effectiveDate
-);
-       
-       const alreadyShown = localStorage.getItem("journeyPopup_" + bookingId);
-        const alreadyReviewed = localStorage.getItem("journeyReviewed_" + bookingId) || booking.reviewed === true;
+        // Also honour the older key so existing users do not see the same popup again.
+        const alreadyShown =
+            localStorage.getItem(popupKey) ||
+            localStorage.getItem("journeyPopup_" + bookingId);
+        const alreadyReviewed =
+            localStorage.getItem("journeyReviewed_" + bookingId) ||
+            booking.reviewed === true;
 
         if (
             booking.status !== "CANCELLED" &&
-            journeyTime &&
-            journeyTime < now &&
+            completionTime &&
+            completionTime.getTime() <= now.getTime() &&
+            now.getTime() - completionTime.getTime() <= recentWindowMs &&
             !alreadyShown &&
-            !alreadyReviewed &&
-            !completedBooking
+            !alreadyReviewed
         ) {
-            completedBooking = booking;
+            eligible.push({ booking, bookingId, completionTime, popupKey });
         }
     });
 
-    if (completedBooking) {
-    const bookingId = completedBooking.bookingUid || completedBooking.id;
+    if (!eligible.length) return;
+
+    // Show only the most recently completed journey, never an arbitrary old booking.
+    eligible.sort((a, b) => b.completionTime - a.completionTime);
+    const selected = eligible[0];
+    const completedBooking = selected.booking;
+
     pendingCompletedBooking = completedBooking;
-    localStorage.setItem("journeyPopup_" + bookingId, "shown");
+    localStorage.setItem(selected.popupKey, "shown");
+    localStorage.setItem("journeyPopup_" + selected.bookingId, "shown");
 
     const routeBox = document.getElementById("journeyPopupRoute");
     const routeText = document.getElementById("journeyPopupRouteText");
@@ -6042,9 +6106,7 @@ const journeyTime = getIndianJourneyTime(
 
     completedBooking.date = effectiveDate;
 
-    if (message) {
-        message.textContent = "Your journey is completed. Please review your journey.";
-    }
+    if (message) message.textContent = "Your journey is completed. Please review your journey.";
 
     if (routeBox && routeText && dateText) {
         routeBox.style.display = "block";
@@ -6053,9 +6115,7 @@ const journeyTime = getIndianJourneyTime(
     }
 
     setActiveJourneyReviewNote(completedBooking);
-
     document.getElementById("journeyCompletePopup").style.display = "flex";
-}
 }
 
 window.closeJourneyPopup = function () {
@@ -6097,8 +6157,16 @@ window.openReviewSection = function () {
                 await loadCurrentUserProfile();
                 updateUserPreview();
                 checkCompletedJourneyPopup(user);
+
+                // Re-check while the home page remains open so the popup follows
+                // the actual IST journey-completion time instead of only login time.
+                clearInterval(window.__journeyCompletionTimer);
+                window.__journeyCompletionTimer = setInterval(() => {
+                    if (auth.currentUser) checkCompletedJourneyPopup(auth.currentUser);
+                }, 60 * 1000);
         
             } else {
+                clearInterval(window.__journeyCompletionTimer);
                 const wasLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
                 localStorage.removeItem("isLoggedIn");
@@ -6266,6 +6334,7 @@ window.openReviewSection = function () {
         
             const reviewData = {
                 uid: currentUser.uid,
+                phone: currentUser.phoneNumber || "",
                 name: currentProfileName || "User",
                 photo: currentProfilePhoto || "",
                 rating: Number(rating),
@@ -6504,7 +6573,9 @@ const q = query(
                     <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
                 </strong>
                 <div style="margin-top:2px;">
-                    Thanks for your feedback ❤️ We’re always working to improve your travel experience.
+                    ${rating <= 2
+                        ? "We're sorry your experience didn't meet your expectations. We'll use your feedback to improve our service."
+                        : "Thank you for your valuable feedback! We're glad you chose Dreamliner Bus and look forward to serving you again."}
                 </div>
             </div>
         </div>`;
@@ -6594,7 +6665,9 @@ function renderAllReviewsFromArray(reviews) {
                     <i class="fas fa-circle-check" style="color:#1d9bf0; font-size:13px;"></i>
                 </strong>
                 <div style="margin-top:2px;">
-                    Thanks for your feedback ❤️ We’re always working to improve your travel experience.
+                    ${rating <= 2
+                        ? "We're sorry your experience didn't meet your expectations. We'll use your feedback to improve our service."
+                        : "Thank you for your valuable feedback! We're glad you chose Dreamliner Bus and look forward to serving you again."}
                 </div>
             </div>
         </div>`;
