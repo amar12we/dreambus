@@ -6,7 +6,7 @@
 <title>Select Seats - Dreamliner</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="preconnect" href="https://backend-1-ci0t.onrender.com" crossorigin>
 <link rel="preconnect" href="https://api.razorpay.com" crossorigin>
 <link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
@@ -2857,18 +2857,10 @@ body{
 
         <div class="content-section section-grey" id="amenities">
             <div class="section-title"><i class="fas fa-star"></i> Premium Amenities</div>
-            <div class="amenities-grid">
-                <div class="amenity-item"><i class="fas fa-door-open"></i> Emergency Exit</div>
-                <div class="amenity-item"><i class="fas fa-couch"></i> Semi-Sleeper</div>
-                <div class="amenity-item"><i class="fas fa-plug"></i> Charging Socket</div>
-                <div class="amenity-item"><i class="fas fa-video"></i> CCTV Security</div>
-                <div class="amenity-item">
-                    <img src="waterbottle.png" class="amenity-img"> Water Bottle
+            <div class="amenities-grid" id="dynamicAmenities">
+                <div style="grid-column:1/-1;padding:15px;color:#777;text-align:left;">
+                    Loading amenities...
                 </div>
-                <div class="amenity-item"><i class="fas fa-cookie"></i> Snacks</div>
-                <div class="amenity-item"><i class="fas fa-user-tie"></i> Trained Staff</div>
-                <div class="amenity-item"><i class="fas fa-female"></i> Woman Safety</div>
-                <div class="amenity-item"><i class="fas fa-snowflake"></i> Air Conditioning</div>
             </div>
         </div>
 
@@ -3499,7 +3491,6 @@ document.getElementById("dateTrip").innerText = `${displayDate} | ${trip} Trip`;
     
         showToast(`Rescheduling ${maxSelect} seat(s)`, "info");
     }
-    loadBusGallery();
 
     // Seat document and layout are initialized only after the booking and
     // Firebase service configuration have been resolved. This prevents
@@ -3723,6 +3714,149 @@ if (
 
         return cachedPaymentOrderPromise;
     }
+    // ================= DYNAMIC BUS AMENITIES =================
+const AMENITY_ICON_MAP = {
+    premium_pushback_seat: "fas fa-couch",
+    premium_pushback_seater: "fas fa-couch",
+    air_conditioning: "fas fa-snowflake",
+    charging_points: "fas fa-plug",
+    charging_point: "fas fa-plug",
+    charging_socket: "fas fa-plug",
+    water_bottle: "fas fa-bottle-water",
+    snacks: "fas fa-cookie-bite",
+    trained_crew: "fas fa-user-tie",
+    trained_staff: "fas fa-user-tie",
+    cctv_surveillance: "fas fa-video",
+    cctv_security: "fas fa-video",
+    women_safety: "fas fa-person-dress",
+    woman_safety: "fas fa-person-dress",
+    emergency_exit: "fas fa-door-open",
+    semi_sleeper: "fas fa-couch",
+    sleeper: "fas fa-bed",
+    blanket: "fas fa-blanket",
+    reading_light: "fas fa-lightbulb",
+    wifi: "fas fa-wifi",
+    gps_tracking: "fas fa-location-dot",
+    fire_extinguisher: "fas fa-fire-extinguisher",
+    first_aid: "fas fa-kit-medical",
+    luggage_storage: "fas fa-suitcase",
+    live_tracking: "fas fa-location-arrow",
+    entertainment: "fas fa-tv",
+    emergency_hammer: "fas fa-hammer",
+    curtains: "fas fa-window-maximize",
+    pillow: "fas fa-mattress-pillow"
+};
+
+function escapeAmenityHtml(value = "") {
+    return String(value).replace(/[&<>'"]/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+    })[character]);
+}
+
+function normalizeAmenity(rawAmenity, index = 0) {
+    if (typeof rawAmenity === "string") {
+        const label = rawAmenity.trim();
+        return {
+            name: label,
+            key: label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""),
+            icon: "",
+            imageUrl: "",
+            active: true,
+            sortOrder: index + 1
+        };
+    }
+
+    if (!rawAmenity || typeof rawAmenity !== "object") return null;
+
+    const name = String(rawAmenity.name || rawAmenity.label || rawAmenity.title || "").trim();
+    const key = String(rawAmenity.key || rawAmenity.id || name)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_|_$/g, "");
+
+    return {
+        name,
+        key,
+        icon: String(rawAmenity.icon || rawAmenity.iconClass || rawAmenity.faIcon || "").trim(),
+        imageUrl: String(rawAmenity.imageUrl || rawAmenity.image || "").trim(),
+        active: rawAmenity.active !== false,
+        sortOrder: Number(rawAmenity.sortOrder || rawAmenity.order || index + 1)
+    };
+}
+
+function renderBusAmenities(rawAmenities = []) {
+    const container = document.getElementById("dynamicAmenities");
+    if (!container) return;
+
+    const amenities = (Array.isArray(rawAmenities) ? rawAmenities : [])
+        .map(normalizeAmenity)
+        .filter(item => item && item.active && item.name)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+    if (!amenities.length) {
+        container.innerHTML = `
+            <div style="grid-column:1/-1;padding:15px;color:#777;text-align:left;">
+                No amenities listed for this bus.
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = amenities.map(item => {
+        const safeName = escapeAmenityHtml(item.name);
+        const safeImageUrl = escapeAmenityHtml(item.imageUrl);
+        const iconClass = escapeAmenityHtml(
+            item.icon || AMENITY_ICON_MAP[item.key] || "fas fa-circle-check"
+        );
+
+        const visual = safeImageUrl
+            ? `<img src="${safeImageUrl}" class="amenity-img" alt="" loading="lazy" onerror="this.style.display='none'">`
+            : `<i class="${iconClass}" aria-hidden="true"></i>`;
+
+        return `<div class="amenity-item">${visual}<span>${safeName}</span></div>`;
+    }).join("");
+}
+
+async function loadBusAmenities() {
+    const container = document.getElementById("dynamicAmenities");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div style="grid-column:1/-1;padding:15px;color:#777;text-align:left;">
+            <i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>
+            Loading amenities...
+        </div>`;
+
+    // Use the final resolved physical busId first.
+    // serviceId/layoutId are fallbacks for old records.
+    const candidateIds = [busId, serviceId, layoutId].filter((value, index, array) =>
+        value && array.indexOf(value) === index
+    );
+
+    try {
+        for (const candidateId of candidateIds) {
+            const snap = await getDoc(doc(db, "busAmenities", candidateId));
+            if (!snap.exists()) continue;
+
+            const data = snap.data();
+            renderBusAmenities(Array.isArray(data.amenities) ? data.amenities : []);
+            console.log("Amenities loaded from busAmenities/" + candidateId);
+            return;
+        }
+
+        renderBusAmenities([]);
+    } catch (error) {
+        console.error("Bus amenities load error:", error);
+        container.innerHTML = `
+            <div style="grid-column:1/-1;padding:15px;color:#b91c1c;text-align:left;">
+                Amenities could not be loaded.
+            </div>`;
+    }
+}
+
     // ================= BUS GALLERY =================
 async function loadBusGallery() {
     const gallery = document.getElementById("busGallery");
@@ -4580,6 +4714,12 @@ async function resolveServiceAndLayout() {
 async function initializeSeatAvailability() {
     try {
         await resolveServiceAndLayout();
+
+        // busId/serviceId are now final, so load the correct bus-specific content.
+        await Promise.all([
+            loadBusAmenities(),
+            loadBusGallery()
+        ]);
 
         const busDocId = `${date}_${serviceId}`;
         const resolvedDocRef = doc(db, "buses", busDocId);
